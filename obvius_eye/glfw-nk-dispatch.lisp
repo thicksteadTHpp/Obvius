@@ -26,7 +26,8 @@
   (defparameter *glfw* nil)) ;;the current glfw class
 
 
-
+(defvar *in-render-loop* nil) ;;global voar to check if a call to render is made from inside the render-loop
+;; or from outside. if called from outside we can not use open gl calls and we don't have the nk-context
 
 
 
@@ -381,37 +382,40 @@
 	   (claw:c-let ((bg (:struct (%nk:colorf)) :from background-color))
 	     (when cv
 	       (bt:condition-notify cv))
-	     (loop while (= (%glfw:window-should-close window) 0) do
+	     
+	     (let ((*in-render-loop* T))
+	       (declare (special *in-render-loop*))  
+	       (loop while (= (%glfw:window-should-close window) 0) do
 
 	       ;; 1.) input handling
-	       (%glfw:poll-events)
-	       (register-nk-inputs nk-context window)
-	       ;; 2.) the nk widgets
-	       (gl:clear-color (bg :r) (bg :g) (bg :b) 1f0)
-	       (gl:clear :color-buffer-bit)
+		 (%glfw:poll-events)
+		 (register-nk-inputs nk-context window)
+		 ;; 2.) the nk widgets
+		 (gl:clear-color (bg :r) (bg :g) (bg :b) 1f0)
+		 (gl:clear :color-buffer-bit)
 
-	       ;; (claw:c-with ((rect (:struct (%nk:rect))))
-	       ;; 	 (let ((val (%nk:begin nk-context "Hello Nuklear" (%nk:rect rect 50f0 50f0 230f0 250f0)
-	       ;; 			       (logior %nk:+window-border+ %nk:+window-movable+ %nk:+window-scalable+
-	       ;; 				       %nk:+window-minimizable+ %nk:+window-title+))))
-	       ;; 	   (unless (= val 0)
-	       ;; 	     (%nk:layout-row-static nk-context 30f0 80 1)
-	       ;; 	     (unless (= (%nk:button-label nk-context "button") 0)
-	       ;; 	       (format T "~&button pressed")))))
-	       ;; (%nk:end nk-context)
+		 ;; (claw:c-with ((rect (:struct (%nk:rect))))
+		 ;; 	 (let ((val (%nk:begin nk-context "Hello Nuklear" (%nk:rect rect 50f0 50f0 230f0 250f0)
+		 ;; 			       (logior %nk:+window-border+ %nk:+window-movable+ %nk:+window-scalable+
+		 ;; 				       %nk:+window-minimizable+ %nk:+window-title+))))
+		 ;; 	   (unless (= val 0)
+		 ;; 	     (%nk:layout-row-static nk-context 30f0 80 1)
+		 ;; 	     (unless (= (%nk:button-label nk-context "button") 0)
+		 ;; 	       (format T "~&button pressed")))))
+		 ;; (%nk:end nk-context)
 
-	       ;;get somthing from the render queue
+		 ;;get somthing from the render queue
 
-	       (unless (chanl:recv-blocks-p render-queue)
-		 (funcall (chanl:recv render-queue :blockp nil) dispatcher))
-	       
-	       (%display-panes dispatcher nk-context)
-	       
-	       ;; 3.) nuklear render functions and clear
-	       (gl:viewport 0 0 glfw.width glfw.height)	   
-	       (nk:render-nuklear nk-renderer nk-context glfw.width glfw.height)
-	       (%nk:clear nk-context)
-	       (%glfw:swap-buffers window)))))
+		 (unless (chanl:recv-blocks-p render-queue)
+		   (funcall (chanl:recv render-queue :blockp nil) dispatcher))
+		 
+		 (%display-panes dispatcher nk-context)
+		 
+		 ;; 3.) nuklear render functions and clear
+		 (gl:viewport 0 0 glfw.width glfw.height)	   
+		 (nk:render-nuklear nk-renderer nk-context glfw.width glfw.height)
+		 (%nk:clear nk-context)
+		 (%glfw:swap-buffers window))))))
     ;;call the destroy method so that the screen object will also be destroyed
     (destroy dispatcher)
     ))  

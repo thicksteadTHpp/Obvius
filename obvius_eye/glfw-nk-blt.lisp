@@ -607,15 +607,14 @@
 ;;(defmethod render :before ((window nk-pane) (bltable GL-bltable) y-offset x-offset zoom))
 ;;  (%glfw:make-context-current (%window-of (screen-of window))))
 
-(defmethod render :after ((window nk-pane) frob y-offset x-offset zoom)
-  (setf (status window) :realized))
+
+
 
 
 ;;;
 ;;; Generic render routine for 24bit GL screens
-;;;
+;;; will be called in eah fram of the render loop 
 (defmethod render ((window 24bit-nk-pane) (bltable GL-bltable) y-offset x-offset zoom)
-      (vom:info "[render] win 24-bit GL-bltable")
   (with-slots (nk-image texture-id image pane->frob-y pane->frob-x dimensions base-dimensions) bltable
     (when (and image (/= (cadr dimensions) (ceiling (* (cadr base-dimensions) zoom))))
       ;; we need to to recompute the picture due to zooming

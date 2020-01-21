@@ -69,7 +69,12 @@
 	 (claw:free nk-rect)))
   (setf (status pane) :destroyed))
 
+(defmethod font-helper ((pane nk-pane))
+  (font-helper (screen-of pane)))
 
+
+(defmethod get-context ((window nk-pane))
+  (slot-value (screen-of window) 'nk-context))
 
 (defmethod x-dim ((window nk-pane))
   (width window))
@@ -87,10 +92,18 @@
       (setf nk-rect (claw:calloc '(:struct (%nk:rect)))))
     
     (claw:c-val ((rect (:struct (%nk:rect)) nk-rect))
-      (let ((w (floor (+ width-padding width)))
-	    (h (floor (+ height-padding height))))
+      (let ((w (floor (padded-width window)))
+	    (h (floor (padded-height window))))
 	(setf nk-rect (%nk:recti rect x-pos y-pos w h))))))
 
+(defmethod padded-width ((window nk-pane))
+  (with-slots (width width-padding) window
+      (+ width-padding width)))
+
+
+(defmethod padded-height ((window nk-pane))
+  (with-slots (height height-padding) window
+      (+ height-padding height)))
 
 ;;; patch because obvius assumes the origin is at the top right
 ;;; hand corner.  If the window is resized, we have to update this
