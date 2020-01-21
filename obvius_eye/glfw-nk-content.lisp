@@ -189,10 +189,12 @@
 								  :total-space total-space
 								  :rect r))
 	      ;; call render with frob and offset from total space
-		  ;;(render pane gf (total-space :y) (total-space :x) 1))))
-		  (%nk:fill-rect painter (%nk:recti +rect+ (floor (+ 15 (total-space :x))) (floor (+ 15 (total-space :y))) 210 210) 5.0 (%nk:rgb rgb 247 230 154)) 
-		  (%nk:fill-rect painter (%nk:recti r (+ 20 (floor (total-space :x))) (+ 20 (floor (total-space :y))) 200 200) 5.0 (%nk:rgb rgb 188 174 118))
-		  (%nk:draw-text painter (%nk:recti r (+ 30 (floor (total-space :x))) (+ 30 (floor (total-space :y))) 150 20) "Text to draw" 12 font (%nk:rgb rgb 188 174 118) (%nk:rgb rgb 0 0 0))))
+		  (setf y-offset (total-space :y)
+			x-offset (total-space :x))
+		  (call-next-method)))
+		  ;;(%nk:fill-rect painter (%nk:recti +rect+ (floor (+ 15 (total-space :x))) (floor (+ 15 (total-space :y))) 210 210) 5.0 (%nk:rgb rgb 247 230 154)) 
+		  ;;(%nk:fill-rect painter (%nk:recti r (+ 20 (floor (total-space :x))) (+ 20 (floor (total-space :y))) 200 200) 5.0 (%nk:rgb rgb 188 174 118))
+		  ;;(%nk:draw-text painter (%nk:recti r (+ 30 (floor (total-space :x))) (+ 30 (floor (total-space :y))) 150 20) "Text to draw" 12 font (%nk:rgb rgb 188 174 118) (%nk:rgb rgb 0 0 0))))
 	      (%nk:end ctx)
 	      (setf (slot-value pane 'canvas) nil))))))
 

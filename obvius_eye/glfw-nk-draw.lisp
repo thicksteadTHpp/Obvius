@@ -63,10 +63,10 @@
   (let ((font-handle (font-helper-font-handle (font pane)))
 	(canvas (slot-value pane 'canvas)))
     (nk-drawing (foreground background rect painter canvas)
-      (%nk:draw-text painter (%nk:recti rect x y 150 20) string font-handle (font-height (font pane)) foreground background))))
+      (%nk:draw-text painter (%nk:recti rect (floor x) (floor y) 150 20) string (length string) font-handle foreground background))))
   ;;(vom:info "[draw-text] ~s at x: ~d y: d" string x y))
   ;; (declare (ignore keys))
-  ;; (let ((x-int (floor x)) (y-int (floor y)))
+  ;; (let ((x-int (floor x)) (y-int (4floor y)))
   ;;   (GL:with-GL-lock
   ;;     (GL:cmov2i x-int y-int)
   ;;     (GL:charstr string))))
@@ -111,20 +111,19 @@
   ;; 	  (GL:endline)))))
 
 (defmethod draw-lines ((pane nk-pane) y0 x0 y1 x1
-		       &key foreground line-width line-style x-offset y-offset)
-  (declare (ignore line-style))
+		       &key foreground line-width line-style (x-offset 0) (y-offset 0))
   (declare (fixnum x-offset y-offset))
-  (declare (type (simple-vector (signed-byte 32)) y0 x0 y1 x1))  
+;; (declare (type (vector fixnum) y0 x0 y1 x1))  
   ;; (vom:info "[draw-lines]"))
   (let ((nlines (length y0)))
     (unless y-offset (setq y-offset 0))
     (unless x-offset (setq x-offset 0))
     (dotimes (i nlines)
       (draw-line pane
-		 (+ (svref y0 i) y-offset) 
-		 (+ (svref x0 i) x-offset)
-		 (+ (svref y1 i) y-offset)
-		 (+ (svref x1 i) x-offset)
+		 (+ (aref y0 i) y-offset) 
+		 (+ (aref x0 i) x-offset)
+		 (+ (aref y1 i) y-offset)
+		 (+ (aref x1 i) x-offset)
 		 :line-style line-style
 		 :foreground foreground
 		 :line-width line-width))))
