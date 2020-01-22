@@ -1,6 +1,6 @@
 * Intro
 
-  Obvius was a image processing software which was created by Eero Simoncelli, David Heeger and E.J. Chichilinsky 
+  Obvius was an image processing software which was created by Eero Simoncelli, David Heeger and E.J. Chichilinsky 
   at the MIT. Several Cntributors added functionality to it. Patrick C. Teo added a GL implementation. The software  
   got out of use in the mid 90ies presumly by abondon CommonLisp code at all. 
 
