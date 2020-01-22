@@ -1,0 +1,42 @@
+;
+;	D 65 illuminant at 10 nm intervals from Wyszecki and Stiles
+;	page 759, table II(3.3.4).
+;
+;	The book also contains a specification at 1nm, but we just
+;	interpolated (linearly)
+;
+31	;From 400nm to 700nm
+1	;Relative Spectral Radiant Power Distribution
+;
+82.8	;400nm
+91.5
+93.4
+86.7
+104.9
+117.0
+117.8
+114.9
+115.9
+108.8
+109.4	;500
+107.8
+104.8
+107.7
+104.4
+104.0
+100.0	;560
+96.3
+95.8
+88.7
+90.0	;600nm
+89.6
+87.7
+83.3
+83.7
+80.0	;650nm
+80.2
+82.3
+78.3
+69.7
+71.6	;700nm
+

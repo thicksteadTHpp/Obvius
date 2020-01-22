@@ -1,0 +1,121 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  File: README 
+;;;  Author: Patrick Teo
+;;;  Description: README for lisp tutorials
+;;;  Creation Date: 6/93
+;;;  ----------------------------------------------------------------
+;;;    Object-Based Vision and Image Understanding System (OBVIUS),
+;;;      Copyright 1988, Vision Science Group,  Media Laboratory,  
+;;;              Massachusetts Institute of Technology.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+The files in this directory make up a mini LISP tutorial for those of
+you who don't already know LISP and those of you who want to learn the
+neater stuff about LISP (e.g. in loop.lisp and clos.lisp).
+
+I grouped the topics covered in each file into two classes: introductory
+and advanced.  Introductory topics are topics which I feel are usually
+covered in some reasonable depth in most basic LISP programming
+classes.  Advanced topics are either topics of some technical
+difficulty or which are usually absent from basic LISP programming
+classes.
+
+The order in which you should read these files should be in the order
+presented.  However, you might need to postpone a full understanding
+of some of the constructs used in earlier files for later.
+
+These files are made up of English text in comments as well as code
+(which are not commented out).  These code are to be evaluated in the
+text buffer (via C-M-x or C-c e).  I encourage you to explore all the
+possibilities of the constructs by varying the examples given.
+
+LISP comments are preceeded by at least one semi-colon.  Everything
+following that semi-colon till the end of the line is treated as a
+comment.  LISP also considers to be comments anything within a #| and
+|# pair.
+
+For those of you who would like to buy a book on LISP.  I'd recommend
+Tatar's book for a good coverage of LISP and Keene's book for a nice
+introduction to CLOS (Common Lisp Object System).  Steele is the
+dictionary of LISP and has almost everything you ever wanted (or
+cared) to know about LISP but it is definitely a reference text and I
+would not recommend it for someone who doesn't already know LISP.
+
+Bug fixes, kudos and flames are most welcomed. 
+ 
+Have fun!!
+Patrick
+teo@cs.stanford.edu
+
+
+
+				FILES
+
+types-tutorial.lisp
+	Introductory::
+	About lisp types including symbols, numbers, lists and arrays.
+	I also mention the operators and predicates that are commonly
+	used to work with them.  
+
+	Advanced::
+	In the section on lists, a discussion on CONS cells 
+	and pointer manipulationg is presented.
+
+functions-tutorial.lisp
+	Introductory:
+	About lisp functions and macros.  
+	Funcall and apply functions introduced.
+
+	Advanced::
+	&optional, &key, &rest keywords are introduced.
+	Macros, backquotes (with the , and ,@ operators)
+	
+control-tutorial.lisp
+	Introductory:
+	Basic if-then-else, when, unless, cond, case, prog1,
+	progn, let, and let* constructs.
+
+	Advanced::
+	A short discussion on static and dynamic scoping in LISP.
+	
+loop-tutorial.lisp
+	Advanced::
+	A good amount of the LOOP macro is presented which can be used
+	in place of the conventional do, do*, dolist and dotimes
+	constructs.
+
+clos-tutorial.lisp
+	Advanced::
+	CLOS (Common Lisp Object System).  This takes the place of
+	defstructs (structures) in traditional LISP programming.
+	Defining classes, slot options and class options.
+	Defining methods (:around, :before, :after and primary methods)
+	Inheritance of data and methods.
+	Class precedence.
+	Specializing built in methods.
+	
+development-tutorial.lisp (forthcoming)
+	Advanced::
+	Packages and Modules
+
+
+			      REFERENCES
+
+Sonya E. Keene, "Object-Oriented Programming in Common Lisp: 
+	A Programmer's Guide to CLOS," Addison Wesley 1989.
+
+Guy L. Steele, "Common Lisp: The Language,"
+	2nd ed, Digital Press 1990.
+
+Steven L. Tanimoto, "The Elements of Artificial Intelligence:
+	Using Common Lisp," Computer Science Press 1990.
+
+Deborah G. Tatar, "A Programmer's Guide to Common Lisp,"
+	Digital Press, 1987.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Local Variables:
+;;; buffer-read-only: t 
+;;; fill-column: 79
+;;; End:

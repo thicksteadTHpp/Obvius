@@ -5,7 +5,20 @@
   :author "Your Name <your.name@example.com>"
   :license "MIT"
   :serial t
-  :depends-on (:zpng :ffa :cl-fad :cffi :static-vectors :trivial-garbage :closer-mop :vom)
+  :depends-on (:zpng :ffa :cl-fad :cffi :static-vectors :trivial-garbage :closer-mop :vom
+	       :chanl
+	       :cl-colors
+	       :cl-opengl
+	       :alexandria
+	       :claw
+	       :nuklear-blob
+	       :bodge-nuklear
+	       :glfw-blob
+	       :bodge-glfw
+	       :glad-blob
+	       :bodge-glad
+	       :trivial-main-thread
+	       :cl-soil)
   :components ((:file "package")
                (:file "obvius01")
 	       (:module obvius_system
@@ -61,6 +74,19 @@
 				     (:file "overlay")
 				     (:file "hardcopy")
 				     ))
+	       (:module obvius_eye
+		        :components ((:file "gl-obv-lucid-ffi")
+				     (:file "glfw-nk-font-helper")
+				     (:file "glfw-nk-dispatch")
+				     (:file "glfw-nk-screen")
+				     (:file "glfw-nk-screen-8-bit")
+				     (:file "glfw-nk-screen-24-bit")
+				     (:file "glfw-nk-pane")
+				     (:file "glfw-nk-blt")
+				     (:file "glfw-nk-render")
+				     (:file "glfw-nk-draw")
+				     (:file "glfw-nk-content")
+				     (:file "obv_eye_post")))
 	       (:file "obv_print")
 	       ))
 ;;; missing lisp view gl-ffi and obvius-gl
@@ -176,42 +202,42 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(asdf:defsystem #:obvius-eye
-  :description "Preliminary Viewport for obvius 4.0"
-  :author "Your Name <your.name@example.com>"
-  :license "MIT"
-  :pathname "obvius_eye/"
-  :serial t
-  :depends-on (:obvius01
-	       :chanl
-	       :cl-colors
-	       :cl-opengl
-	       :alexandria
-	       :cffi
-	       :ffa
-	       :claw
-	       :nuklear-blob
-	       :bodge-nuklear
-	       :glfw-blob
-	       :bodge-glfw
-	       :glad-blob
-	       :bodge-glad
-	       :trivial-main-thread
-	       :cl-soil)
-  :components ((:file "obv_eye_package")
-	       (:file "gl-obv-lucid-ffi")
-	       (:file "glfw-nk-font-helper")
-	       (:file "glfw-nk-dispatch")
-	       (:file "glfw-nk-screen")
-	       (:file "glfw-nk-screen-8-bit")
-	       (:file "glfw-nk-screen-24-bit")
-	       (:file "glfw-nk-pane")
-	       ;;(:file "glfw-nk-window")
-	       (:file "glfw-nk-blt")
-	       (:file "glfw-nk-render")
-	       (:file "glfw-nk-draw")
-	       (:file "glfw-nk-content")
-	       (:file "obv_eye_post")))
+;; (asdf:defsystem #:obvius-eye
+;;   :description "Preliminary Viewport for obvius 4.0"
+;;   :author "Your Name <your.name@example.com>"
+;;   :license "MIT"
+;;   :pathname "obvius_eye/"
+;;   :serial t
+;;   :depends-on (:obvius01
+;; 	       :chanl
+;; 	       :cl-colors
+;; 	       :cl-opengl
+;; 	       :alexandria
+;; 	       :cffi
+;; 	       :ffa
+;; 	       :claw
+;; 	       :nuklear-blob
+;; 	       :bodge-nuklear
+;; 	       :glfw-blob
+;; 	       :bodge-glfw
+;; 	       :glad-blob
+;; 	       :bodge-glad
+;; 	       :trivial-main-thread
+;; 	       :cl-soil)
+;;   :components ((:file "obv_eye_package")
+;; 	       (:file "gl-obv-lucid-ffi")
+;; 	       (:file "glfw-nk-font-helper")
+;; 	       (:file "glfw-nk-dispatch")
+;; 	       (:file "glfw-nk-screen")
+;; 	       (:file "glfw-nk-screen-8-bit")
+;; 	       (:file "glfw-nk-screen-24-bit")
+;; 	       (:file "glfw-nk-pane")
+;; 	       ;;(:file "glfw-nk-window")
+;; 	       (:file "glfw-nk-blt")
+;; 	       (:file "glfw-nk-render")
+;; 	       (:file "glfw-nk-draw")
+;; 	       (:file "glfw-nk-content")
+;; 	       (:file "obv_eye_post")))
 
 
 

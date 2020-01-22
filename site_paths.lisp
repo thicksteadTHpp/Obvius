@@ -40,8 +40,8 @@
 	("images;*.*" ,(str+ *real-obvius-directory* "images/*.*"))
         ("**;*.*" ,(str+ *real-obvius-directory* "mpw/**/*.*"))))
 
-;; [TODO] use xdg or something to mak it implementation independent
-;; this will only work on unix
+;; [TODO] use xdg or something to make it implementation independent
+;; this will only work on unix now
 (defparameter *temp-dir* #+UNIX "/tmp/obv/")
 
 (setf (logical-pathname-translations "tmp")

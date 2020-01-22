@@ -1,0 +1,1110 @@
+2020-01-22  THO  <tobias@adrenochrom>
+
+	* Reorganized into github
+	* Added new graphical Backend with nuklear.h and glfw
+
+Mon May 30 16:27:20 1994  David Heeger  (heeger at white)
+
+	* Add make-inverse-discrete-function, that takes a df as input and
+	produces the inverse function after checking that the input is
+	monotonic-increasing.
+
+	* Added verify-monotone-increasing as a method on arrays (got rid
+	of the function version from gamma.lisp).
+
+Mon May 23 17:44:48 1994  David Heeger  (heeger at violet)
+
+	* Added mul methods on complex-image and complex-number
+
+Tue Mar 29 22:58:22 1994  David Heeger  (heeger@violet)
+
+* Fixed bug in singular-p.
+
+* Changed make-quadrature-steerable-basis to make complex-images
+rather than image-pairs.
+
+Tue Mar 29 11:40:43 1994  Eduardo-Jose Chichilnisky  (ej at red)
+
+	* Fixed SVD to only warn (rather than return NIL) when Linpack's
+	C code complains. This was due to a case I found when Linpack's
+	code returns something slightly wrong, but it seemed better to
+	warn than to cause a crash by returning NIL.
+	* Fixed minimum and maximum on lists to return positions, like
+	array methods. Added minimum-location and maximum-location on lists.
+
+Sat Mar 26 12:40:18 1994  David Heeger  (heeger@violet)
+
+* Fixed bugs in col-space, row-space, col-null-space, row-null-space
+in svd.lisp.
+
+Fri Mar 25 15:43:49 1994  David Heeger  (heeger@violet)
+
+* Added scatter-frob viewable and make-scatter methods to
+drawing.lisp.  This used to be defined in
+tutorials/psychophysics/scatter.
+
+* Added cumulative-normal and inverse-detection-normal to
+statistics.lisp.  This used to be defined in
+tutorials/psychophysics/stuff.
+
+* Added multiple-sort methods to misc.lisp.  This used to be defined
+in tutorials/psychophysics/stuff.
+
+Thu Mar 24 13:42:39 1994  David Heeger  (heeger@violet)
+
+* Added internal8_circular_shift imops.c, lisp definition in
+  lucid-ffi.lisp, and call it from circular-shift in array-ops.lisp
+
+Mon Mar 12 09:10:54 1994  Eero Simoncelli  (eero at blue)
+
+	* Finished porting steerable pyramids.  Includes new filters,
+	  slightly modified circuit diagram.
+	* Added llse-filter-design.lisp: code to do weighted least-squares
+	  filter design.
+
+Wed Feb 16 11:56:41 1994  David Heeger  (heeger at violet)
+
+	* Copied C source back to Sun from the Mac.  Here's what's been
+	added on the Mac and/or changed on both:
+
+	chartohex: 
+	- get rid of the <unistd.h>, include obv.h instead
+
+	obv.h: added to deal with machine dependencies
+	- reference to pi needs to depend on machine (ifdef MPW or whatever)
+	- need to put this file on the sun
+	- included obv.h in fft.c, imops.c, matrix.c, chartohex.c
+	- #include<String.h> for memset(), needed for imops.c
+	- #include<StdLib.h> for rand(), needed for imops.c
+	- #include<StdIO.h> for fprintf() , needed for imops.c
+	- conditional include of <FCntl.h> on mac (something else for SUN)
+	  to deal with lseek() in chartohex.c
+
+	mpw-hacks.c: added to take care of C functions missing on the Mac
+
+	MakeFile-mac:
+	- inserted compiler option -d float=double to make all floats be double.
+	  This appears to work, at least tested with matrix.c (internal-dot-product)
+	- tiff-access.c causes an undefined TiffPrintDirectory; so we left it out
+	- This file MUST be renamed MakeFile before compiling in MPW.
+
+Wed Feb 16 11:56:41 1994  David Heeger  (heeger at violet)
+
+	* Moved lucid-window-init.lisp, lucid-obvius-init.lisp,
+	mcl-window-init.lisp, and mcl-obvius-init.lisp into <obv> 
+	directory.  This makes it easier to copy new versions to the mac.
+	Each time a new version is copied, need to update/reconstruct:
+	mcl-window-init, mcl-obvius-init, mcl-site-init, and
+	mcl-site-paths.  At least these four files are now all in the same
+	directory.
+
+Wed Feb 16 11:56:41 1994  David Heeger  (heeger at violet)
+
+   * Notes about mcl-*.lisp files:
+
+	mcl-defsys.lisp:
+	- Copy and Paste are taken by CCL. We unintern and unexport them in
+	  mcl-defsys.lisp
+	- Use clos as a nickname for ccl package.  Every reference to clos
+	  package must have a double colon.
+	
+	mcl-clos-extensions.lisp:
+	- Had to define the following functions because MCL 2.0 doesn't
+	  support everything they should (see p. 608 of MCL docs):
+	    slot-definition-initform
+	    slot-definition-initargs
+	    class-default-initargs
+	  These definitions are unsupported hacks.  Worry about this
+	  for future releases of MCL.
+	- Changed (nth 2 thing) to (nth 1 thing) in get-default and in 
+	  get-defaults because lucid's initargs are triplets whereas
+	  MCL's initargs are pairs (at least for the time being, note
+	  that slot-definition-initargs is one of the above hacks).
+	- Changed set-default, dumped initfunction since it's not used in MCL.
+	  There are 3 cases.  (1) If it's an initarg, change the initarg.
+	  (2) If it's a direct slot, change the initform in the slot.  (3)
+	  If it's an inhertited slot, add an initarg.  Couldn't figure out
+	  how to implement the 2nd case, so came up with a ***hack*** for the
+	  time being; we simply add an initarg (i.e., treat case 2 the same
+	  as case 3).  This works fine but... Eero can fix it later.
+
+	mcl-screen.lisp (modified from lv-screen):
+	- Not dealing with blting yet, so I didn't deal with find-color and
+	  registered colors.  Color maps don't appear to be supported by MCL.
+	  This is going to be a bit of a hassle.
+	- mcl-screen object (modified from 8bit-X-screen).
+	- color slots in mcl-screen object and in picture objects must be
+	  either color name keywords like :black or triplets of floats between
+	  0 and 1.  For now, I left it the :type spec in the defclass t (i.e., 
+	  no error checking on the type for the time being).
+	- Wrote convert methods that convert rgb-list to and from
+	  encoded color fixnums.
+	- setf background: didn't bother setting background of control panel
+	  because I'm not sure we're going to have one.
+	- There are a bunch of functions and methods that I left out
+	  until we figure out how to deal with color maps:
+	      destroy method on screen
+	      set-gray-lut
+      	      set-color-lut
+              allocate-pseudo-colors
+	- Decided that default background is :white.  So needed to change default
+	  foreground of all drawing picture types to be :black.  For now, put 
+	  lots of set-defaults in mcl-obvius-init.lisp
+
+	mcl-window.lisp:
+	- foreground slot needed to restore fore-color after drawing routines
+	  like: draw-lines, draw-circles, etc.
+	- no background slot in the pane.  Get background color from screen.
+	- take another look at the various methods for destroying a pane
+	  including: destroy methods (in mcl-window and pane.lisp),
+	  ccl::window-close (in mcl-window), and (setf (status pane) :destroyed)
+	  in mcl-window.
+	- view-draw-contents still needs work (look at comment above defmethod).
+	  Works fine when window is selected, but wrong behavior when window
+	  is resized.
+
+Wed Feb 16 11:56:41 1994  David Heeger  (heeger at violet)
+
+   * Changes needed for consistency in mcl and lucid lisp-source:
+
+	image.lisp:
+	- Moved definitions of *max-print-vals* *y-print-range* and
+	  *x-print-range* to array-ops.
+
+	viewable.lisp:
+	- In mcl, exporting name from obvius conflicts with symbol already present
+	  in cl-user. Removed export of symbol 'name, because we could not 
+	  understand or avoid the apparent conflict with a symbol in cl-user.
+	- Function set already defined in CCL kernel.  
+	  Added (fmakunbound 'set) above set redefinition.
+
+	picture.lisp
+	- reset-picture-defaults: added &allow-other-keys to arglist.
+	  The goal was to have all methods inherit this feature; seems to work.
+
+	list-ops.lisp
+	- added (fmakunbound 'union) above union redefinition
+
+	fileio.lisp
+	- Wrote mcl specific versions of: directory-p,
+	  trim-right-delimiter, and directory-path.  Moved these to
+	  mcl-hacks and lucid-hacks.
+
+	synth.lisp
+	- patched make-uniform-noise, mod seed against most-positive-fixnum
+	  without this, seed was sometimes a bignum which busted ff call.
+
+Tue Feb  1 10:12:29 1994  Eduardo-Jose Chichilnisky  (ej at gold)
+
+	* Replaced statistics.lisp and numerical-recipes.lisp. The latter
+	now implements the needed NR routines in Lisp, rather than linking
+	C code. The former is cleaned up and calls those NR routines. Also
+	removed ff calls from lucid-ffi.lisp.  And updated installation
+	instructions.
+
+Fri Jan 14 14:18:25 1994  Eduardo-Jose Chichilnisky  (ej at gold)
+
+	* Patched vectorize, which (amazingly) had a bug with using one of
+	its keyword args.
+
+Tue Nov 30 17:35:15 1993  David Heeger  (heeger at violet)
+
+	* Fixed polar-to-complex in image-pair.lisp.  Used to call sin.
+	and cos., but these macros are not defined when this file gets
+	compiled.  Changed it to make calls directly to
+	periodic-point-operation.
+
+Wed Sep 22 11:41:58 1993  Eduardo-Jose Chichilnisky  (ej at magenta)
+
+	* Fixed condition-number bug in svd. (was returning (sqrt (/ sn s1)),
+	now returns (/ s1 sn) (Gill, Murray, & Wright, p 57). Also fixed 
+	:condition-number-limit keyword in matrix-inverse to correspond.
+
+Mon Sep  6 11:50:23 1993  David Heeger  (heeger at violet)
+
+	* Fixed copy-object on overlays.  Had a serious bug that was
+	causing Obvius to crash.  Also made minor changes to hardcopy
+	function to pass several args (:system-dependent-frob, :current)
+	to copy-object, rather than setting them after the copy-object.
+
+Wed Sep  1 14:12:23 1993  David Heeger  (heeger at violet)
+
+	* Took out the following line from the hardcopy function.  
+	
+        (unless (getf keys :zoom) (setf (getf keys :zoom) :auto))
+
+	This was busting hardcopies of overlayed polar-plots.  Also, it's
+	been bothering me for a long time and I'm certain it is wrong.  We
+	want hardcopy to be more or less wysiwyg, i.e., it should take the
+	zoom parameter from the existing picture.  With this line in
+	there, it was over-riding the zoom parameter and always using
+	:auto.
+
+	If we decide to put it back, it was right after the remf keys lines.
+
+Thu Aug 26 14:44:01 1993  David Heeger  (heeger at violet)
+
+	* Overlay: Added code and fixed a bug to allow overlays of
+	polar-plots. 
+
+Tue Jul 27 10:34:37 1993  David Heeger  (heeger at violet)
+
+	* Changed save-image to return full directory path instead of nil.
+
+Wed Jul 21 15:20:13 1993  David Heeger  (heeger at violet)
+
+	* Fixed (factor) in misc.lisp. The loop macro had a non-portable
+	syntax error "return num" that worked in lucid but crashes in MCL.
+
+Sun Jun 27 15:31:31 1993  David Heeger  (heeger at violet)
+
+	* Changed fft on discrete-functions to be more efficient: don't
+	allocate new dfs if result df is passed.
+
+	* Added pseudo-color and true-color picture types.
+
+	* Added suppress-error keyword so that purge! will do its thing
+	without stopping for continuable errors.  Had to make minor
+	changes to destroy (on viewables), notify-of-inferior-,
+	notify-of-superior-, and purge!
+
+Sun Jun 27 08:17:53 1993  Eduardo-Jose Chichilnisky  (ej at red)
+
+	* Slightly Enhanced col, cols, (randomize arr num), (similar cons). 
+	Fixed regress, which depended on bug in (col).
+	Fixed small bugs in identity-p, (matrix-inverse arr).
+	Speeded up matrix-trace.
+	Used patch-1.lisp for all but matrix-inverse, col, cols (in modules).
+
+Fri Apr  2 14:53:14 1993  Eero Simoncelli  (eero@tarpon.cis.upenn.edu)
+
+	* Wrote plist-difference (like set-differnece, for plists) in 
+	lucid-clos-extensions.lisp.
+	* Fixed some bugs reset-picture-defaults on flipbooks/overlays.
+	* Added &allow-other-keys to reinitialize-instance on pictures.
+
+Thu Mar 11 14:55:56 1993  Eero Simoncelli  (eero@tarpon.cis.upenn.edu)
+
+	* Ported qmf-pyramid.lisp (inherits from new pyramid class)
+	* Modified Laplacian and Gaussian pyramids to inherit from pyramid.
+	* Ported steer.lisp, steer-orient.lisp, steer-pyramid.lisp (w/Heeger)
+
+	* made a lucid-site-paths.lisp.penn
+	* made a make-world.penn
+	* added ".mbin" for *binary-file-suffix* (fixed at stanford, too)
+	* incorporated umask stuff/optimize-clos stuff from obvius-2.2/lucid-defsys
+	
+	* TRIED WITH LUCID-4.1:  Had to fix all lambda lists:
+	  - commented out definition of symbol-macrolet in lucid-hacks.lisp
+	  - added &allow-other-keys to definition of similar in array-ops.lisp
+	  - added &allow-other-keys and :zero-val key to natural-log in list-ops.lisp
+	  - added &allow-other-keys to defs of div in list-ops.lisp and viewable-matrix.lisp
+	  - added &allow-other-keys to defs of gauss-out, gauss-in in viewable-matrix.lisp
+	  - added &allow-other-keys to defs of point-operation, hilbert-transform
+	    in discrete-function.lisp
+	  - used &rest to  in (apply-filter thing filter).
+	  - added &allow-other-keys to (div polar-im polar-im) in image-pair.lisp
+
+Wed Feb 10 17:58:27 1993  David Heeger  (heeger at blue)
+
+	* Changed make-synthetic-image to be a method.  When the first arg
+	is a list, operates as before.  When the first arg is a number,
+	makes a one-d-image of that size and the function takes only one
+	variable (x).
+
+	* Fixed paste on vectors (in array-ops) so that it works for
+	one-d-images as well.  Did similar hack to fix correlate (also in
+	array-ops).
+
+Wed Feb  3 13:53:55 1993  David Heeger  (heeger at blue)
+
+	* Incorporated obvius-2.2 patches into obvius-3.0.  Lots of misc
+	things.  Important ones include: fix to viewable-matrix macros
+	(patch-2.lisp); fixes to set-not-current (patch-7.lisp); various
+	fixes to viewable-sequences.  It looks like matrix-mul etc methods 
+	in patch-4.lisp were already incorporated.
+
+	* Copied over steerable filters code from obvius-2.2 (not tested 
+	yet).
+
+	* Copied over user-macros.lisp from obvius-2.2.
+
+Tue Dec 29 09:55:00 1992  Eduardo-Jose Chichilnisky  (ej at violet)
+
+	* Added almost-zero. Fixed non-float handling bug in negate.
+	Added suppress-warning to natural-logarithm. Added logarithm.
+	Added (paste vec vec) method. Improved efficiency of 
+	paste-rows, paste-cols. Gave vectorize and columnize
+	modern x and y keywords. Added random-row and random-rows.
+	Fixed bug in non-float behavior of product-of, and sped up.
+	Allowed scatter-plot to use arrays (used to only handle vectors).
+	Added logistic and inverse-logistic methods. Added sgn, half-square.
+	Made coerce-to-float much more efficient. Added internal_cieluv
+	and internal_cielab and added color.c to C libraries. 
+	Interface functions too. Lisp code that uses these not yet in OBVIUS.
+
+Wed Nov 11 15:11:47 1992  Eduardo-Jose Chichilnisky  (ej at violet)
+
+	* Added sum-square-error. Made vector-distance a function.
+	Improved error-checking in cumulative-chi-square. 
+	Added logarithm method. Improved randomize methods.
+	Added gaussian-randomize and poisson-randomize.
+	Improved scatter-plot methods by adding scale keyword
+	and making range defaults better.
+	Added a bunch of check-sizes to array-ops code (not all though).
+
+Sat Oct 17 14:42:38 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Spiffed up matrix-inverse to handle small singular values well.
+	Default singular-value-limit is *machine-tolerance*.
+	Multiple values are now returned that indicate the min and max
+	singular values, and the dimensions of the result.
+
+Fri Oct 16 09:02:17 1992  Eduardo-Jose Chichilnisky  (ej at ecru)
+
+	* Fixed small bug in quadratic-decomposition, and added keywords
+	to it. Removed (matrix-mul arr vec), which used to return an error.
+	This op is valod when arr is a column vector. Took out the two other
+	matrix-mul(-transpose) methods that always generated cerrors.
+	Small enhancements to  make-identity-matrix and make-diagonal-matrix.
+
+	* Fixed up all (add/mul/sub/div)-(rows/cols) methods
+	and appropriate C code, ffi code.
+	Added vector-length-rows and quadratic-form functions
+	and corresponding C code, ffi code.
+
+	* Took LCL dependencies out of stepit.lisp and numerical-recipes.lisp.
+
+Tue Oct 13 10:20:14 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Major changes to fitting code:
+	stepit.c - made stepit re-entrant. Lots of changes.
+	stepit.lisp - corresponding changes to lisp interface to stepit.
+		Eliminated handling of lists, cumbersome and slow.
+		Took out Lucid dependencies (see below)
+	amoeba.lisp - spiffed up and added amoeba fitting routine.
+		Slower and worse than stepit, but more is better.
+		Made interface as close to stepit as possible.
+	lucid-hacks.lisp - added routine for getting function pointers
+	lucid-ffi.lisp - added new stepit interface functions
+
+Sun Sep 20 13:44:20 1992  David Heeger  (heeger at blue)
+
+	* Cleanup up files to make it easier to port.  Renamed some files
+	lucid-*.lisp and created lucid-hacks.lisp.
+
+	* Eliminated retain-bitmap.  No longer really necessary, and
+	getting rid of it will make things easier to port.  Got rid of
+	x-drawable and postscript-drawable objects (no longer needed).
+	Had to make a variety of changes to hardcopy.lisp (still needs to
+	be cleanup up further).
+
+Fri Sep 18 15:38:29 1992  Eero Simoncelli  (eero at ecru)
+
+	* Modified load-patches (in lucid-defsys.lisp) to turn of
+	redefinition warnings!
+
+    Patch-4:
+	* small contour-plot bug: called tolerance with :tolerance key
+
+	* Default args to blur and gauss-out were different for images and
+	viewable-matrices.
+
+	* modified matrix ops on viewable-matrix to give error if result
+	is one of the args.  Also, put in checks for zero or one values
+	when multiplying a viewable-matrix by a scalar matrix.
+
+
+Thu Sep 10 11:39:00 1992  David Heeger  (heeger at blue)
+
+	* Added overlays of scatter-plots.
+
+Wed Sep  9 11:54:27 1992  David Heeger  (heeger at blue)
+
+	* Viewable-matrix macros did not use gensym, so local variables
+	were conflicting with user variables (esp in circular-shift, crop,
+	paste).  Eero provided new versions (patch-2.lisp).
+
+Mon Sep  7 10:44:49 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* Added optional arguments and defaults to weibull functions.
+	Added keyword to (copy arr) to allow forcing the copy to
+	be allocated on the static heap (like with similar).
+	Changed names of identity-matrix, diagonal-matrix
+	to make-identity-matrix, make-diagonal-matrix,
+	consistent with make-matrix. Changed keyword to displaced-matrix
+	to be consistent with crop, paste, etc. Patch-1.lisp.
+
+Sat Aug 29 10:02:22 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* NOW IN PATCH MODE
+	* Added :-> argument to make-histogram, kept :name argument
+	for back-compatibility. Added make-histogram methods on 
+	lists and arrays. patch-1.lisp
+
+Fri Aug 28 20:25:18 1992  Eero Simoncelli  (eero at picadilly)
+
+	* Modification to patch mechanism: patches are now loaded by
+	make-obvius, and by initialize-obvius.  Thus, if you save a new
+	world, it will include all patches currently in the patches
+	directory.  At runtime, all patches newer than the last one loaded
+	when you made the world will be loaded.  
+
+	  - Wrote load-patches function to load patch files and increment
+	  *starting-patch-file* to be one greater than the last patch loaded.
+	  - Created site-patches.lisp file for sites to add their own
+	  patches (only loaded at runtime).
+
+Fri Aug 28 14:59:44 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* Fixed up Numerical Recipes interface to use library (not .o
+	files)
+	* Sped up coerce-to-float a little with declarations.
+
+Tue Aug 25 20:04:57 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* Fixed big bug in (sub im im-mat) which was doing same as (sub im-mat im),
+	(as well as div, and sub and div on (arr im-mat)).
+	Did this by adding a macro, unary-viewable-reverse-matrix-op
+	in viewable-matrix.lisp.
+
+	* Replaced (matrix) methods with (make-matrix). Replaced all calls.
+
+	* Added dot-product, circular-shift on bit-arrays.
+
+	* Altered correlate methods to allow :x :y :x-dim :y-dim keys for
+	correlation over a restricted range. 
+
+	* Altered make-slice methods to take :x and :y args, 
+	leaving :x-coord and :y-coord for back-compatibility.
+	Changed x-mouse to use :x and :y also. 
+
+Sat Aug 22 18:32:15 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Fleshed out the "troubleshooting memory problems"
+	section (in hacking.tex).
+
+	* Wrote a brief "Adding menus and dialog boxes" subsection of the
+	manual (in hacking.tex).
+
+	* Save-image on sequences was saving the class incorrectly
+	(eg, was writing "#<Standard-Class IMAGE-PAIR>", instead of
+	"IMAGE-PAIR").
+
+Fri Aug 21 15:48:35 1992  Eero Simoncelli  (eero at oxfordcircus)
+	
+	* Uncommented the line in load-obvius that compiles all CLOS
+	dispatch code, since this now seems to work with the production
+	compiler.  Also speeds things up noticably!  CAREFUL: if you
+	see errors about lucid:STRUCTURE-IS-STANDARD-OBJECT-P not
+	being defined, this line is responsible.
+	
+	* Added keywords :optimizations and :brief-optimize-message to
+	compile-if-necessary and compile-load functions.  obv-compile-load
+	and obv-compile now call these with *obvius-compiler-optimizations*.
+	Documented these in release notes.
+
+	* Added *obvius-compiler-optimizations* variable (in lucid-defsys) to
+	hold optimization list for compiling all obvius source.  Wrote
+	current-compiler-optimzations function to return current settings.
+
+	* Wrote WITH-COMPILER-OPTIMIZATIONS to deal with the compiler
+	problem  (Lucid has an undocumented variable that holds the
+	current compiler optimizations).
+
+Thu Aug 20 17:03:01 1992  Eero Simoncelli  (eero at picadilly)
+
+	* Modified load-obvius and compile-obvius-modules to proclaim
+	production compiler optimizations, and return to dev mode (the
+	lucid default) afterward (see next comment).  This is gross,
+	but I don't know how to read current compiler settings.
+
+	* Finally sorted out this lucid-ffi compilation confusion with
+	EJ (we were getting "lucid:set-%ptr-float-ref not defined" bugs).
+	We believe lucid-ffi will break if BOTH of the following things
+	are true: 1) it is compiled in development mode, and 2) it is used
+	from within the same lisp world that it was compiled.  Changing
+	condition (1) always seems to fix it.  Changing condition (2) seemed
+	to work in some cases, but was more complicated.  Gotta love this
+	Lucid Lisp.  ALSO, the problem we had earlier of gc'ing when in
+	foreign function calls ONLY HAPPENS WHEN YOU USE THE DEVELOPMENT
+	COMPILER.  Clearly, the answer to all of this is to use production
+	compiler....
+
+	* Small mods to display (in viewable.lisp):
+	1) Modified the meaning of *auto-update-pictures*.  It
+	controls whether pictures that are re-displayed by calling
+	display on a viewable with an existing picture are re-computed
+	(used to recompute pictures on any call to draw-pane, such as
+	cycle-pane, or move-picture)
+	2) Added new variable *preserve-picture-pane*.  If non-nil, when
+	display finds an existing picture of the viewable, it is NOT
+	moved to the current pane, but remains on the same pane.  If
+	nil, it is moved to the current pane (this is like
+	obvius-1.2).  Default value is nil.  Users might prefer either
+	mode, depending on whether they like to set up panes with
+	particular pictures....  Documented this.
+
+Thu Aug 20 11:14:41 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* Added error-checking to (paste arr1 arr2) and (paste vec arr).
+	Removed some unnecessary matrix-transposes from svd.
+	Changed square-p, orthogonal-p, and diagonal-matrix to be more
+	efficient. Took malloc out of chartohex.c, added the 
+	necessary allocation to write-postscript-data, and added a new
+	argument to the ffi wrapper for internal-chartohex in lucid-ffi.
+	Put back in the line
+	(proclaim '(optimize (compilation-speed 0) (speed 3) (safety 0)))
+	into lucid-ffi since this fixed the lucid-setf-ptr-% error.
+
+Tue Aug 18 14:25:47 1992  Eero Simoncelli  (eero at ickenham)
+
+	* Commented out all exports in contour-plot.lisp, except for the
+	symbol 'contour-plot.
+
+	* Changed back-compatibility macros in synth to be functions.
+
+	* Nasty bug in flipbooks: subpics were not refreshed, but
+	title bar said they were! Mods to flipbook.lisp marked with
+	8/18/92. Modified update-subpic-dialog on flipbook to use eq
+	and put into flipbook,lisp.  Moved update-subpic-dialog on
+	overlay into overlay.lisp.
+
+	* Changed *x-bltable-overhang* to 2.4 to make dragging behavior
+	better.
+
+	* fixed (setf iref) to return val 
+
+	* Put in ignore declarations to get rid of all compiler warnings
+	(found a few bugs in the process!).  
+
+	* Changed *obvius-system-files* so that user-macros is loaded just
+	after generic-fns.  It defines macros that are used in synth.
+
+Mon Aug 17 18:52:09 1992  Eero Simoncelli  (eero at ickenham)
+
+	* Copied all exports from optional modules into
+	generic-fns.lisp, so that you don't get import errors when you
+	load them.
+
+	* removed "x-dialogs" from the :x-control-panel module: they
+	are needed with the :x-windows module, since meta-middle
+	brings up a parameter dialog!  Tested to see that picture
+	dialogs work if control panel code is NOT loaded.
+
+	* Modified drag-picture for gray/bitmap.  Only clears exposed
+	rectangles (old code cleared whole pane) and so avoids flickering.
+	Old methods are still in the file (commented out).
+	Only losing thing now is that it hesitates every time it has to
+	recompute the X-image (i.e. after you drag 40% of the pane).
+	This would improve if we could destructively modify the X-image data!
+
+	* Added dimensions methods for gray/bitmap that return the 
+	zoomed size of the picture (old code returned dimensions of frob,
+	which has changed -- see next change).
+
+Mon Aug 17 12:17:17 1992  Ciamac Moallemi  (ciamac at ickenham)
+
+	* Added smart zooming code to x-blt.lisp so that when 
+	8-bit images are zoomed, only the part that is to be
+	displayed is calculated (previous code zoomed the whole
+	image).  This speeds zooming operations up and eliminates
+	a lot of consing.
+
+Sun Aug 16 13:39:02 1992  Eero Simoncelli  (eero at picadilly)
+
+	* Scary bug: Calling malloc from C code may cause a GC in
+	lisp, thereby moving all dynamic data objects.  Documented
+	this in hacking.tex.
+
+	* Modified code in patches.lisp to compile into the bin directory.
+
+Sat Aug 15 18:18:42 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* New arglists: 
+		(crop im :offset :dimensions :x :y :x-dim :y-dim :->)
+		(paste im base :offset :x :y :->)
+		(cirular-shift im :offset :x :y :->)
+	I kept around the old keywords (:x-size for crop, :x-offset for
+	paste, :x-shift for circular-shift) for back-compatibility.
+	Documented these.
+
+	* Fixed nasty bug in viewable-insertion into function dialogs,
+	where user lost left-mouse clicks in panes.  Code no longer
+	relies on mouse interests, and is therefore much more robust.
+
+	* Inserted simple mechanism to only allow one function dialog
+	to be on screen at once (avoid proliferation of these things,
+	which ends up confusing the user because left-mouse clicks no
+	longer go to *lisp* buffer).  
+
+	* Fixed make-global-parameter-dialog/make-slot-value-dialog/ 
+	make-slot-default-dialog: if a dialog already exists for the
+	paremters/object/class, its values are reverted, and it is
+	exposed.  These are all kept in hash tables.
+
+	* Added with-status-message macro.  Put it into relavent files.
+
+	* Aded position args to make-control-panel (:left :right :top :bottom).
+	Added destroy-control-panel function (documented).  When
+	control-panel is destroyed, re-direct status msgs to Emacs
+	minibuffer.
+
+	* Added new menu items: round. truncate. floor. rotate resample.
+
+	* Wrote find-all-subclasses (iterative depth-first search) and
+	used it in class-based menus to get proper ordering.
+
+	* Modified all function and class-defaults menus to be computed at
+	click-time.  Now modules can add items to these menus (eg,
+	color-images will show up on viewable defaults menu).  Also,
+	user can add items by simply adding to the global variable lists.
+
+	* Added Modules submenu to Misc menu: contains optional modules that have
+	not yet been loaded.
+
+	* Make-obvius modified to compile module source files (thus
+	preventing problems when users try to load them).  
+
+	* Added obv-compile definition in lucid-defsys.  Split
+	compile-load into two functions: wrote compile-if-necessary
+	and obv-compile.
+
+Fri Aug 14 23:07:11 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Fixed defaults dialogs so that colors are displayed as keywords
+	or number-lists, instead of "(lv:find-color ....)".
+
+	* CLeanup of abstraction barrier: tried to get rid of LispView
+	references in gray.lisp, small mods to x-blt.lisp.  BUt had to
+	leave them in the defclass of bitmap, so that color spec errors
+	are flagged in dialogs...  Gross.
+
+	* If bin directories (eg sun4-bin) don't exist, load-obvius now
+	creates them.
+
+	* Getting a nasty "lucid:set-%ptr-float-ref not defined" error
+	whenever foreign code is called.  It seems to happen when I
+	compile-load lucid-ffi, but not if I just load the source.
+	For now, took lucid-ffi out of *obvius-system-files* list, and
+	loaded source from load-obvius.
+
+Fri Aug 14 17:59:22 1992 David Heeger (heeger at blue)
+
+	* Fixed polar-plots to use their own polar-plot-frob.  Previous
+	code used vf-frob.
+
+Thu Aug 13 11:23:25 1992  Eduardo-Jose Chichilnisky  (ej at blue)
+
+	* Mods to SVD: allocate temporary space in Lisp and pass it
+	in, since losing LUcid often calls GC when C mallocs!
+
+	* Moved overlay code into hardcopy (ps stuff) 
+	x-bltable (x bitmap stuff) and x-mouse (mouse-specific stuff).
+	Made overlay part of normal distribution (not a module).
+
+Wed Aug 12 17:51:53 1992  David Heeger  (heeger at blue)
+
+	* Rewrote overlay (again).
+
+	* Minor changes to flipbooks related to picture slot dialog.
+	Cleaned it up so that sub-pic slots are handled differently for
+	flipbooks and overlays.
+
+Tue Aug 11 12:07:29 1992  David Heeger  (heeger at blue)
+
+        * Fixed hardcopy.  Eero had left a huge bug that broke everything.
+	The postscript-pane can not be used for the
+	system-dependent-frob slot.  Destroying a picture involves
+	destroying its frob slot.  If the frob slot is a pane, then
+	destroy on a picture will attempt to destroy the pane (that
+	wouldn't be good).
+
+	* Fixed contour-plot reset-picture-defaults. If skip is supplied,
+	then use it.  Otherwise choose skip based on density (which is
+	always supplied via default initarg).
+
+Sun Aug  2 17:26:29 1992  Eero Simoncelli  (eero at ecru)
+
+	* Massive speedup of flipbook code: added fast-display-seq
+	method dispatching on sub-frob type.  Wrote a generic one 
+	(works for all types of frob), and a fast one for 'x-bltables.
+	Thus, flipbooks of gray pictures are now much more efficient.
+
+	* Created a Makefile in the doc directory.
+
+	* Added doc for filter display.
+
+	* Added doc for fft and power-spectrum.
+
+Thu Jul 30 10:08:20 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Added make-full-tarfile for tar'ing  entire source tree (for
+	transfer between MIT to Stanford).  Additional files include
+	the DONE file, The site-specific site-paths.lisp files, and the
+	old directory.
+	
+	* lucid-ffi: Put compiler optimizations at top of file.
+	There were serious bugs calling foreign functions (I think because
+	of in-line compilations).  Confusion: it seems to work with safety-0
+	in the file....
+
+	* Added (:array :unsigned-8bit) declarations.
+
+	* Added doc index entries for each subsection heading.  Got
+  	rid of losing caps and plurals in index entries! (e.g. \lsym{Grays})
+
+	* Documented display, warp, rotate and resample.
+
+	* Added rotate and resample to imops. 
+
+	* Warp no longer an optional module (it is very small so we
+	should just include it).
+
+Wed Jul 29 16:20:22 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Speedup of display-seq (could still use more, but it's a start)
+
+	* fixed use of density parameter in vector-field, contour-plot.
+
+	* Pane manipulation functions provided (useful from within
+	programs, or if mouse dies): exported pop-picture, cycle-pane,
+	get-viewable.  Wrote next-pane. Got rid of destroy-top-picture
+	(same as pop-picture), and destroy-pane (destroy *current-pane*).
+	Got rid of destroy-top-viewable: provided current-viewable
+	instead, which returns viewable on top of current pane.
+	Documented all of these.
+
+	* Modified functions in synth to pass :binsize to
+	(periodic)-point-operation calls.
+
+	* Added point-operation method for periodic-discrete-functions.
+
+	* changed names of synthetic noise generators
+	(make-gaussian-noise, make-uniform-noise, make-random-dots).
+	Left macros for backward compatibility.  Documented these.
+
+Tue Jul 28 17:34:29 1992 Eero Simoncelli (eero at oxfordcircus)
+
+	* Smaller floats in dialog boxes!
+
+	* Fixed default blur kernel not to change mean value of im.
+
+	* Small modification to with-result: handles 'apply 'fn in hist-list.
+
+	* sequence.lisp -> viewable-sequence.lisp to avoid confusion with CL.
+
+Mon Jul 13 11:43:19 1992  Eero Simoncelli (MIT)  (eero@csh3)
+
+	* load-image on image-sequence now checks for a "class" key!
+
+	* Modified fft to take dimensions argument.
+
+	* Fixed rounding bug in warper.c.
+
+Sun Jul 12 09:50:08 1992  Eero Simoncelli (MIT)  (eero@fasolt)
+
+	* Modified dialogs to come up below menu bar.  Picture dialogs
+	come up near the corresponding pane (depends on where the pane is
+	and how big the dialog is - yucho!).
+
+	* Added display stuff for filters (gray or bar-graphs, depending
+	on rank).
+
+	* Fixed ugly clipping-region bug for bar-graphs (wasn't drawing
+	last spike)
+
+	* Fixed array-from-list to coerce args to element-type if it is
+	passed.  Now, can pass integers: (make-filter '((1 2 3) (4 5 6))).
+
+	* Fixed setf-iref on bit-image
+
+	* Point-operation now has default binsize of nil => call the
+	function directly (rather than using a discretized lookup-table).
+	Slower, but no surprises! Documented.
+
+	* Fixed paste on sequences to pass correct keyword defaults.
+
+	* Added :center :post-center and :pre-center keys to power-spectrum
+	and fft functions.  These allow user to do circular-shifting
+	automatically.
+
+Fri Jul  3 11:42:07 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Replaced functions make-image, make-discrete-function, and
+	make-log-discrete-function with methods. They can be used as
+	before, but they now can also accept arrays as their first
+	argument, in which case they act as the ***-from-array functions
+	used to work. 
+	* Made new world. Removed patches.
+
+Wed Jul  1 23:19:26 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Fixed copy-object method so that initargs override slot values.
+
+	* Took out exported globals from contour-plot.
+
+	* Lucid-defsys.lisp: Got rid of global compilation safety
+	proclamation: put it in as a declaration in obv-compile-load.
+	Added (lcl::compile-all-dispatch-code) and
+	(lcl::precompile-generic-functions) to load-obvius.  This makes
+	the methods much faster! Added optional filename to make-obvius.
+
+	* Incorporated new surface-plot code.  
+
+    	* Many fixes to hardcopy, although there are still problems.  Works for
+	surface-plots.  Uses generic line-drawing frobs.  Copied existing
+	picture slots correctly. Works for retain-bitmaps t or nil.
+	Default zoom parameter is :auto (fills the page).
+	Postscript-pane dimensions are now '(660 500) (size of 8.5x11
+	paper in default postscript units).
+
+        * Added point-operations round. truncate. and floor. to the
+	source code. These are similar to the common lisp functions.
+	Documented these.
+
+	* Destroy mouse binding now removes pic from pane immediately.
+
+	* Default args of crop modified.
+
+	* Zoom is now a required arg to render.
+
+	* Fixed zero! on sequences, pyramid, matrices to return vbl.
+
+Sat Jun 27 13:59:08 1992  David Heeger & Eero Simoncelli (heeger at blue)
+
+	* Fixed Purge! function:  it now takes keywords :suppress-warnings
+	and :preserved-viewables.
+
+	* Added set-not-current method on graphs to recompute y-range slot
+	when refreshing.
+
+	* Fixed setf iref.
+
+	* control-panel icon.
+
+	* Fixed overlays.  Had weird problems with destroy, etc.  Added
+	name keyword to display-overlay.  Added warning to get people to
+	stop using make-overlay.  Display-overlay returns t, instead of
+	returning picture of viewable.
+
+	* Fixed flipbook single-step to clear pane. NOTE: now this is busted
+	for gray/bitmap flipbooks.  We need to specialize on the
+	sub-picture type.
+
+	* Fixed display.  If there is ANY picture of a vbl on any pane,
+	auto-display does not make a new one!  Also, auto-display does not
+	move picture to another pane, since some users like to keep panes
+	organized and don't want pictures randomly jumping around!
+
+	* Fixed destroy, if name is :destroyed, don't try to destroy it
+	again.
+
+	* Fixed dot-product on viewable-matrix.  Added zero!
+
+Fri Jun 19 09:29:57 1992  David Heeger  (heeger at blue)
+
+	* Fixed minor bug in free-array.  It used to crap out if you
+	passed it a non-static array, and no heap had yet been created.
+
+	* bug fix in reset-picture-defaults ((pic flipbook) (seq viewable-sequence)
+	Used to have (remf subl key) so it skipped every other keyword.
+
+	* Added reset-compound-picture-defaults ((sub-pic graph) (sub-vbl viewable)
+	Not quite correct, but it's better than it was.
+
+	* Fixed array-fft to always divide by (sqrt (total-size arr)),
+	both for foward and inverse.
+
+	* Added endpoint slot to discrete-functions.  Default value is t,
+	so behavior is the same as it used to be.  If endpoint is nil,
+	then the discrete function starts sampling at min and stops
+	just below max.  Changed def-simple-class, settable-parameters,
+	make-discrete-function, fill-discrete-function, set-result,
+	domain.
+
+	* Changed fft on discrete-function to do the right thing (I think)
+	with :increment (/ 1 (increment df) padded-size).
+
+	* Added periodic-discrete-functions.
+
+	* Added log-discrete-functions.
+
+	* Added circular-shift and mean-square-error on viewable-matrix.
+	
+Tue Jun  9 14:40:52 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Changed *starting-patch-file* to 1 from 5. Don't know why it was 5.
+
+	* Added row-space, row-null-space, col-space, col-null-space
+	to svd.lisp, removed orthogonal-complement (which is replaced
+	by row-null-space).
+
+Fri May 29 17:39:39 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* WRONG: I fixed x-mouse.lisp so that it doesn't initialze the X
+	display. It is now back in the *obvius-x-files* list where it
+	belongs.
+	* Modiified Purge! function to take preserved-viewables args.
+	* Added sym-or-vbl function.
+	* Added new (slightly faster) convolve.c code.
+	* Dialogs are now lv::popup-windows instead of lv::base-windows.
+	* Moved old code into old/ directory.
+
+Fri May 29 10:53:34 1992  David Heeger  (heeger at blue)
+
+	* X-mouse can not be loaded into the world.  It initializes
+	the X display which breaks when the world is loaded.  So,
+	x-mouse.lisp is not included in site-init.lisp.  Rather, it gets
+	loaded at run time in obvius-window-init.lisp.
+
+Wed May 27 19:11:02 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* svd.lisp: Took out symmetric-decomposition, non-singular-p.
+
+Tue May 26 10:08:13 1992  David Heeger  (heeger at blue)
+
+	* Added multivariate gaussian-noise method (in svd.lisp because it
+	depends on svd and other matrix utilities).
+
+	* Added "old" directory in obvius for out-of-date code that we
+	don't want to loose (e.g., old svd code written in lisp).  Policy
+	on files in "old" is there should be a comment near the top
+	justifying why they shouldn't be deleted.  If that reasoning is no
+	longer valid, then nuke 'em.
+
+	* svd.lisp: new version of principal-components.  Added
+	orthogonal-complement.
+
+	* New file: row-ops.lisp (part of matrix module)
+	- New versions of row,rows,col,cols,displaced-row,displaced-rows.
+	- Lots of other new row operations, some of them pretty weird.
+
+	* New file: gaussian-noise.lisp:
+	- Changed gaussian-noise to be a method (yuch) that takes mean and
+	variance as arguments.  It's a method so we can use for
+	multivariate gaussian noise also (given vector and covariance
+	matrix).  
+	- Eliminated normal-random function.
+	- Added normal-noise function that calls gaussian-noise with 0 1.
+	- Had to make small change to simplex (which calls
+	gaussian-noise).
+	- Didn't change make-gaussian-noise-image.  It does its own
+	iterative thing.
+	- Eliminated make-normal-random-image.
+
+	* Changed how/when control panel gets made. x-control-panel is
+	obv-required in site-init.lisp.  Loading X-control-panel does not
+	make a control panel.  You must call (make-control-panel) in your
+	obvius-init.lisp file.  This is done in the default
+	obvius-init.lisp.  (make-control-panel) is now exported.
+
+Sun May 24 15:10:50 1992  David Heeger  (heeger at blue)
+
+	* Changed default for independent-parameters (used to be t, now it
+	is nil) in flipbooks and pasteups.
+
+	* Wrote gamma-correct method on arrays (in array-ops.lisp) and on
+	viewables (in generic-ops.lisp).
+
+	* Eliminated gamma from all gray pictures.  Gamma-correction is
+	done by setting gray-gamma in the screen.  Eventually, screens
+	will inherit from devices and the gamma slot will be either a
+	number of a table (to linear the screen more precisely).
+
+	* Finished rehacking overlays.  There are some kludges, but it is
+	good enough for now.  Two main limitations: (1) Discrete-functions
+	must have the same origin, increment, and size to be overlayed.
+	(2) Overlaying bit-image on image is slower than it should be.
+	Best way to do it would be to use :operation keyword in copy area,
+	but I could not get that to work.
+
+Sat May 23 10:12:12 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Made changes/additions to matrix.lisp. Functions affected:
+	matrix-transpose,matrix.
+
+	* Added statistics module. This consists of numerical-recipes.lisp
+	and statistics.lisp. The user must set a path in the
+	site-paths.lisp file which tells where to find the
+	numerical-recipes object modules. Without them this stuff does not
+	work. 
+
+Fri May 22 16:24:18 1992  Eduardo-Jose Chichilnisky  (ej at green)
+
+	* Replaced regress.lisp and stepit.lisp files with newer versions. 
+	Added corresponding C code in stepit.c, and C code wrapper in
+	lucid-ffi.lisp.
+
+Fri May 22 09:56:39 1992  David Heeger  (heeger at blue)
+
+	* Added :around method for single-step (in x-control-panel).  If
+	there is a picture parameters dialog, it updates the dlg so
+	widgets	point at the new sub-picture.
+
+Thu May 21 10:20:31 1992  David Heeger  (heeger at blue)
+
+	* Generic-ops.lisp created.  Defines lots of methods on viewables
+	to just operate on the data slot.  Did NOT delete old method
+	definitions (e.g., imops.lisp was unchanged).
+
+	* defined range, similar, and copy on (thing t).  removed range on
+	image and viewable-matrix (to use the generic version).
+
+	* destroy-viewable:  always suppress-warnings if array is not
+	allocated from static-heap.  Used to warn every time (as debugging
+	aid).
+
+	* Changed definition of x-pane so that they can be destroyed with
+	the mouse in the usual openwindows way.  Added small change to
+	draw-pane method on x-pane to make sure it doesn't try to redraw 
+	pane while it, and its pictures, are being destroyed.
+
+	* Set parameters dialog on flipbooks and overlays now lets you set
+	parameters of the subpictures as well:
+	- Added set-subpic-parameter-interest class and receive event.
+	- make-slot-value-widget now a method.  It must be slightly
+	  different for flipbooks and overlays.
+
+Tue May 19 10:43:31 1992  David Heeger  (heeger at blue)
+
+	* Added plot symbols to all graphs.  This involved touching
+	a lot of code in drawing.lisp and graph.lisp, and touching
+	some code in x-draw.lisp, x-window.lisp, and hardcopy.lisp.
+	The previous versions of some of these files were saved as
+	whatever.lisp.5-19-92.
+
+	* Added axes (but no axis labels) to polar plots.
+
+	* Added scatter plots.  (display image-pair 'graph) no
+	longer works.  Use (display image-pair 'scatter-plot) or use the 
+	new scatter-plot method.
+
+	* Started rewriting overlays.  First step was to remove all
+	references to overlay in color-picture, drawing, gray, memory, and
+	picture.lisp.
+
+Tue May 12 18:29:06 1992  Eero Simoncelli  (eero at oxfordcircus)
+
+	* Added patches accumulated from October 1991 to present:
+	  - Patch repl to avoid setting * when no values returned
+	  - Added make-disc function with soft threshold
+	  - New: make-soft-threshold-df
+	  - Purge! function to reclaim all memory (destroying all viewables).
+
+	* Fixed all of the make-<vbl> functions.  Put the :-> arg back
+	since it was driving us all crazy.  Also, each of these
+	functions now should have a full (explicit) keyword arglist.
+	This is so users can find outline-mode what the parameters are!
+
+Thu Apr 23 16:41:43 1992  Eero Simoncelli  (eero at picadilly)
+
+	* Modified compile-load (sorry, guys) to have :output-file
+	keyword, which matches the Common Lisp compile-file command.
+
+	* Modified obv-compile-load to locally bind compiler options,
+	and got rid of global proclaim in lucid-defsys.lisp
+
+	* Put initialization line in x-control-panel.lisp (make-control-panel)
+
+	* Set up new version number (2.2)

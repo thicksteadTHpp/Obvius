@@ -43,7 +43,7 @@
 (in-package :obv)
 
 ;; maybe add one up [THO]
-(defconstant *obvius-version* 3.0 "OBVIUS version number.")
+(defconstant *obvius-version* 3.1 "OBVIUS version number.")
 
 ;;; [THO] check if that is really needed
 ;;; Production mode compiler optimizations.  These are used when

@@ -1,0 +1,103 @@
+* Intro
+
+  Obvius was a image processing software which was created by Eero Simoncelli, David Heeger and E.J. Chichilinsky 
+  at the MIT. Several Cntributors added functionality to it. Patrick C. Teo added a GL implementation. The software  
+  got out of use in the mid 90ies presumly by abondon CommonLisp code at all. 
+
+  The main idea of Obvius is image processing for academic and research. There is no explicit focus on speed or
+  high performanc computing. But nearly all low level functions are implemented in C. This may be a good idea or
+  not in 2020. There have to be test if this affects the performance to the better or not.
+
+  For now it is my goal to resurrect as much of legacy functionalty as possible. The purpose of Version 3.X will be
+  to be a reference point to the modernized version 4.0. See below for a widh list of features in Version 4.0 
+
+  In the meantime struggling with CommonLisp code from the 90ies. But there a good reasons to do so.
+  There a re very good tutorials in doc section. But not all of them work. If most of their content work one
+  can update them to newer versions still having a reference.
+
+  Obvius was intended to be used as a companion to Emacs. In the original version there was en extra emacs mode 
+  which used a special REPL. As of 2020 i use SLIME or SLY for this purpuse. There are now no plans to revive the 
+  emacs modes bundled with the legacy code. 
+
+  In this repository i bundle the original code which is downloadable from MIT under the legacy folder. Please
+  pay special attention to the original license which makes this software usable for educational and researching purposes only.
+  I try to contact the original authors to put a more modern license into it which will serve the same goals.
+
+* State  
+ 
+  The last version as i know of was Obvius 3.0. So the current branch will be Version 3.1. It is intendended
+  to recover as much as possible of the functionality of the previus version. Even though I dont' have any 
+  Screenshots or other material, I try to guess what Obvius looked like. 
+
+  When i resurected Obvius 
+  there were some minor problems  with CLOS to be solved and the graphics backend had to witten completely new.
+  Luckily Obvius was designed in a way which made it possible to add new graphics backends without interfering
+  much with the core functions. I decided to use a immediate mode gui called nuklearon top of glfw. Both are 
+  available through Quicklisp by Bodge. An immediat mode gui allows to add a fully controllable render loop. 
+  This makes it possible to add windows (in Obvius called panes) at runtime and remove them. For displaying
+  Pictures a couple of GL commands need to be performed. For every picture to be displayed a GL- Texture is created
+  and displayed in the nuklear windows (panes in obvius). This works quite well and the nuklear library
+  saves the trouble of redisplaying and moving of windows. On the contrary is the situation with the drawing objects.
+  Drawing objects ar Graphs and other diagrams which have been drawn line by line and point by point to a foreign 
+  array in the 90is. This foreign array had been blitted to the (X)-Screen and was so to be seen at the display.
+  For a workaround i use the drawing capabilities of nuklear to draw graphs etc. every frame to the nuklear window.
+  This is quite a waste and will change in future.
+
+** What works
+
+ For Version 3.1 I have tried to be as little intrusive as possible to the core legacy code. There are no Changes 
+ or at least little changes to the core mechanics. The display of Graphs and other drawing ojects is now a real cycle
+ burner. Drawing objects are redrawn every frame which is quite a waste of ressource. My idea to solve this is to draw
+ graphs only once on with Zach Beans vecto library and then generate a GL-Texture the same way as with pictures. 
+
+
+** TODO
+   - Code cleanup
+   - Add support for color images
+   - Dithering???
+   - Test the Tutorials
+   - Make the graphic backend more robust
+   - rework the foreign function interface
+   - adapt the documentation
+   - lots of minor glitches
+
+
+* Far Goals
+  
+  For Version 4.0 getting rid of unnecessary dependies in legacy code is planed.
+  - there is no need for a self written garbage collector anymore
+  - the memory management can be safely done by Lisp
+  - replace the static array creating either by static-vectors or ffa
+  - reduce the dependencies of foreign code. Get as much functionality into lisp as possible.
+  - replace matrix code by BLAS calls or similar
+  - make porting to other OSes possible (library compilation)
+
+
+* Install
+ 
+  Download a copy of this rep and put it in a folder under ~/quicklisp/local-projects/
+
+  Then load it with (ql:quickload "obvius31").
+
+  For obvius to work a foreign library has to be compiled.
+  Go to c-source folder and type make. This should be enough - I hope. I am no expert when it comes
+  to Makefiles and c-compiling stuff. Any help is appreciated.
+
+** Depedencies 
+
+   There are a lot of dependencies. Luckily a big part comes with quicklisp.
+  I tried to bundle as much dependencies as possible in the repo. For GLFW to work look at bodge-glfw and bodge-nuklear
+  All the rest should be installable via Quicklisp.
+
+
+* Basic Usage
+
+  When obvius is loaded o into the obvius package by (in-package :obv) and then
+  load the test images with (make-test-images). You can now (display einstein)  or (display reagan) to 
+  display them 
+
+
+* Acknowledgements
+
+  Thanks to David Heeger and Eero Simoncelli for designing Obvius, to vurtun for nuklear.h, to Pavel Korolev for making it possible to use
+  it from CommonLisp.
