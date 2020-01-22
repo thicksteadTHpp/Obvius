@@ -475,6 +475,8 @@
 	 (destroy frob)
 	 (apply 'make-instance 'graph-frob initargs))))
 
+
+
 (defmethod render ((pane pane) (frob graph-frob) y-offset x-offset zoom)
   (declare (ignore zoom))
   (with-slots (data graph pane->frob-y pane->frob-x

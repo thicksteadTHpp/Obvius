@@ -69,7 +69,7 @@
 	for picture = (first (picture-stack pane))
         if picture do (with-slots (system-dependent-frob y-offset x-offset zoom) picture
 		       (render pane  system-dependent-frob y-offset x-offset zoom))
-	  else       do (draw-empty-nk-win pane nk-context)))
+	  else       do (render pane nil T T 1)))
 	
 	;; if (eq (status pane) :realized)
 	;;   do (%display-pictures pane nk-context)
@@ -99,7 +99,10 @@
 (defmethod render :around ((pane nk-pane) frob y-offset x-offset zoom)
   (when *in-render-loop*
     (if  (eq (status pane) :cleared)
-	 (draw-empty-nk-win pane)
+	 (if (null frob)
+	     (draw-empty-nk-win pane)
+	     (prog1 (draw-empty-nk-win pane)
+	       (setf (status pane) :realized)))
 	 (prog1 (call-next-method)
 	   (setf (status pane) :realized)))))
 
@@ -126,7 +129,7 @@
 	    (unless (claw:wrapper-null-p +image+)
 	      (%nk:layout-row-static ctx +height+ +width+ 1)
 	      (when (/= 0 (%nk:button-image ctx +image+))
-		(vom:info "[image] button pressed pic-id: ~d" (index picture))
+		(vom:info "[image] button pressed pic-id: ~d" (index (first (picture-stack pane ))))
 		(setf *current-pane* pane))))
 	  (%nk:end ctx))))))
 
@@ -188,10 +191,16 @@
 								  :window-background background
 								  :total-space total-space
 								  :rect r))
-	      ;; call render with frob and offset from total space
-		  (setf y-offset (total-space :y)
-			x-offset (total-space :x))
-		  (call-next-method)))
+		  ;; call render with frob and offset from total space
+		  ;; this does not affect (call-next-method)
+		  ;; (setf y-offset (total-space :y)
+		  ;; 	x-offset (total-space :x))
+;;		  (with-slots (pane->frob-y pane->frob-x graph->frob-y graph->frob-x data->frob-y data->frob-x) gf
+;;		    (translate-transform! graph->frob-y y-offset)
+;;		    (translate-transform! graph->frob-x x-offset))
+		    ;;(translate-transform! data->frob-y y-offset)
+		    ;;(translate-transform! data->frob-x x-offset))
+		  (call-next-method pane gf (total-space :y) (+ 20 (total-space :x)) 1)))
 		  ;;(%nk:fill-rect painter (%nk:recti +rect+ (floor (+ 15 (total-space :x))) (floor (+ 15 (total-space :y))) 210 210) 5.0 (%nk:rgb rgb 247 230 154)) 
 		  ;;(%nk:fill-rect painter (%nk:recti r (+ 20 (floor (total-space :x))) (+ 20 (floor (total-space :y))) 200 200) 5.0 (%nk:rgb rgb 188 174 118))
 		  ;;(%nk:draw-text painter (%nk:recti r (+ 30 (floor (total-space :x))) (+ 30 (floor (total-space :y))) 150 20) "Text to draw" 12 font (%nk:rgb rgb 188 174 118) (%nk:rgb rgb 0 0 0))))
@@ -326,3 +335,5 @@
      (%nk:end ,ctx-var)))
        
 
+(defmethod compute-picture :before ((pic graph) vbl)
+  (setf (zoom pic) 1.0))

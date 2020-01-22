@@ -679,7 +679,6 @@ top of the stack).")
   
   (declare (special *protected-viewables*)
 	   (optimize (debug 3)))
-  (break)
   ;; Destructively delete all non-viewables and duplicates:
   (setq vbls (delete-duplicates (delete-if-not #'viewable-p vbls)))
   ;; Destructively add inferiors:

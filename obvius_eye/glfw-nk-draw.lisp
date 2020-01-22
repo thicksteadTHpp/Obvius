@@ -63,7 +63,7 @@
   (let ((font-handle (font-helper-font-handle (font pane)))
 	(canvas (slot-value pane 'canvas)))
     (nk-drawing (foreground background rect painter canvas)
-      (%nk:draw-text painter (%nk:recti rect (floor x) (floor y) 150 20) string (length string) font-handle foreground background))))
+      (%nk:draw-text painter (%nk:recti rect (floor x) (floor y) 150 20) string (length string) font-handle background foreground))))
   ;;(vom:info "[draw-text] ~s at x: ~d y: d" string x y))
   ;; (declare (ignore keys))
   ;; (let ((x-int (floor x)) (y-int (4floor y)))

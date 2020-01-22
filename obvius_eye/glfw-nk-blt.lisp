@@ -603,12 +603,6 @@
     ;; 						(round (/ 1 zoom)))))))
 
 
-;; get the current gl-context
-;;(defmethod render :before ((window nk-pane) (bltable GL-bltable) y-offset x-offset zoom))
-;;  (%glfw:make-context-current (%window-of (screen-of window))))
-
-
-
 
 
 ;;;
