@@ -1,0 +1,840 @@
+\indexentry{{\ptt viewable}}{7}
+\indexentry{{\ptt picture}}{7}
+\indexentry{tutorial}{7}
+\indexentry{{\ptt viewable},DEF}{10}
+\indexentry{{\ptt viewable},slots of}{10}
+\indexentry{{\ptt name}}{10}
+\indexentry{{\ptt superiors-of}}{10}
+\indexentry{{\ptt display-type}}{10}
+\indexentry{{\ptt picture}}{10}
+\indexentry{{\ptt pictures-of}}{10}
+\indexentry{{\ptt history}}{10}
+\indexentry{{\ptt current}}{11}
+\indexentry{{\ptt info-list}}{11}
+\indexentry{{\ptt info-list},DEF}{11}
+\indexentry{{\ptt info-get},DEF}{11}
+\indexentry{{\ptt info-set},DEF}{11}
+\indexentry{{\ptt viewable},auto display}{11}
+\indexentry{{\ptt *auto-display-viewables*}}{11}
+\indexentry{{\ptt picture}}{11}
+\indexentry{{\ptt pane}}{11}
+\indexentry{{\ptt *preserve-picture-pane*}}{11}
+\indexentry{{\ptt display}}{11}
+\indexentry{{\ptt viewable},destructive modification}{11}
+\indexentry{{\ptt :->}}{11}
+\indexentry{{\ptt set-not-current}}{11}
+\indexentry{{\ptt destroy}}{12}
+\indexentry{{\ptt purge!}}{12}
+\indexentry{{\ptt *auto-destroy-orphans*}}{12}
+\indexentry{{\ptt :destroyed}}{12}
+\indexentry{orphans}{12}
+\indexentry{{\ptt ogc}}{12}
+\indexentry{{\ptt *auto-destroy-orphans*}}{12}
+\indexentry{{\ptt *auto-destroy-orphans*}}{13}
+\indexentry{{\ptt constructor}}{13}
+\indexentry{{\ptt history-sexp}}{13}
+\indexentry{{\ptt pane},DEF}{13}
+\indexentry{{\ptt new-pane}}{13}
+\indexentry{{\ptt picture},DEF}{13}
+\indexentry{{\ptt scale}}{14}
+\indexentry{{\ptt pedestal}}{14}
+\indexentry{{\ptt setp}}{14}
+\indexentry{{\ptt *current-pane*}}{15}
+\indexentry{{\ptt display},DEF}{15}
+\indexentry{{\ptt display-type}}{15}
+\indexentry{{\ptt *current-pane*}}{15}
+\indexentry{{\ptt :make-new},DEF}{15}
+\indexentry{{\ptt *auto-update-pictures*}}{15}
+\indexentry{{\ptt refresh},DEF}{15}
+\indexentry{{\ptt *current-pane*}}{15}
+\indexentry{{\ptt next-pane},DEF}{15}
+\indexentry{{\ptt cycle-pane},DEF}{15}
+\indexentry{{\ptt *current-pane*}}{15}
+\indexentry{{\ptt current-viewable},DEF}{15}
+\indexentry{{\ptt get-viewable},DEF}{16}
+\indexentry{{\ptt *current-pane*}}{16}
+\indexentry{{\ptt pop-picture},DEF}{16}
+\indexentry{{\ptt setp},DEF}{16}
+\indexentry{{\ptt getp},DEF}{16}
+\indexentry{{\ptt zoom},slot}{16}
+\indexentry{{\ptt :auto},zoom}{16}
+\indexentry{datfile}{17}
+\indexentry{{\ptt load-image}}{17}
+\indexentry{{\ptt save-image}}{17}
+\indexentry{{\ptt load-image},DEF}{18}
+\indexentry{{\ptt save-image},{\pit image},DEF}{18}
+\indexentry{{\ptt load-image-sequence},DEF}{19}
+\indexentry{{\ptt save-image},{\pit image-sequence},DEF}{19}
+\indexentry{{\ptt change-memory-management},DEF}{19}
+\indexentry{{\ptt room},DEF}{19}
+\indexentry{{\ptt *auto-expand-heap*}}{19}
+\indexentry{{\ptt *heap-growth-rate*}}{20}
+\indexentry{{\ptt expand-heap},DEF}{20}
+\indexentry{{\ptt heap-status},DEF}{20}
+\indexentry{{\ptt ogc},DEF}{20}
+\indexentry{orphans}{20}
+\indexentry{{\ptt scrounge!}}{20}
+\indexentry{{\ptt image}}{21}
+\indexentry{{\ptt loop-over-image-pixels}}{22}
+\indexentry{{\ptt make-image}}{22}
+\indexentry{{\ptt iref}}{23}
+\indexentry{{\ptt loop-over-image-pixels}}{23}
+\indexentry{{\ptt loop-over-image-positions}}{23}
+\indexentry{{\ptt iref},efficiency}{23}
+\indexentry{{\ptt print-values}}{23}
+\indexentry{{\ptt *x-print-range*}}{23}
+\indexentry{{\ptt *y-print-range*}}{23}
+\indexentry{{\ptt *x-print-range*}}{23}
+\indexentry{{\ptt *y-print-range*}}{23}
+\indexentry{{\ptt *max-print-vals*}}{23}
+\indexentry{{\ptt slice}}{24}
+\indexentry{{\ptt one-d-image}}{24}
+\indexentry{{\ptt discrete-function}}{24}
+\indexentry{{\ptt periodic-discrete-function}}{24}
+\indexentry{{\ptt log-discrete-function}}{24}
+\indexentry{{\ptt histogram}}{24}
+\indexentry{{\ptt point-operation}}{24}
+\indexentry{{\ptt make-discrete-function},DEF}{24}
+\indexentry{{\ptt make-periodic-discrete-function},DEF}{24}
+\indexentry{{\ptt make-log-discrete-function},DEF}{24}
+\indexentry{{\ptt evaluate},{\pit discrete-function},DEF}{25}
+\indexentry{{\ptt bit-image}}{25}
+\indexentry{{\ptt image-sequence},DEF}{25}
+\indexentry{{\ptt viewable-sequence},DEF}{25}
+\indexentry{{\ptt image-pair},DEF}{25}
+\indexentry{{\ptt complex-image},DEF}{25}
+\indexentry{{\ptt polar-image},DEF}{25}
+\indexentry{{\ptt pasteup}}{26}
+\indexentry{{\ptt vector-field}}{26}
+\indexentry{{\ptt filter},DEF}{26}
+\indexentry{{\ptt separable-filter},DEF}{26}
+\indexentry{{\ptt graph}}{26}
+\indexentry{{\ptt gray}}{26}
+\indexentry{{\ptt :reflect1}}{26}
+\indexentry{{\ptt :reflect2}}{26}
+\indexentry{{\ptt :zero}}{26}
+\indexentry{{\ptt :repeat}}{26}
+\indexentry{{\ptt make-filter}}{26}
+\indexentry{{\ptt :step-vector}}{26}
+\indexentry{{\ptt :start-vector}}{26}
+\indexentry{{\ptt :edge-handler}}{26}
+\indexentry{{\ptt apply-filter}}{26}
+\indexentry{{\ptt expand-filter}}{26}
+\indexentry{{\ptt make-separable-filter}}{26}
+\indexentry{{\ptt apply-filter}}{27}
+\indexentry{{\ptt expand-filter}}{27}
+\indexentry{{\ptt gaussian-pyramid},DEF}{27}
+\indexentry{{\ptt make-gaussian-pyramid}}{27}
+\indexentry{{\ptt collapse}}{27}
+\indexentry{{\ptt access-band}}{27}
+\indexentry{{\ptt color-image},DEF}{27}
+\indexentry{{\ptt viewable-matrix}}{28}
+\indexentry{{\ptt image-matrix}}{28}
+\indexentry{{\ptt image-sequence}}{28}
+\indexentry{{\ptt gray}}{29}
+\indexentry{{\ptt setp}}{29}
+\indexentry{{\ptt pedestal}}{29}
+\indexentry{{\ptt scale}}{29}
+\indexentry{{\ptt gray-shades}}{30}
+\indexentry{{\ptt gray-dither}}{30}
+\indexentry{{\ptt gray-dither}}{30}
+\indexentry{{\ptt gray-dither}}{30}
+\indexentry{{\ptt gray-dither}}{30}
+\indexentry{{\ptt scale}}{30}
+\indexentry{{\ptt :auto},scale}{30}
+\indexentry{{\ptt pedestal}}{30}
+\indexentry{{\ptt :auto},pedestal}{30}
+\indexentry{{\ptt zoom}}{30}
+\indexentry{{\ptt y-offset}}{30}
+\indexentry{{\ptt x-offset}}{30}
+\indexentry{{\ptt dither},DEF}{30}
+\indexentry{{\ptt bitmap},DEF}{30}
+\indexentry{{\ptt foreground}}{30}
+\indexentry{{\ptt background}}{30}
+\indexentry{{\ptt color-picture},DEF}{31}
+\indexentry{{\ptt scale}}{31}
+\indexentry{{\ptt pedestal}}{31}
+\indexentry{{\ptt rgb-bits}}{31}
+\indexentry{{\ptt pasteup},DEF}{31}
+\indexentry{{\ptt pasteup}}{31}
+\indexentry{{\ptt independent-parameters}}{32}
+\indexentry{{\ptt scale}}{32}
+\indexentry{{\ptt pedestal}}{32}
+\indexentry{{\ptt border}}{32}
+\indexentry{{\ptt pasteup-format}}{32}
+\indexentry{{\ptt zoom}}{32}
+\indexentry{{\ptt surface-plot}}{32}
+\indexentry{{\ptt z-size}}{32}
+\indexentry{{\ptt box-p}}{33}
+\indexentry{{\ptt box-color}}{33}
+\indexentry{{\ptt contour-plot}}{33}
+\indexentry{{\ptt z-min}}{33}
+\indexentry{{\ptt z-max}}{33}
+\indexentry{{\ptt num-levels}}{33}
+\indexentry{{\ptt skip}}{33}
+\indexentry{{\ptt retain-bitmap}}{33}
+\indexentry{{\ptt zoom}}{33}
+\indexentry{{\ptt line-width}}{33}
+\indexentry{{\ptt color}}{33}
+\indexentry{{\ptt vector-field},DEF}{34}
+\indexentry{{\ptt skip}}{34}
+\indexentry{{\ptt zoom}}{34}
+\indexentry{{\ptt scale}}{34}
+\indexentry{{\ptt arrow-heads}}{34}
+\indexentry{{\ptt color}}{34}
+\indexentry{{\ptt graph},DEF}{34}
+\indexentry{{\ptt graph}}{34}
+\indexentry{{\ptt setp}}{34}
+\indexentry{{\ptt graph-type}}{34}
+\indexentry{{\ptt x-range}}{35}
+\indexentry{{\ptt :auto},x-range}{35}
+\indexentry{{\ptt y-range}}{35}
+\indexentry{{\ptt y-axis}}{35}
+\indexentry{{\ptt x-axis}}{35}
+\indexentry{{\ptt y-tick-step}}{35}
+\indexentry{{\ptt y-tick-step}}{35}
+\indexentry{{\ptt :auto},tick-step}{35}
+\indexentry{{\ptt y-label}}{35}
+\indexentry{{\ptt x-label}}{35}
+\indexentry{{\ptt aspect-ratio}}{35}
+\indexentry{{\ptt retain-bitmap}}{35}
+\indexentry{{\ptt zoom}}{35}
+\indexentry{{\ptt line-width}}{35}
+\indexentry{{\ptt axis-color}}{35}
+\indexentry{{\ptt color}}{35}
+\indexentry{{\ptt plot-symbol}}{35}
+\indexentry{{\ptt symbol-size}}{35}
+\indexentry{{\ptt fill-symbol-p}}{35}
+\indexentry{{\ptt polar-plot},DEF}{35}
+\indexentry{{\ptt maximum}}{36}
+\indexentry{{\ptt line-width}}{36}
+\indexentry{{\ptt axis-color}}{36}
+\indexentry{{\ptt color}}{36}
+\indexentry{{\ptt plot-symbol}}{36}
+\indexentry{{\ptt symbol-size}}{36}
+\indexentry{{\ptt fill-symbol-p}}{36}
+\indexentry{{\ptt make-scatter},{\pit image},DEF}{36}
+\indexentry{{\ptt flipbook},DEF}{37}
+\indexentry{{\ptt frame-delay}}{37}
+\indexentry{{\ptt seq-delay}}{37}
+\indexentry{{\ptt back-and-forth}}{37}
+\indexentry{{\ptt independent-parameters}}{37}
+\indexentry{{\ptt zoom}}{37}
+\indexentry{{\ptt sub-display-type}}{37}
+\indexentry{{\ptt overlay},DEF}{38}
+\indexentry{{\ptt hardcopy}}{38}
+\indexentry{{\ptt display}}{38}
+\indexentry{{\ptt display}}{38}
+\indexentry{{\ptt display-type}}{38}
+\indexentry{{\ptt :make-new}}{38}
+\indexentry{{\ptt *temp-ps-directory*}}{39}
+\indexentry{{\ptt *default-printer*}}{39}
+\indexentry{{\ptt *print-command-string*}}{39}
+\indexentry{{\ptt :->}}{40}
+\indexentry{{\ptt +.}}{40}
+\indexentry{{\ptt add}}{41}
+\indexentry{{\ptt iref},{\pit image},DEF}{41}
+\indexentry{{\ptt image-p},DEF}{41}
+\indexentry{{\ptt dimensions},{\pit image},DEF}{41}
+\indexentry{{\ptt rank},DEF}{41}
+\indexentry{{\ptt x-dim},{\pit image},DEF}{41}
+\indexentry{{\ptt y-dim},{\pit image},DEF}{41}
+\indexentry{{\ptt total-size},{\pit image},DEF}{41}
+\indexentry{{\ptt print-values},{\pit image},DEF}{41}
+\indexentry{{\ptt make-image},DEF}{41}
+\indexentry{{\ptt similar},{\pit image},DEF}{41}
+\indexentry{{\ptt copy},{\pit image},DEF}{42}
+\indexentry{{\ptt image-from-array},DEF}{42}
+\indexentry{{\ptt make-synthetic-image},DEF}{42}
+\indexentry{{\ptt make-impulse},DEF}{42}
+\indexentry{{\ptt make-ramp},DEF}{42}
+\indexentry{{\ptt make-grating},DEF}{42}
+\indexentry{{\ptt make-square-grating},DEF}{42}
+\indexentry{{\ptt make-saw-tooth-grating},DEF}{42}
+\indexentry{{\ptt make-sin-grating},DEF}{43}
+\indexentry{{\ptt make-atan},DEF}{43}
+\indexentry{{\ptt make-r-squared},DEF}{43}
+\indexentry{{\ptt make-1-over-r},DEF}{43}
+\indexentry{{\ptt make-zone-plate},DEF}{43}
+\indexentry{{\ptt make-pinwheel},DEF}{43}
+\indexentry{{\ptt make-disc},DEF}{43}
+\indexentry{{\ptt make-left},DEF}{43}
+\indexentry{{\ptt make-top},DEF}{43}
+\indexentry{{\ptt make-uniform-noise},DEF}{43}
+\indexentry{{\ptt make-gaussian-noise},DEF}{43}
+\indexentry{{\ptt make-random-dots},DEF}{43}
+\indexentry{{\ptt make-fractal},DEF}{43}
+\indexentry{{\ptt load-image},DEF}{44}
+\indexentry{{\ptt save-image},{\pit image},DEF}{44}
+\indexentry{{\ptt load-image-sequence},DEF}{44}
+\indexentry{{\ptt save-image},{\pit image-sequence},DEF}{44}
+\indexentry{{\ptt save-picture},DEF}{44}
+\indexentry{{\ptt zero!},{\pit image},DEF}{44}
+\indexentry{{\ptt fill!},{\pit image},DEF}{44}
+\indexentry{{\ptt add},{\pit image},DEF}{44}
+\indexentry{{\ptt +.}}{44}
+\indexentry{{\ptt sub},{\pit image},DEF}{44}
+\indexentry{{\ptt -.}}{44}
+\indexentry{{\ptt mul},{\pit image},DEF}{45}
+\indexentry{{\ptt *.}}{45}
+\indexentry{{\ptt div},{\pit image},DEF}{45}
+\indexentry{{\ptt /.}}{45}
+\indexentry{foreign functions,floating-point exceptions}{45}
+\indexentry{{\ptt *div-by-zero-result*}}{45}
+\indexentry{{\ptt linear-xform},{\pit image},DEF}{45}
+\indexentry{{\ptt negate},{\pit image},DEF}{45}
+\indexentry{{\ptt -.}}{45}
+\indexentry{{\ptt square},{\pit image},DEF}{45}
+\indexentry{{\ptt sqr.}}{45}
+\indexentry{{\ptt sqr}}{45}
+\indexentry{{\ptt square-root},{\pit image},DEF}{45}
+\indexentry{{\ptt sqrt.}}{45}
+\indexentry{{\ptt abs-value},{\pit image},DEF}{45}
+\indexentry{{\ptt abs.}}{45}
+\indexentry{{\ptt power},{\pit image},DEF}{45}
+\indexentry{{\ptt expt.}}{45}
+\indexentry{{\ptt natural-logarithm},{\pit image},DEF}{45}
+\indexentry{foreign functions,floating-point exceptions}{45}
+\indexentry{{\ptt gamma-correct},{\pit image},DEF}{45}
+\indexentry{{\ptt point-operation},{\pit image},DEF}{45}
+\indexentry{{\ptt periodic-point-operation},{\pit image},DEF}{46}
+\indexentry{{\ptt clip},{\pit image},DEF}{46}
+\indexentry{{\ptt round.},{\pit image},DEF}{46}
+\indexentry{{\ptt floor.},{\pit image},DEF}{46}
+\indexentry{{\ptt quantize},{\pit image},DEF}{46}
+\indexentry{{\ptt circular-shift},{\pit image},DEF}{46}
+\indexentry{{\ptt upsample},{\pit image},DEF}{46}
+\indexentry{{\ptt downsample},{\pit image},DEF}{46}
+\indexentry{{\ptt subsample},{\pit image},DEF}{47}
+\indexentry{{\ptt resample},{\pit image},DEF}{47}
+\indexentry{{\ptt crop},{\pit image},DEF}{47}
+\indexentry{{\ptt paste},{\pit image},DEF}{47}
+\indexentry{{\ptt side-by-side},DEF}{47}
+\indexentry{{\ptt transpose},DEF}{47}
+\indexentry{{\ptt flip-x},DEF}{47}
+\indexentry{{\ptt flip-y},DEF}{47}
+\indexentry{{\ptt rotate},{\pit image},DEF}{47}
+\indexentry{{\ptt warp},{\pit image},DEF}{47}
+\indexentry{{\ptt greater-than},{\pit image},DEF}{47}
+\indexentry{{\ptt >.}}{47}
+\indexentry{{\ptt less-than},{\pit image},DEF}{48}
+\indexentry{{\ptt <.}}{48}
+\indexentry{{\ptt equal-to},{\pit image},DEF}{48}
+\indexentry{{\ptt =.}}{48}
+\indexentry{{\ptt greater-than-or-equal-to},{\pit image},DEF}{48}
+\indexentry{{\ptt >=.}}{48}
+\indexentry{{\ptt less-than-or-equal-to},{\pit image},DEF}{48}
+\indexentry{{\ptt <=.}}{48}
+\indexentry{{\ptt point-minimum},{\pit image},DEF}{48}
+\indexentry{{\ptt point-maximum},{\pit image},DEF}{48}
+\indexentry{{\ptt square-error},DEF}{48}
+\indexentry{{\ptt abs-error},DEF}{48}
+\indexentry{{\ptt mean-square-error},DEF}{48}
+\indexentry{{\ptt mean-abs-error},DEF}{48}
+\indexentry{{\ptt max-abs-error},DEF}{48}
+\indexentry{{\ptt zero-crossings},DEF}{48}
+\indexentry{{\ptt correlate},DEF}{48}
+\indexentry{{\ptt minimum},{\pit image},DEF}{49}
+\indexentry{{\ptt min.}}{49}
+\indexentry{{\ptt maximum},{\pit image},DEF}{49}
+\indexentry{{\ptt max.}}{49}
+\indexentry{{\ptt minimum-location},{\pit image},DEF}{49}
+\indexentry{{\ptt maximum-location},{\pit image},DEF}{49}
+\indexentry{{\ptt range},{\pit image},DEF}{49}
+\indexentry{{\ptt mean},{\pit image},DEF}{49}
+\indexentry{{\ptt variance},DEF}{49}
+\indexentry{{\ptt skew},DEF}{49}
+\indexentry{{\ptt kurtosis},DEF}{49}
+\indexentry{{\ptt entropy},DEF}{49}
+\indexentry{{\ptt fft},{\pit image},DEF}{49}
+\indexentry{{\ptt power-spectrum},{\pit image},DEF}{50}
+\indexentry{{\ptt fft}}{50}
+\indexentry{{\ptt dct},DEF}{50}
+\indexentry{{\ptt hilbert-transform},DEF}{50}
+\indexentry{{\ptt derivative},DEF}{50}
+\indexentry{{\ptt apply-filter},{\pit image},DEF}{50}
+\indexentry{{\ptt expand-filter},{\pit image},DEF}{50}
+\indexentry{{\ptt gauss-in},{\pit image},DEF}{50}
+\indexentry{{\ptt gauss-out},{\pit image},DEF}{51}
+\indexentry{{\ptt blur},{\pit image},DEF}{51}
+\indexentry{{\ptt flip-x}}{51}
+\indexentry{{\ptt flip-y}}{51}
+\indexentry{{\ptt upsample}}{51}
+\indexentry{{\ptt downsample}}{51}
+\indexentry{{\ptt subsample}}{51}
+\indexentry{{\ptt transpose}}{51}
+\indexentry{{\ptt side-by-side}}{51}
+\indexentry{{\ptt one-d-image-p},DEF}{51}
+\indexentry{{\ptt make-slice},{\pit image},DEF}{51}
+\indexentry{{\ptt iref}}{51}
+\indexentry{{\ptt dimensions}}{51}
+\indexentry{{\ptt x-dim}}{51}
+\indexentry{{\ptt y-dim}}{51}
+\indexentry{{\ptt total-size}}{51}
+\indexentry{{\ptt mul}}{51}
+\indexentry{{\ptt copy}}{51}
+\indexentry{{\ptt similar}}{51}
+\indexentry{{\ptt paste}}{51}
+\indexentry{{\ptt greater-than}}{51}
+\indexentry{{\ptt equal-to}}{51}
+\indexentry{{\ptt zero-crossings}}{51}
+\indexentry{{\ptt bit-image-p},DEF}{51}
+\indexentry{{\ptt x-dim},{\pit bit-image},DEF}{51}
+\indexentry{{\ptt y-dim},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt iref},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt make-bit-image},DEF}{52}
+\indexentry{{\ptt make-image}}{52}
+\indexentry{{\ptt image-from-bit-image},DEF}{52}
+\indexentry{{\ptt coerce-to-float},DEF}{52}
+\indexentry{{\ptt image-from-bit-image}}{52}
+\indexentry{{\ptt similar},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt copy},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt crop},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt paste},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt invert},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt not.}}{52}
+\indexentry{{\ptt add},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt or.}}{52}
+\indexentry{{\ptt mul},{\pit bit-image},DEF}{52}
+\indexentry{{\ptt and.}}{52}
+\indexentry{{\ptt mul}}{52}
+\indexentry{{\ptt div}}{52}
+\indexentry{{\ptt add}}{52}
+\indexentry{{\ptt sub}}{52}
+\indexentry{{\ptt mul}}{52}
+\indexentry{{\ptt div}}{52}
+\indexentry{{\ptt polar-to-complex}}{52}
+\indexentry{{\ptt make-image-pair},DEF}{53}
+\indexentry{{\ptt make-complex-image},DEF}{53}
+\indexentry{{\ptt make-polar-image},DEF}{53}
+\indexentry{{\ptt make-slice},{\pit image-pair},DEF}{53}
+\indexentry{{\ptt image-pair-p},DEF}{53}
+\indexentry{{\ptt complex-image-p},DEF}{53}
+\indexentry{{\ptt print-values},{\pit image},DEF}{53}
+\indexentry{{\ptt first-image},DEF}{53}
+\indexentry{{\ptt second-image},DEF}{53}
+\indexentry{{\ptt y-component},DEF}{53}
+\indexentry{{\ptt first-image}}{53}
+\indexentry{{\ptt x-component},DEF}{53}
+\indexentry{{\ptt second-image}}{53}
+\indexentry{{\ptt left-image},DEF}{53}
+\indexentry{{\ptt first-image}}{53}
+\indexentry{{\ptt right-image},DEF}{53}
+\indexentry{{\ptt second-image}}{53}
+\indexentry{{\ptt imaginary-part},DEF}{53}
+\indexentry{{\ptt first-image}}{53}
+\indexentry{{\ptt real-part},DEF}{54}
+\indexentry{{\ptt second-image}}{54}
+\indexentry{{\ptt magnitude},{\pit polar-image},DEF}{54}
+\indexentry{{\ptt first-image}}{54}
+\indexentry{{\ptt complex-phase},{\pit polar-image},DEF}{54}
+\indexentry{{\ptt second-image}}{54}
+\indexentry{{\ptt switch-components},DEF}{54}
+\indexentry{{\ptt magnitude},{\pit image-pair},DEF}{54}
+\indexentry{{\ptt square-magnitude},DEF}{54}
+\indexentry{{\ptt complex-phase},{\pit polar-image},DEF}{54}
+\indexentry{{\ptt complex-conjugate},DEF}{54}
+\indexentry{{\ptt complex-to-polar},DEF}{54}
+\indexentry{{\ptt polar-to-complex},DEF}{54}
+\indexentry{{\ptt fft},{\pit complex-image},DEF}{54}
+\indexentry{{\ptt make-discrete-function},DEF}{54}
+\indexentry{{\ptt make-histogram},DEF}{55}
+\indexentry{{\ptt evaluate},DEF}{55}
+\indexentry{{\ptt distribution-mean},DEF}{55}
+\indexentry{{\ptt distribution-variance},DEF}{55}
+\indexentry{{\ptt distribution-mean-and-variance},DEF}{55}
+\indexentry{{\ptt range},DEF}{55}
+\indexentry{{\ptt domain},DEF}{55}
+\indexentry{{\ptt make-soft-threshold-df},DEF}{55}
+\indexentry{{\ptt make-viewable-sequence},DEF}{55}
+\indexentry{{\ptt make-image-sequence},DEF}{56}
+\indexentry{{\ptt viewable-sequence-p},DEF}{56}
+\indexentry{{\ptt image-sequence-p},DEF}{56}
+\indexentry{{\ptt viewable-list},{\pit viewable-sequence},DEF}{56}
+\indexentry{{\ptt image-list},{\pit image-sequence},DEF}{56}
+\indexentry{{\ptt dimensions},{\pit sequence},DEF}{56}
+\indexentry{{\ptt x-dim},{\pit sequence},DEF}{56}
+\indexentry{{\ptt y-dim},{\pit sequence},DEF}{56}
+\indexentry{{\ptt sequence-length},DEF}{56}
+\indexentry{{\ptt length.}}{56}
+\indexentry{{\ptt frame},{\pit number viewable-sequence},DEF}{56}
+\indexentry{{\ptt sub-sequence},DEF}{56}
+\indexentry{{\ptt append-sequence},DEF}{56}
+\indexentry{{\ptt append.}}{56}
+\indexentry{{\ptt make-iterated-image},DEF}{56}
+\indexentry{{\ptt make-slice},{\pit sequence},DEF}{57}
+\indexentry{{\ptt make-synthetic-image-sequence},DEF}{57}
+\indexentry{{\ptt reduce.},DEF}{57}
+\indexentry{{\ptt map.},DEF}{57}
+\indexentry{{\ptt color-image-p},DEF}{57}
+\indexentry{{\ptt make-color-image},DEF}{57}
+\indexentry{{\ptt div},{\pit color-transform},DEF}{57}
+\indexentry{{\ptt div},{\pit rgb->yiq},DEF}{57}
+\indexentry{{\ptt div},{\pit yiq->rgb},DEF}{57}
+\indexentry{{\ptt make-viewable-matrix},DEF}{58}
+\indexentry{{\ptt make-image-matrix},DEF}{58}
+\indexentry{{\ptt diagonal-image-matrix},DEF}{58}
+\indexentry{{\ptt viewable-matrix-p},DEF}{58}
+\indexentry{{\ptt image-matrix-p},DEF}{58}
+\indexentry{{\ptt dimensions},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt x-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt y-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt x-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt y-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt row-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt col-dim},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt size},{\pit viewable-matrix},DEF}{58}
+\indexentry{{\ptt total-size},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt vectorize},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt columnize},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt matrix-transpose},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt determinant},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt matrix-inverse},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt matrix-mul},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt matrix-mul-transpose},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt matrix-transpose-mul},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt dot-product},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt normalize},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt outer-product},{\pit viewable-matrix},DEF}{59}
+\indexentry{{\ptt make-filter},DEF}{59}
+\indexentry{{\ptt make-separable-filter},DEF}{59}
+\indexentry{{\ptt x-dim},{\pit filter},DEF}{59}
+\indexentry{{\ptt y-dim},{\pit filter},DEF}{60}
+\indexentry{{\ptt dimensions},{\pit filter},DEF}{60}
+\indexentry{{\ptt volume},DEF}{60}
+\indexentry{{\ptt sum-of}}{60}
+\indexentry{{\ptt filter-p},DEF}{60}
+\indexentry{{\ptt separable-filter-p},DEF}{60}
+\indexentry{{\ptt copy},{\pit filter},DEF}{60}
+\indexentry{{\ptt negate},{\pit filter},DEF}{60}
+\indexentry{{\ptt mul},{\pit filter},DEF}{60}
+\indexentry{{\ptt add},{\pit filter},DEF}{60}
+\indexentry{{\ptt sub},{\pit filter},DEF}{60}
+\indexentry{{\ptt shift-by-pi},DEF}{60}
+\indexentry{{\ptt interpolate-hex-image},DEF}{60}
+\indexentry{{\ptt make-gaussian-pyramid},DEF}{61}
+\indexentry{{\ptt gaussian-pyramid-p},DEF}{61}
+\indexentry{{\ptt make-laplacian-pyramid},DEF}{61}
+\indexentry{{\ptt laplacian-pyramid-p},DEF}{61}
+\indexentry{{\ptt make-separable-qmf-pyramid},DEF}{61}
+\indexentry{{\ptt qmf-pyramid-p},DEF}{61}
+\indexentry{{\ptt build},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt access},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt access-band},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt low-band},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt collapse},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt height},{\pit pyramid},DEF}{61}
+\indexentry{{\ptt almost-equal},DEF}{62}
+\indexentry{{\ptt scalar-multiple},DEF}{62}
+\indexentry{{\ptt randomize},DEF}{62}
+\indexentry{{\ptt shuffle},DEF}{62}
+\indexentry{{\ptt elements},DEF}{63}
+\indexentry{floating-point exceptions}{63}
+\indexentry{{\ptt matrix-mul},{\pit array},DEF}{64}
+\indexentry{{\ptt matrix-transpose},{\pit array},DEF}{64}
+\indexentry{{\ptt matrix-transpose-mul},DEF}{64}
+\indexentry{{\ptt matrix-mul-transpose},{\pit array},DEF}{64}
+\indexentry{{\ptt outer-product},{\pit vector},DEF}{64}
+\indexentry{{\ptt cross-product},{\pit vector},DEF}{64}
+\indexentry{{\ptt dot-product},{\pit vector},DEF}{64}
+\indexentry{{\ptt vector-length},{\pit vector},DEF}{64}
+\indexentry{{\ptt vector-length},{\pit vector},DEF}{64}
+\indexentry{{\ptt normalize},{\pit vector},DEF}{64}
+\indexentry{{\ptt matrix-inverse},{\pit array},DEF}{64}
+\indexentry{{\ptt determinant},DEF}{65}
+\indexentry{{\ptt symmetric-p},DEF}{65}
+\indexentry{{\ptt square-p},DEF}{65}
+\indexentry{{\ptt diagonal-p},DEF}{65}
+\indexentry{{\ptt identity-p},DEF}{65}
+\indexentry{{\ptt unitary-p},DEF}{65}
+\indexentry{{\ptt orthogonal-p},DEF}{65}
+\indexentry{{\ptt singular-p},DEF}{65}
+\indexentry{{\ptt identity-matrix},DEF}{65}
+\indexentry{{\ptt diagonal-matrix},DEF}{65}
+\indexentry{{\ptt diagonal},DEF}{65}
+\indexentry{{\ptt matrix-trace},DEF}{65}
+\indexentry{{\ptt singular-value-decomposition},DEF}{66}
+\indexentry{{\ptt svd}}{66}
+\indexentry{{\ptt with-svd},DEF}{66}
+\indexentry{{\ptt with-static-svd},DEF}{66}
+\indexentry{{\ptt singular-values},DEF}{66}
+\indexentry{{\ptt left-singular-matrix},DEF}{66}
+\indexentry{{\ptt right-singular-matrix},DEF}{66}
+\indexentry{{\ptt principal-components},DEF}{66}
+\indexentry{{\ptt condition-number},DEF}{66}
+\indexentry{{\ptt quadratic-decomposition},DEF}{66}
+\indexentry{{\ptt row-space},DEF}{67}
+\indexentry{{\ptt row-null-space},DEF}{67}
+\indexentry{{\ptt col-space},DEF}{67}
+\indexentry{{\ptt col-null-space},DEF}{67}
+\indexentry{{\ptt solve-eigenvalue},DEF}{67}
+\indexentry{{\ptt qr-decomposition},DEF}{67}
+\indexentry{{\ptt qrd}}{67}
+\indexentry{{\ptt row-space-qr},DEF}{67}
+\indexentry{{\ptt col-space-qr},DEF}{67}
+\indexentry{{\ptt row-null-space-qr},DEF}{67}
+\indexentry{{\ptt col-null-space-qr},DEF}{67}
+\indexentry{{\ptt determinant-qr},DEF}{67}
+\indexentry{{\ptt make-matrix},DEF}{68}
+\indexentry{{\ptt vectorize},DEF}{68}
+\indexentry{{\ptt columnize},DEF}{68}
+\indexentry{{\ptt row},DEF}{68}
+\indexentry{{\ptt displaced-row},DEF}{68}
+\indexentry{{\ptt rows},DEF}{68}
+\indexentry{{\ptt displaced-rows},DEF}{68}
+\indexentry{{\ptt col},DEF}{68}
+\indexentry{{\ptt cols},DEF}{68}
+\indexentry{{\ptt row-dim},DEF}{68}
+\indexentry{{\ptt col-dim},DEF}{68}
+\indexentry{{\ptt add-rows},{\pit matrix vector},DEF}{68}
+\indexentry{{\ptt add-rows},{\pit vector matrix},DEF}{68}
+\indexentry{{\ptt add-cols},{\pit matrix vector},DEF}{68}
+\indexentry{{\ptt add-cols},{\pit vector matrix},DEF}{69}
+\indexentry{{\ptt sub-rows},{\pit matrix vector},DEF}{69}
+\indexentry{{\ptt sub-rows},DEF}{69}
+\indexentry{{\ptt sub-cols},{\pit matrix vector},DEF}{69}
+\indexentry{{\ptt sub-cols},{\pit vector matrix},DEF}{69}
+\indexentry{{\ptt mean-rows},DEF}{69}
+\indexentry{{\ptt mean-cols},DEF}{69}
+\indexentry{{\ptt normalize-rows},DEF}{69}
+\indexentry{{\ptt normalize-cols},DEF}{69}
+\indexentry{{\ptt sum-rows},DEF}{69}
+\indexentry{{\ptt sum-cols},DEF}{69}
+\indexentry{{\ptt covariance-rows},DEF}{69}
+\indexentry{{\ptt covariance-cols},DEF}{69}
+\indexentry{{\ptt shuffle-rows},DEF}{69}
+\indexentry{{\ptt swap-rows},DEF}{70}
+\indexentry{{\ptt sort-rows},DEF}{70}
+\indexentry{{\ptt paste-rows},DEF}{70}
+\indexentry{{\ptt paste-cols},DEF}{70}
+\indexentry{{\ptt append-rows},DEF}{70}
+\indexentry{{\ptt append-cols},DEF}{70}
+\indexentry{control panel}{78}
+\indexentry{{\ptt make-control-panel},DEF}{78}
+\indexentry{{\ptt destroy-control-panel},DEF}{78}
+\indexentry{{\ptt obvius::*obvius-misc-functions*}}{78}
+\indexentry{menus}{78}
+\indexentry{{\ptt *default-printer*}}{80}
+\indexentry{{\ptt *max-print-vals*}}{80}
+\indexentry{{\ptt *y-print-range*}}{80}
+\indexentry{{\ptt *x-print-range*}}{80}
+\indexentry{{\ptt *auto-bind-loaded-images*}}{80}
+\indexentry{{\ptt *auto-update-pictures*}}{80}
+\indexentry{{\ptt *auto-destroy-orphans*}}{80}
+\indexentry{{\ptt *auto-display-viewables*}}{80}
+\indexentry{{\ptt *heap-growth-rate*}}{80}
+\indexentry{{\ptt *auto-expand-heap*}}{81}
+\indexentry{{\ptt *div-by-zero-result*}}{81}
+\indexentry{{\ptt with-locked-pane}}{82}
+\indexentry{{\ptt :->}}{84}
+\indexentry{{\ptt with-result}}{84}
+\indexentry{{\ptt *protected-viewables*}}{84}
+\indexentry{{\ptt :class}}{85}
+\indexentry{{\ptt set-result}}{85}
+\indexentry{{\ptt set-not-current}}{85}
+\indexentry{{\ptt set-history}}{85}
+\indexentry{{\ptt with-local-viewables},DEF}{85}
+\indexentry{{\ptt *auto-destroy-orphans*}}{85}
+\indexentry{{\ptt *auto-destroy-orphans*}}{85}
+\indexentry{{\ptt loop-over-image-pixels},DEF}{86}
+\indexentry{{\ptt loop-over-image-positions},DEF}{86}
+\indexentry{foreign functions}{86}
+\indexentry{foreign functions,floating-point exceptions}{86}
+\indexentry{{\ptt internal-div}}{86}
+\indexentry{foreign functions, passing arrays to}{87}
+\indexentry{foreign functions, and garbage collection}{87}
+\indexentry{{\ptt malloc}}{87}
+\indexentry{{\ptt allocate-array},DEF}{87}
+\indexentry{{\ptt malloc}}{87}
+\indexentry{{\ptt *auto-expand-heap*}}{87}
+\indexentry{{\ptt *heap-growth-rate*}}{87}
+\indexentry{{\ptt free-array},DEF}{87}
+\indexentry{{\ptt free}}{87}
+\indexentry{{\ptt with-static-arrays},DEF}{87}
+\indexentry{{\ptt expand-heap},DEF}{87}
+\indexentry{{\ptt heap-status},DEF}{88}
+\indexentry{{\ptt run-heap-diagnostics},DEF}{88}
+\indexentry{{\ptt ogc},DEF}{88}
+\indexentry{{\ptt scrounge!}}{88}
+\indexentry{{\ptt *protected-viewables*}}{88}
+\indexentry{orphans}{88}
+\indexentry{{\ptt ogc}}{88}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt *protected-viewables*}}{89}
+\indexentry{{\ptt with-local-viewables}}{89}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt *auto-destroy-orphans*}}{89}
+\indexentry{{\ptt ogc}}{90}
+\indexentry{{\ptt static-arrays-of}}{90}
+\indexentry{foreign functions, and garbage collection}{90}
+\indexentry{{\ptt allocate-array}}{90}
+\indexentry{{\ptt with-interrupts-deferred}}{90}
+\indexentry{{\ptt def-simple-class}}{90}
+\indexentry{{\ptt settable-parameters},DEF}{91}
+\indexentry{{\ptt initialize-instance},DEF}{91}
+\indexentry{{\ptt allocate-array}}{91}
+\indexentry{{\ptt set-result},DEF}{91}
+\indexentry{{\ptt with-result}}{91}
+\indexentry{{\ptt check-size}}{91}
+\indexentry{{\ptt make-instance}}{91}
+\indexentry{{\ptt make-<viewable-class>},DEF}{92}
+\indexentry{{\ptt make-instance}}{92}
+\indexentry{{\ptt make-image}}{92}
+\indexentry{{\ptt set-result}}{92}
+\indexentry{{\ptt with-result}}{92}
+\indexentry{{\ptt <viewable-class>-p},DEF}{92}
+\indexentry{{\ptt print-object},DEF}{92}
+\indexentry{{\ptt print-values},DEF}{92}
+\indexentry{{\ptt check-size},DEF}{92}
+\indexentry{{\ptt static-arrays-of},DEF}{92}
+\indexentry{{\ptt ogc}}{92}
+\indexentry{{\ptt set-not-current},DEF}{92}
+\indexentry{{\ptt with-result}}{92}
+\indexentry{{\ptt inferiors-of},DEF}{92}
+\indexentry{{\ptt destroy}}{92}
+\indexentry{{\ptt ogc}}{92}
+\indexentry{{\ptt notify-of-inferior-destruction},DEF}{92}
+\indexentry{{\ptt notify-of-superior-destruction},DEF}{93}
+\indexentry{{\ptt superiors-of}}{93}
+\indexentry{{\ptt *auto-destroy-orphans*}}{93}
+\indexentry{{\ptt ogc}}{93}
+\indexentry{{\ptt initialize-instance}}{93}
+\indexentry{{\ptt present},{\pit viewable},DEF}{93}
+\indexentry{{\ptt frame}}{93}
+\indexentry{{\ptt x-component}}{93}
+\indexentry{{\ptt history}}{93}
+\indexentry{{\ptt set-history}}{93}
+\indexentry{{\ptt with-result}}{93}
+\indexentry{{\ptt repl}}{94}
+\indexentry{{\ptt event-dispatch-process}}{94}
+\indexentry{{\ptt with-locked-pane}}{94}
+\indexentry{{\ptt *auto-display-viewables*}}{94}
+\indexentry{menus,modifying}{95}
+\indexentry{dialog boxes}{95}
+\indexentry{{\ptt repl},DEF}{95}
+\indexentry{{\ptt display}}{95}
+\indexentry{{\ptt print-top-level-values}}{95}
+\indexentry{{\ptt current}}{95}
+\indexentry{{\ptt set-not-current}}{95}
+\indexentry{{\ptt with-result}}{95}
+\indexentry{{\ptt current}}{95}
+\indexentry{{\ptt display},DEF}{97}
+\indexentry{{\ptt *preserve-picture-pane*}}{97}
+\indexentry{{\ptt *auto-update-pictures*}}{97}
+\indexentry{{\ptt draw-pane}}{97}
+\indexentry{{\ptt refresh},DEF}{97}
+\indexentry{{\ptt move-picture},DEF}{97}
+\indexentry{{\ptt system-dependent-frob}}{97}
+\indexentry{{\ptt cycle-pane},DEF}{97}
+\indexentry{{\ptt pop-picture},DEF}{97}
+\indexentry{{\ptt destroy}}{97}
+\indexentry{{\ptt draw-pane},DEF}{97}
+\indexentry{{\ptt system-dependent-frob}}{98}
+\indexentry{{\ptt drawable}}{98}
+\indexentry{{\ptt graph}}{98}
+\indexentry{{\ptt vector-field}}{98}
+\indexentry{{\ptt retain-bitmap}}{98}
+\indexentry{{\ptt draw-line}}{98}
+\indexentry{{\ptt draw-text}}{98}
+\indexentry{{\ptt postscript-bltable}}{98}
+\indexentry{{\ptt defclass},DEF}{98}
+\indexentry{{\ptt settable-parameters},DEF}{98}
+\indexentry{{\ptt reset-picture-defaults},DEF}{98}
+\indexentry{{\ptt shared-initialize}}{98}
+\indexentry{{\ptt initialize-instance}}{98}
+\indexentry{{\ptt reinitialize-instance}}{98}
+\indexentry{{\ptt setp}}{99}
+\indexentry{{\ptt set-not-current},DEF}{99}
+\indexentry{{\ptt static-arrays-of},DEF}{99}
+\indexentry{{\ptt system-dependent-frob}}{99}
+\indexentry{{\ptt drag-picture},DEF}{99}
+\indexentry{{\ptt zoom-picture},DEF}{99}
+\indexentry{{\ptt position-message},DEF}{99}
+\indexentry{{\ptt pane-coord-to-viewable-coord}}{99}
+\indexentry{{\ptt status-message}}{99}
+\indexentry{{\ptt frob-coord-to-viewable-coord},DEF}{99}
+\indexentry{{\ptt pane-coord-to-viewable-coord}}{99}
+\indexentry{{\ptt title-bar-string},DEF}{99}
+\indexentry{{\ptt present},{\pit picture},DEF}{100}
+\indexentry{{\ptt compute-picture},DEF}{100}
+\indexentry{{\ptt render},DEF}{100}
+\indexentry{{\ptt set-default}}{106}
+\indexentry{{\ptt get-defaults}}{106}
+\indexentry{{\ptt obvius-init.lisp}}{106}
+\indexentry{{\ptt .obvius}}{106}
+\indexentry{{\ptt obvius-window-init.lisp}}{106}
+\indexentry{{\ptt .obvius-windows}}{106}
+\indexentry{{\ptt :zoom}}{107}
+\indexentry{{\ptt :scale}}{107}
+\indexentry{{\ptt dither}}{107}
+\indexentry{{\ptt one-d-graph}}{107}
+\indexentry{{\ptt graph}}{107}
+\indexentry{{\ptt drawing}}{107}
+\indexentry{{\ptt :gray-gamma}}{107}
+\indexentry{{\ptt :gray-shades}}{107}
+\indexentry{{\ptt :gray-dither}}{107}
+\indexentry{{\ptt :foreground}}{107}
+\indexentry{{\ptt :background}}{107}
+\indexentry{{\ptt make-filter}}{107}
+\indexentry{point operations}{107}
+\indexentry{{\ptt *auto-destroy-orphans*}}{107}
+\indexentry{{\ptt with-local-images}}{108}
+\indexentry{{\ptt with-local-viewables}}{108}
+\indexentry{{\ptt *auto-destroy-orphans*}}{108}
+\indexentry{{\ptt :display-type}}{108}
+\indexentry{{\ptt :make-new}}{108}
+\indexentry{{\ptt hardcopy}}{108}
+\indexentry{{\ptt make-sin-grating}}{109}
+\indexentry{{\ptt make-histogram}}{109}
+\indexentry{{\ptt entropy}}{109}
+\indexentry{{\ptt :name}}{109}
+\indexentry{{\ptt *obvius-module-plist*}}{109}
+\indexentry{{\ptt overlay}}{109}
+\indexentry{{\ptt polar-image}}{109}
+\indexentry{{\ptt polar-to-rect}}{109}
+\indexentry{{\ptt polar-to-complex}}{109}
+\indexentry{{\ptt rect-to-polar}}{109}
+\indexentry{{\ptt complex-to-polar}}{109}
+\indexentry{{\ptt circular-shift}}{110}
+\indexentry{{\ptt paste}}{110}
+\indexentry{{\ptt crop}}{110}
+\indexentry{{\ptt correlate}}{110}
+\indexentry{{\ptt with-locked-pane}}{110}
+\indexentry{{\ptt obvius::run-heap-diagnostics}}{110}
+\indexentry{{\ptt *auto-expand-heap*}}{110}
+\indexentry{{\ptt *heap-growth-rate*}}{110}
+\indexentry{{\ptt with-result}}{110}
+\indexentry{{\ptt with-result-<vbl>}}{110}
+\indexentry{{\ptt repl}}{111}
+\indexentry{{\ptt present}}{111}
+\indexentry{{\ptt set-result}}{111}
+\indexentry{{\ptt set-result}}{111}
+\indexentry{{\ptt viewable-sequence}}{111}
+\indexentry{{\ptt :sub-viewable-spec}}{111}
+\indexentry{{\ptt gray-lut}}{111}
+\indexentry{{\ptt default-display-type}}{111}
+\indexentry{{\ptt *starting-patch-file*}}{111}
+\indexentry{{\ptt crop}}{112}
+\indexentry{{\ptt paste}}{112}
+\indexentry{{\ptt make-slice}}{112}
+\indexentry{{\ptt circular-shift}}{112}
+\indexentry{{\ptt make-normal-random-image}}{113}
+\indexentry{{\ptt make-uniform-random-image}}{113}
+\indexentry{{\ptt make-gaussian-noise-image}}{113}
+\indexentry{{\ptt make-random-dot-image}}{113}
+\indexentry{{\ptt load-image}}{113}
+\indexentry{{\ptt fft}}{113}
+\indexentry{{\ptt point-operation}}{113}
+\indexentry{{\ptt rotate}}{113}
+\indexentry{{\ptt resample}}{113}
+\indexentry{{\ptt round.}}{113}
+\indexentry{{\ptt truncate.}}{113}
+\indexentry{{\ptt floor.}}{113}
+\indexentry{{\ptt warp}}{113}
+\indexentry{{\ptt next-pane}}{113}
+\indexentry{{\ptt purge!}}{113}
+\indexentry{{\ptt periodic-discrete-function}}{113}
+\indexentry{{\ptt log-discrete-function}}{113}

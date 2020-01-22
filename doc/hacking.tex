@@ -1,0 +1,924 @@
+\section{Hacking}
+\label{sec:hacking}
+
+This section is provided for users who want to write their own
+extensions to OBVIUS.  As OBVIUS becomes larger and more people work
+on it, it becomes increasingly important to observe the existing
+programming conventions.  It is generally a good idea to use existing
+code (copy it and modify it) as a prototype for whatever you are
+doing.  In the following sections, we try to describe and motivate
+these conventions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Writing Additional Image Processing Functions}
+\label{sec:writing-ops}
+
+Since OBVIUS was originally conceived as an image processing package,
+it contains a library of image processing functions in the file {\bf
+imops.lisp}.  Here is a simple example:
+\begin{tt} \begin{verbatim}
+(defmethod add ((val number) (im image) &key ->)
+  (with-result ((result ->) im 'add val im)
+    (add (data im) val :-> (data result))
+    result))
+\end{verbatim} \end{tt}
+Note the result keyword argument, \lsym{:->}.  All functions that
+return viewables should take this keyword argument.  The standard
+handling of this argument is described in
+section~\ref{sec:operations}.  OBVIUS provides a macro, {\tt
+with-result} that makes it easy to provide standard handling of this
+result argument.
+
+\mysubsubsec{The with-result macro}
+The \lsym{with-result} macro should be used by {\em all} operations
+returning viewables.  It provides a simple mechanism for creating
+functions with uniform result argument handling.  The syntax is as
+follows: 
+\begin{verbatim}
+(with-result ((res-sym res-arg) model . history)
+   . body)
+\end{verbatim}
+The programmer should think of this macro as being very similar to the
+Common Lisp {\tt let*} macro.  The forms of the {\tt body} are
+executed within a lexical environment where the symbol {\tt res-sym}
+is bound to a ``result'' viewable.  This result viewable is protected
+from the garbage collector, and from auto-destruction of orphans
+(i.e., it is placed on the \lsym{*protected-viewables*} list).  The
+macro returns the value (or multiple-values) returned by the {\tt
+body}.  The {\tt res-arg}, {\tt model}, and {\tt history} arguments
+are used to construct the result viewable.
+
+The {\tt model} argument must either be a plist of keyword initargs
+specifying the type and slots of the result, or an existing viewable
+which is used as a model for the result.  If a plist is used, the
+first two elements should be the keyword \lsym{:class} and the symbol
+name of a viewable class.  The remaining keyword/value pairs should be
+those you would pass to {\tt make-instance} in order to create the
+viewable.  That is, they are a set of initialization arguments
+(initargs) for the object.
+
+The {\tt res-arg} is typically the result argument, \res, as passed
+by the user.  If this is an existing viewable, OBVIUS will check that
+it is consistent with the specification given by the {\tt model} and
+then bind {\tt res-sym} to it.  If it is a name (nil, a symbol, or a
+string), then OBVIUS will create a new viewable according to the
+specification of the {\tt model} and give it this name.
+
+The {\tt history} argument is typically the symbol name of the function
+({\tt 'add} in the example above) followed by the arguments to the
+function (except for the result argument itself).  This list is saved
+in the history slot of the viewable.  If no {\tt history} argument is
+passed, then the history of the result viewable will be set according
+to the operations performed in the {\tt body}. 
+
+The macro {\tt with-result} calls the methods \lsym{set-result} and
+\lsym{set-not-current}, both of which are described below in section
+\ref{sec:new-viewable}.  It also calls
+\lsym{set-history} to set the history slot of the resulting image
+according to the {\tt history} argument.  Examples of usage can be
+found in {\bf imops.lisp}.  Calling {\tt macroexpand-1} on these
+examples may help to clarify the use of the macro.
+
+\mysubsubsec{Temporary Viewables}
+Often, you will need to generate intermediate viewables within the
+body of a function.  These viewables are not needed once execution of
+the function is completed: they should be destroyed so that their
+static arrays are returned to the system for re-allocation.  OBVIUS
+provides a macro for this purpose: \\
+\lfun{with-local-viewables}{ image-list . body}
+This macro has the same syntax as the Common Lisp {\tt let*} macro.
+It performs a local binding (using {\tt let*}), executes the body
+within an {\tt unwind-protect} and then (silently) destroys all
+viewables that were locally bound, thus freeing any heap memory
+belonging to those viewables.   The returned value (or multiple values)
+is that of the {\tt body}.
+
+It is an error to return a temporary viewable from the body of {\tt
+with-local-viewables}.  You may, however, return inferior viewables of
+temporary viewables (even if \lsym{*auto-destroy-orphans*} is
+non-nil).  For example, you may create a temporary complex image by
+computing an fft, and then return the real-part of this complex image.
+The complex image will be destroyed, but the real-part will be
+preserved.  See the sections on destroying viewables and orphans
+(section~\ref{sec:organization}) and the next section
+(section~\ref{sec:using-memory}) for a more complete explanation of
+\lsym{*auto-destroy-orphans*}.
+
+If you need to create temporary static arrays (i.e., arrays allocated from
+OBVIUS's static heap), use the the macro {\tt with-static-arrays},
+described in the next section.
+
+\mysubsubsec{Efficient Looping}
+In the {\tt add} method given above, we call another method on the
+data arrays of the argument image and the result image.  The methods
+on arrays are typically designed to call C functions, which run at
+least 20-30\% on Sun SPARC machines.  Despite this speed improvement,
+it is somewhat inconvenient to have to write C code every time you
+want a new image operation.  It is often simpler just to write the
+code in LISP.  Several macros, defined in the file {\bf
+lucid-image-loops.lisp} are provided to make it easier to write new
+image processing functions in LISP:
+\begin{description}
+\item\lfun{loop-over-image-pixels}{ image-list . body}
+Provides efficient looping mechanism for images.  The syntax is like
+the Common Lisp {\tt let*} macro.  
+See examples in the
+files {\bf lucid-image-loops.lisp}, and {\bf imops.lisp}.
+
+\item\lfun{loop-over-image-positions}{ image-list (ypos xpos) . body}
+Provides efficient looping mechanism for images, with access to the current
+coordinates.  See examples in the
+files {\bf lucid-image-loops.lisp}, and {\bf synth.lisp}.
+\end{description}
+
+\mysubsubsec{Calling Foreign Functions}
+\index{foreign functions}
+If you do need to call C code (or some other language) from OBVIUS,
+you can look at the foreign function definitions given in {\tt
+lucid-ffi.lisp}.  Communication between Lisp and C can be complicated,
+and you should  be aware of a few difficulties:
+\begin{itemize}
+\item If you pass non-static data structures to C code, you must be
+careful that the Lisp Garbage Collector is not invoked.  See the
+discussion of this in section~\ref{sec:using-memory} on memory
+management.
+\item If the C code encounters a floating point exception (eg, underflow,
+overflow, divide-by-zero, log-of-negative-number... ), then Lisp
+\index{foreign functions,floating-point exceptions}
+will (by default) generate a continuable error.  This is appropriate
+if it only happens once, but if it happens in a loop over a large data
+structure, it is disastrous!  The user can turn off this error
+handling by evaluating {\tt (setf (enabled-floating-point-traps)
+nil)}, but then they will not know when an exception has occured.
+Much of the C code in obvius handles floating exceptions more
+gracefully (see, for example, \lsym{internal-div}), returning the
+number of exceptions encountered within the loop.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The Memory Manager}
+\label{sec:using-memory}
+
+OBVIUS objects that contain large arrays should make use of OBVIUS's
+static array allocator, defined in the {\bf memory.lisp} file.  In
+Lucid Common Lisp, the ``static'' storage area is a portion of memory
+that is not managed by the Lisp garbage-collector.  The reason for
+using static arrays (as opposed to normal ``consed'' arrays) is
+three-fold:
+\begin{enumerate}
+\item 
+Lucid requires that arrays passed to foreign functions are static, and
+begin on even word boundaries.  
+\index{foreign functions, passing arrays to}
+\index{foreign functions, and garbage collection}
+Technically, this is only a problem if
+the Lisp garbage collector is invoked while in the foreign function.
+In this case, the arrays will be relocated by the garbage collector,
+and the foreign function will write into the wrong portions of memory.
+This can situation can arise if the foreign function calls a Lisp
+function (a ``callback'' ), {\em or
+if the foreign function calls} \lsym{malloc}! 
+\item We want to prevent large arrays from being garbage collected.
+\item Keeping images together in memory improves virtual memory swapping behavior.
+\end{enumerate}
+The OBVIUS static array allocation function ({\tt allocate-array})
+works by displacing sub-arrays into large static vectors.  OBVIUS
+keeps track of the space that has been allocated, and provides a
+function to de-allocate arrays ({\tt free-array}).  The disadvantage
+of this explicit memory allocation scheme is that arrays allocated in
+this manner must be freed by the user or the programmer.
+
+The following memory allocator functions are exported:
+\begin{description}
+
+\item\lfun{allocate-array}{ dims \&key element-type initial-element}
+This function is similar to the \lsym{malloc} function in C.  Returns
+an array of the specified dimensions and type, allocated from OBVIUS's
+static heap.  The args are the same as for Common Lisp {\tt
+make-array}.  The array returned is actually displaced to a large
+static array.  Nevertheless, it is guaranteed to begin on an even word
+boundary.  Remember that these arrays are not garbage collected and so
+must be explicitly freed.  If the memory allocator does not have a
+large enough block of the appropriate type of static memory, and if
+\lsym{*auto-expand-heap*} is nil, a continuable error is given,
+allowing the user to expand the heap by \lsym{*heap-growth-rate*}
+elements.  If {\tt *auto-expand-heap*} is non-nil, this expansion will
+happen automatically.  NOTE that Lucid is not very well protected
+against over-expanding the static memory area and may crash if you
+expand beyond the available process memory space.
+
+\item\lfun{free-array}{ arr}
+This function is similar to the \lsym{free} function in C.  Frees
+storage space for an array that has been allocated using
+allocate-array.  After evaluating (free-array A), it will still be
+possible to access A, but the contents may be overwritten at any time.
+It is also possible to free sub-arrays of an allocated array.  This
+function gives a warning if the argument is not an array, or if it was
+not allocated from the static heap.
+
+\item\lfun{with-static-arrays}{ arr-list . body}
+This macro acts just like the Common Lisp {\tt let*} macro except that
+all of the static-arrays bound by it are freed (silently) before
+exiting.  If a let* was used, the local variables would become unbound
+on exiting, but the static storage space would not be freed.
+
+\item\lfun{expand-heap}{ type-or-heap \&optional size return-block}
+Expand the static heap of the given type (can also pass the heap
+itself) by the given number of elements.  Any valid {\tt
+:element-type} argument for the argument of the Common Lisp make-array
+function may be used as a type.  Note that image arrays are of type
+{\tt 'single-float}.  Default value for {\tt size} is {\tt
+*heap-growth-rate*}.  If {\tt return-block} is nil (the default),
+returns t.  Otherwise returns the newly allocated static array.
+
+\item\lfun{heap-status}{}
+Print out information about the static array allocator.  For each type
+of static heap, prints the number of used elements, the number of free
+elements, the size of the largest block, and the number of contiguous
+blocks (i.e. fragmentation).
+
+\item\lfun{run-heap-diagnostics}{}
+Use this to verify the integrity of the static heap memory allocator.
+Prints out all free arrays, giving warnings if inconsistencies are
+found.
+
+\item\lfun{ogc}{ \&key verbose}
+This is the OBVIUS garbage collector, which can only be called from
+top-level.  The \lsym{scrounge!} macro provides a top-level interface
+(it just calls ogc with keyword {\tt :verbose} non-nil).  When keyword
+{\tt :verbose} is non-nil, it prints out information about the space
+reclaimed, the current heap status, and the (preserved) named
+viewables.  {\tt ogc} preserves all static arrays that are owned by
+pictures on picture stacks, and {\em non-orphaned} viewables (see the
+discussion in the next section).  That is, all viewables that are
+displayed as pictures, all viewables that are bound to symbols in the
+current package or the user package, the viewables on the list
+\lsym{*protected-viewables*}, and all of the inferior and superior
+viewables of the aformentioned viewables (phew!).  All arrays that are
+not preserved are returned to the heap for reallocation.  Therefore,
+it is VERY IMPORTANT that the pointers from pictures to viewables, and
+from viewables to their superiors and inferiors be maintained.  In
+addition, users should be discouraged from creating their own data
+structures containing ``inaccessible'' viewables, since these will not
+be preserved during a garbage collection.  ASIDE: If Lucid ever
+provides a finalize-instance method (called when all references to a
+CLOS object have been lost and it is about to be garbage collected) we
+will be able to get rid of this stuff and just have the
+finalize-instance on viewables free their static arrays!
+
+\end{description}
+
+\mysubsubsec{Orphans and OGC}
+\index{orphans}
+In order to keep track of which allocated arrays are needed, OBVIUS
+contains a fairly large amount of code devoted to maintaining
+bi-directional pointers between viewables and pictures, and between
+viewables and their superiors and inferiors.  For example, when
+viewables are destroyed, their static space is de-allocated, and their
+pictures are destroyed.  At any given time, OBVIUS can access
+viewables through their pictures (which must reside on panes), through
+the Lisp symbol-table (if they have symbol names), and through their
+inferiors and superiors.  Any viewable that is not accessible in this
+manner is called an ``orphan''.  The OBVIUS garbage collector,
+\lsym{ogc}, will reclaim all allocated memory of orphans.
+
+There are three standard situations in which an existing viewable can
+become an orphan.  These are described in the section on ``orphans''
+(in section~\ref{sec:organization}).  If the parameter
+\lsym{*auto-destroy-orphans*} is nil, then the static space belonging
+to these orphans will remain allocated.  In this case, the only way to
+recover the static space belonging to these orphans is by running the
+OBVIUS garbage collector {\tt ogc} (described below).
+
+If the global parameter \lsym{*auto-destroy-orphans*} is non-nil, the
+orphans created in these three situations will be {\em automatically
+destroyed}.  This is a little bit dangerous for new users: it is easy
+to write code that that locally creates orphans that one later expects
+to use.  For example, you create a temporary compound-viewable (e.g.,
+an image-pair), you bind a local variable to one of its inferiors
+(e.g., the x-component).  Later in the function, outside of the scope
+of the {\tt with-local-viewables} macro, you perform computations on
+the inferior.  But this inferior was destroyed upon exiting the {\tt
+with-local-viewables} macro!  You can prevent such destruction of
+orphans by 1) setting \lsym{*auto-destroy-orphans*} to nil, or 2)
+pushing the orphan onto the list in the special variable
+\lsym{*protected-viewables*}.  The \lsym{with-local-viewables} macro
+places its return value(s) on the {\tt *protected-viewables*} (see the
+definition, in {\bf viewable.lisp}.
+
+It is important to understand, however, that setting
+\lsym{*auto-destroy-orphans*} to a non-nil value only ensures that
+non-orphan viewables that become orphaned will be destroyed.  {\em It
+is still possible to create orphans.} For example, suppose the user
+writes a function that returns a list of viewables.  If I call this
+function, and I don't hold onto the list returned by the function,
+then these viewables will be orphans: OBVIUS will have no way of
+accessing them.  But OBVIUS cannot ``know'' about the creation of such
+orphans and thus cannot automatically destroy them.  As before, the
+only way to recover the static space belonging to these orphans is by
+running the OBVIUS garbage collector {\tt ogc} (described below).
+
+Note also that this is a double-edged sword: if I call the function
+and bind the resulting list to a global variable, then these viewables
+are not accessible by OBVIUS (and are thus considered orphans), but I
+(the user) {\em still have access to them} (through the global
+variable).  Calling {\tt ogc} will therefore {\em de-allocate the
+storage belonging to these viewables}.  The user must therefore be
+careful not to create data structures containing ``hidden'' (orphaned)
+viewables.  To return multiple viewables from a function, you should
+use the Common Lisp multiple-values facility.  See
+section~\ref{sec:memory} on memory management for more information.
+
+\mysubsubsec{Troubleshooting Memory Problems}
+If you find that viewables are being destroyed or over-written when
+you don't want them to be destroyed, there are severa things to
+examine.  First, try running your code with the variable
+\lsym{*auto-destroy-orphans*} set to nil.  If this fixes the problem,
+then you must figure out where in your code you are ``orphan'ing''
+viewables (see the previous section).  You should get warnings when
+you orphan viewables and the \lsym{*auto-destroy-orphans*} is nil.
+
+You may also be creating new viewables that are orphans upon creation.
+In this case the problems would not occur until you run the OBVIUS
+garbage collector (\lsym{ogc}).  Look for places in the code that
+store viewables in top-level data structures that OBVIUS doesn't know
+about (i.e., viewable-matrices are ok, but a list of viewables is
+not).
+
+Finally, if the viewables your are losing are {\em not} orphans, it
+must be that OBVIUS does not know about the static arrays of those
+viewables.  Make sure that the \lsym{static-arrays-of} method returns
+alist of all of the appropriate arrays.  These are the arrays that
+will be protected from garbage collection.
+
+\index{foreign functions, and garbage collection}
+Further memory problems may arise because of foreign function calls.
+If you call a foreign function with non-static Lisp data structures,
+and the garbage collector is activated while you are in the foreign
+code, the Lisp data structures will be moved by the garbage collector.
+The foreign function, however, will still have the pointer to the old
+data structure and may continue to read or write data from the old
+memory locations.
+There are several situations in which the garbage collector might be
+called while in foreign code:
+\begin{enumerate}
+\item if the foreign code performs callbacks (that is, calls a Lisp
+function)
+\item if the ephemeral-garbage-collection (egc) is enabled
+\item if the foreign code calls {\tt malloc}
+\end{enumerate}
+Even worse, this behavior may be different depending on whether your
+code is interpreted or compiled, and which which version of the
+compiler (i.e., production or development) you used!!  If your
+def-foreign function definitions are {\em interpreted}, egc will often
+run while you are in the C code!
+
+The programmer should be aware of these situations, since these type
+of bugs are often not noticed when testing code on small examples.
+Once the code is in place and being used, these problems are very
+difficult to track down!  Here are some possible solutions to the
+problem:
+\begin{enumerate}
+\item write lisp interface code that {\em always} passes static
+objects to your foreign code.  You can use the OBVIUS
+\lsym{allocate-array} function to allocate static arrays.
+\item Avoid the three items above that might cause garbage collection in lisp
+while executing foreign code.  This means that all temporary space
+used in the C code must be {\em allocated by Common Lisp} and passed
+in to the foreign code.
+\item Wrapping a \lsym{with-interrupts-deferred} macro around calls to the
+foreign code can prevent garbage collection due to the second and
+third items above.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adding New Viewable Subclasses}
+\label{sec:new-viewable}
+
+Use the CLOS function {\tt defclass} or the OBVIUS function
+\lsym{def-simple-class} to define new types of viewables.  {\tt
+def-simple-class} just calls defclass with args to set up the
+accessors automatically.  The following functions/methods must be
+provided for each viewable (for an example, look at the file {\bf
+image-pair.lisp}).  In some cases, the default methods (defined in the
+file {\bf viewable.lisp}) inherited from the generic viewable class
+will suffice.  Typically, viewable classes and their methods are
+placed in a file called
+\abox{viewable-class}.lisp.
+\begin{description}
+
+\item {\tt (def-simple-class <viewable-class> ...)}
+The class name is usually exported.
+
+\item\lfun{settable-parameters}{ viewable-class-name}
+This method, which should dispatch on a symbol eql to the viewable
+class name, should return a list of the class slots which are user
+adjustable.  It is used by the user interface code to create the
+dialog boxes for editing the viewable slots.  Note that it should
+append a list of the settable slots for this class with the result of
+a call to the inherited method, since the superclasses may also
+provide settable slots.  The default method returns {\tt
+`(display-type)}.
+
+\item\lfun{initialize-instance}{ vbl \&rest initargs}
+This is the standard CLOS initialization function.  Any static arrays
+needed by the viewable should be allocated here using the
+\lsym{allocate-array} function (described in the previous section).
+This method must also fill the superiors-of slots of the inferior
+viewables if the viewable is a compound viewable (ie.  contains other
+viewables).
+
+\item\lfun{set-result}{ vbl model}
+This method is called by the \lsym{with-result} macro (which should be
+used by all functions that return viewables) as described above in
+section \ref{sec:writing-ops}.  If the programmer is planning to write
+routines for performing computations on instances of the new viewable
+class, they should provide set-result methods to standardize the
+result argument (:\res) behavior. The default methods are defined in
+the {\bf viewable.lisp} file. There are four standard method dispatch
+cases:
+\begin{enumerate}
+\item Both arguments are viewables.  In this case, the method checks that 
+the viewables are of the same type, and calls \lsym{check-size} to
+make sure they are the same size.  The default method is usually
+sufficient here.
+\item The {\tt vbl} argument is a name (nil/symbol/string), {\tt model} is a viewable.  
+This method creates a new viewable, as specified by the {\tt model},
+with the given name.  It should copy relevant slots from the model
+into the result.  This method may need to be redefined for viewable
+subclasses.
+\item The {\tt vbl} argument is a viewable, {\tt model} is a property list (plist).  In
+this case, the user has passed a viewable as a result argument, and it
+must be checked for consistency with the initargs specified by the
+plist.  This should be redefined for viewable subclasses to do this
+error-checking.
+\item The {\tt vbl} argument is a name (nil/symbol/string), and the
+{\tt model} is a plist.  A new viewable is created using the plist as
+a list of initargs in a call to the CLOS function
+\lsym{make-instance}.  The default method defined in {\bf
+viewable.lisp} is usually sufficient for this case.
+\end{enumerate}
+
+\item\lfun{make-<viewable-class>}{ \&rest initargs}
+The top-level constructor function for the viewable.  This function
+creates an instance of the viewable and fills in its slots.  This is
+redundant -- the user could just as well call the CLOS function
+\lsym{make-instance}.  It is provided to make the initargs explicit
+(see, for example, the definition of \lsym{make-image}).  It should
+make use of the functionality captured by the {\tt
+initialize-instance} and \lsym{set-result} methods, by calling
+\lsym{with-result}.  This function should
+be exported.
+
+\item\lfun{<viewable-class>-p}{ thing}
+The predicate for the class.  Typically a macro.  This should be exported.
+
+\item\lfun{print-object}{ vbl stream}
+Use this to modify the printed form of this class.
+
+\item\lfun{print-values}{ vbl}
+This should print out ``values'' of the viewable.  It need not be
+defined for all viewable subclasses.
+
+\item\lfun{check-size}{ vbl \&rest vbl-list}
+This method is called by set-result (case 1) and should ensure
+that a list of viewables has comparable ``dimensions'' so that point
+operations performed on them will work.  The meaning of ``dimensions''
+depends on the sub-class of viewable.  The method should return a
+viewable if the sizes are consistent, and signal an error otherwise.
+See example in image.lisp.  The default method does no checking and
+returns the first argument.
+
+\item\lfun{static-arrays-of}{ vbl}
+A method that returns a list of the static arrays allocated when the
+viewable was created.  The list should {\em not} include static arrays
+belonging to the inferiors of the viewable.  These arrays will be
+freed when the viewable is destroyed.  They are also the arrays that
+are preserved when the OBVIUS garbage collector (\lsym{ogc}) is
+called.  The default method returns an empty list (nil).
+
+\item\lfun{set-not-current}{ vbl}
+This method is called when the viewable when it is destructively
+modified.  It is called by the \lsym{with-result} macro.  This method
+does not usually have to be written as the inherited one is usually
+sufficient.  The inherited method increments the {\tt current} slot
+and calls {\tt set-not-current} on the superiors and pictures of the
+viewable (see viewable.lisp).
+
+\item\lfun{inferiors-of}{ vbl}
+A method that returns a list of the inferiors of the viewable.  This
+must be defined for all compound viewables: it is used by the
+\lsym{destroy} and \lsym{ogc} functions. The default (inherited)
+method returns nil, and is thus appropriate for atomic (non-compound)
+viewables.
+
+\item\lfun{notify-of-inferior-destruction}{ vbl}
+A method that is called on a compound viewable when one of its
+inferior viewables is being destroyed.  The default (inherited) method
+signals a continuable error.  If continued, it destroys both the
+superior viewable and the inferior (see viewable.lisp)!  Some
+viewables may allow destruction of inferiors, but they should erase
+all pointers to those inferiors so as not to confuse the system memory
+manager.  See the examples in {\bf sequence.lisp} and {\bf
+gaussian-pyramid.lisp}.
+
+\item\lfun{notify-of-superior-destruction}{ inf-vbl sup-vbl}
+This method is called on a viewable when one of its superiors is being
+destroyed.  It need not be rewritten for viewable subclasses.  The
+standard method removes the superior from the \lsym{superiors-of}
+list, and if \lsym{*auto-destroy-orphans*} is non-nil and the {\tt
+inf-vbl} has been orphaned, it will be destroyed.
+
+The description of the functions and methods above should make it
+clear that the objects in OBVIUS are often connected by bi-directional
+pointers.  This bi-directionality is necessary for the proper
+functioning of the OBVIUS garbage collector (\lsym{ogc}).
+These must be maintained every time an object is created or
+destroyed.  This is especially difficult in the case of compound
+viewables such as complex images and image sequences.  In order to
+localize the source of such problems, it is important that the
+\lsym{initialize-instance} method set up these pointers properly, and
+that viewables should only be destroyed using the standard destroy
+function (defined in the file viewable.lisp).  The superiors-of and
+pictures-of slots must be carefully maintained.  The superiors-of slot
+is used by set-not-current, destroy, and the garbage collector.  The
+inferiors-of slot (method) is used by destroy and the garbage
+collector. The pictures-of method is used by destroy and the
+garbage-collector.
+ 
+\item\lmeth{present}{viewable}{ pic viewable pane}
+Described in section~\ref{sec:new-picture}.
+
+\item {\bf Inferior Accessors} \\
+In general, compound viewables should provide accessor methods to
+access their sub-viewables.  The convention is that these take a :\res
+keyword argument.  If no result is passed, they return the
+sub-viewable, in the style of a standard accessor function.  If a
+result is passed, the sub-viewable is copied into that result. If a
+symbol is passed, a new viewable (bound to that symbol) is created and
+the sub-viewable is copied into it.  For examples, see the definition
+of \lsym{frame} in {\bf sequence.lisp} or \lsym{x-component} in {\bf
+image-pair.lisp}.
+
+\item {\bf History} \\
+The \lsym{history} slot of a viewable contains the a history object.
+This object preserves information about how the viewable was created.
+It keeps track of the symbol names of intermediat viewables, so that
+the user can print out an abbreviated version of the history.  The
+history of a viewable is set with the \lsym{set-history} function:
+{\tt (set-history vbl \&rest hist-list)}.  This destructively replaces
+viewable elements of hist-list by their histories.  This function is
+normally called by the \lsym{with-result} macro.
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Multi-Processing}
+\label{sec:multi-processing}
+
+Starting with version 2.2, OBVIUS takes advantage of Lucid's
+multi-processing capabilities.  The main lisp process runs a top-level
+``listener'' or ``read-eval-print-loop'' (\lsym{repl}), described
+below.  The source code for this is in the file {\bf repl.lisp}.
+
+A secondary process, the \lsym{event-dispatch-process} created by
+LispView, handles window system events (mouse clicks, window exposure,
+etc).  NOTE: if this process dies, you will no longer be able to use
+the mouse.  If you encounter an error and are given a choice of
+killing this process, AVOID DOING SO!
+
+\mysubsubsec{Mouse Events}
+In order to avoid data-access collisions between processes, OBVIUS
+mouse events are handled in one of two ways:
+\begin{enumerate}
+\item  If the a mouse event
+requires processing that will only effect the display (i.e., pictures
+and panes), and the processing is relatively simple (e.g., requiring
+less then one second), then that event is handled immediately by the
+mouse process.  In order to ensure that no other process tries to
+access the same windows, all functions that are to be executed in
+immediate mode should be called within the context of the macro
+\lsym{with-locked-pane}.  This macro sets up a ``lock'' on the a given
+pane, such that other processes executing a {\tt
+with-locked-pane} macro will be forced to wait before accessing the pane.
+\item More extensive event handling is placed on a queue, for
+execution by the listener's read-eval-print-loop (described below).
+This queue is executed in FIFO (first in first out).  Execution will
+be delayed if the listener is not at top-level.
+\end{enumerate}
+Note that if there is an error, the debugger inhibits multi-processing
+and therefore mouse events will not be handled.
+
+\mysubsubsec{Repl}
+The OBVIUS read-eval-print-loop has several purposes:
+\begin{itemize}
+\item Reads forms from *standard-input*, evaluating them and printing
+their value(s) to *standard-output*.  If the value(s) begin printed
+are viewables and \lsym{*auto-display-viewables*} is non-nil, then
+these viewables are automatically displayed on the current pane.
+\item Sets the standard Common Lisp variables, {\tt *, **, ***, +, ++,
++++, -, /, //, ///}, as described in Steele.
+\item Handles enqueued mouse events (see above).
+\item Sends messages to the Status line in the OBVIUS control panel,
+indicating when the listener is at top level, computing, or in the
+debugger. 
+\end{itemize}
+
+\mysubsubsec{Adding Menus and Dialog Boxes}
+\index{menus,modifying} \index{dialog boxes}
+The menus on the control panel are cynamically computed at
+``click-time''.  This makes their reponse time slower, but makes it
+very easy to modify them.  
+
+Adding new functions to the function menus is easy.  You need only add
+the function name (a symbol) to one of the global variables {\tt
+obv::*obvius-<type>-functions*} where {\tt <type> } is one of {\tt
+\{stats, arith, geom, filter, compare, synth, matrix, misc\} }.  These
+menus are recomputed at ``click-time'' from these variables, so
+modifying will result in an immediate change in the menu.  Function
+dialog boxes are computed automatically (although this is sometimes a
+bit flakey).
+
+The Global parameters dialog is also computed at ``click-time'', and
+will contain all exported symbols beginning and ending with an
+asterisk (\*) character.
+
+Similarly, if you define a new viewable or picture sub-class, it will
+be automatically added (in alphabetical order) to the ``Viewable
+defaults'' or ``Picture defaults'' menus.
+
+The ``Modules'' sub-menu (on the ``misc'' menu), is created on the fly
+to contain a list of all currently unloaded modules.  If you load a
+module, it will no longer appear on this menu.  If you define a new
+module (by adding to the obv::*obvius-module-plist*), it will appear
+on this menu.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Display of Pictures}
+\label{sec:auto-display}
+
+\input{display-calls}
+
+The most important convention in OBVIUS is the chain of command for
+display of viewables, and manipulation of picture-stacks.  This is
+illustrated in figure~\ref{fig:display-calls}.  Typically, the
+top-level listener loop (\lfun{repl}, described above) will call the
+\lsym{display} function when viewable(s) are returned
+to top level.  Other code (e.g. a function called from the mouse
+process) can achieve the same behavior by calling the function
+\lsym{print-top-level-values}.
+
+Since OBVIUS allows destructive modification of viewables, it often
+happens that a picture will become out-of-date with respect to its
+viewable.  OBVIUS keeps track of this by maintaining a \lsym{current}
+slot for viewables and pictures.  This slot holds a version number.
+If the version number of the picture is equal to that of the viewable,
+it is up-to-date.  Software that modifies a viewable should call
+\lsym{set-not-current} (or use the \lsym{with-result} macro). 
+{\tt Set-not-current} increments the \lsym{current} slot of the
+viewable.  Below, decribe some of the
+functions used to manipulate and display pictures of viewables, and
+the use of the {\tt current} slot.
+\begin{description}
+
+\item\lfun{display}{ viewable \&optional display-type \&rest initargs \&key pane make-new}
+This is the exported method for creating a picture of a viewable.
+This assumes {\em only} that the viewable exists.  The default value
+for the :pane keyword is the current pane.  If there are no panes, the
+function creates one using new-pane.  The default value for the
+:display-type keyword is the display-type slot of the viewable.  If
+this :display-type keyword is nil, then nothing is displayed.
+Otherwise, the value of the :display-type keyword must be a picture
+class (or the name of one) suitable for passing to make-instance.
+When the :display-type keyword is non-nil, OBVIUS searches through the
+picture stacks for a picture of the specified type.  If no picture of
+this type exists or if the {\tt :make-new} parameter is non-nil, a new
+one is created using {\tt make-instance}.  The {\tt initargs} are
+passed along to make-instance, so the user can specify initialization
+arguements for the picture.  If a picture of this type exists on one
+of the panes, it is moved to the top of the current pane, if the
+variable \lsym{*preserve-picture-pane*} is non-nil.  Otherwise it is
+moved to the top of its own pane.  The picture will be updated if it
+is out of date with the viewable and the variable
+\lsym{*auto-update-pictures*} is non-nil.  In either case, the picture
+is put onto the pane using either {\tt push-picture} or {\tt
+move-picture}.  If it is already displayed in the desired pane, {\tt
+display} just calls \lsym{draw-pane}.
+
+\item\lfun{refresh}{ \&optional (pane *current-pane*)}
+This provides an entrypoint to the draw-pane method that {\em always}
+re-computes the internal representation of the picture, whether or not
+it is out-of-date with respect to the viewable.
+
+\item\lfun{move-picture}{ pic \&optional (pane *current-pane*)}
+This function performs bookkeeping manipulations of the picture-stack
+of the pane and the pane-of the picture (i.e., it is responsible for
+keeping consistent pointer references).  If the picture is being moved
+to another screen, then its \lsym{system-dependent-frob} may have to
+be converted to be consistent with the new type of screen.  It then
+calls {\tt draw-pane} to update the screen.
+
+\item\lfun{cycle-pane}{ pane \&optional (num 1)}
+This function performs bookkeeping manipulations of the picture-stack
+of the pane, rotating the list {\tt num} places (note: num can be
+negative).  It then calls {\tt draw-pane} to update the display.
+
+\item\lfun{pop-picture}{ pane}
+This function calls \lsym{destroy} on the top (visible) picture of the
+pane stack.
+
+\item\lfun{draw-pane}{ pane \&key clear}
+This method is the bottleneck for bringing the appearance of the pane
+up-to-date with the picture on top of the stack.  In addition to being
+called the functions illustrated in figure~\ref{fig:display-calls}, it
+is called internally by the window system when it receives ``damage''
+or ``exposure'' events.  If the {\tt
+:clear} argument is non-nil, {\tt draw-pane} clears the pane and sets
+the title-bar to the string {\tt "displaying ..."}.  When the pane is
+not empty, {\tt draw-pane} calls the {\tt present} method (described
+in the next section) on the picture, viewable and pane, and then sets
+the title bar string.  If an error occurs in the call to {\tt
+present}, {\tt draw-pane} will pop the bad picture from the
+picture-stack when the user returns from the debugger.
+
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adding a New Picture Subclass}
+\label{sec:new-picture}
+
+Pictures are typically created by the {\tt display} function
+(defined in the file {\bf viewable.lisp}).  Note
+that joint methods on viewables and pictures are defined in the
+picture file by convention since the viewable files are loaded first.
+
+In creating a new picture type, the programmer should first write the
+low level code that fill's the \lsym{system-dependent-frob} slot.
+This slot holds a system-dependent representation of the picture that
+can be efficiently ``rendered'' to the screen or printer.  For
+example, the frob might be an X window system offscreen bitmap, or an
+object containing lists of lines that need to be drawn.  This
+abstraction also makes porting to other window systems or display
+devices easier.
+
+The \lsym{drawable} picture subclass, which provides a parent class
+for \lsym{graph}s and \lsym{vector-field}s is a good example.  The
+frob for this class will be either an offscreen bitmap object (called
+a bltable), or an object containing a description of lines to be drawn
+directly in the pane.  The \lsym{retain-bitmap} determines which of
+these types of frob is used.  The code in {\bf graph.lisp} draws the
+graph into the frob using \lsym{draw-line} and \lsym{draw-text}
+commands, which are defined for both type of frob.  Note also that
+these are described for \lsym{postscript-bltable} frobs, which are
+used when sending output to  a postscript printer.
+
+After writing the low-level code that draws the picture, the
+programmer must connect the picture with the rest of OBVIUS.  In order
+to do this, the following functions must be provided for each new
+picture subclass (for examples, see the files {\bf picture.lisp},
+{\bf gray.lisp}, and {\bf drawing.lisp}):
+\begin{description}
+
+\item\lfun{defclass}{ \abox{picture-class} ...}
+The class name is usually exported.
+
+\item\lfun{settable-parameters}{ picture-class-name}
+This method, which should dispatch on a symbol equal to the picture
+class name, should return a list of the class slots which are user
+adjustable.  It is used by the user interface code to automatically
+create dialog boxes for editing pictures.  Note that it should append
+a list of the settable slots for this class with the result of a call
+to the inherited method, since the superclasses may also provide
+settable slots.
+
+\item\lfun{reset-picture-defaults}{ pic vbl \&rest initargs}
+This method should compute appropriate values for all of the picture
+slots.  It is called by the CLOS method \lsym{shared-initialize} which
+is called by both \lsym{initialize-instance} {\em and}
+\lsym{reinitialize-instance}.  That is, it is called whenever the
+slots of the object are being set.  In order to modify slots of a
+picture, the user will typically either use a dialog box, or call
+\lsym{setp}.  Both of these call {\tt reinitialize-instance}.  The
+{\tt reset-picture-defaults} method should take care of all automatic
+computation of parameters (e.g., if the user sets the parameter to
+{\tt :auto}), and should also handle parameter dependencies (i.e.,
+when the modification of one parameter requires adjustment of
+another).  {\em It must return a modifed list of initargs.}  See, for
+example, the method for gray pictures.
+
+\item\lfun{set-not-current}{ pic}
+Called when the underlying viewable is modified.  The default
+(inherited) method puts a double asterisk (ala emacs) in the title bar
+if the picture is at the top of a picture stack.  Specialized versions
+may need to destroy certain internal data, or reset certain
+parameters.  See, for example, the method on gray pictures.
+
+\item\lfun{static-arrays-of}{ pic}
+Returns the static arrays used by the picture.  Note that if any
+of the arrays are shared with a viewable, these should {\em not} be
+returned.  They should be returned only by the static-arrays-of method
+on the viewable (for example, see the code for gray pictures of
+images, which resets the :scale and :pedestal slots ).  The standard
+method just returns the {\tt static-arrays-of} the \lsym{system-dependent-frob}.
+
+\item\lfun{drag-picture}{ pic dy dx}
+This method is called while the user is dragging the picture with the
+mouse.  It should adjust the {\tt x-offset} and {\tt y-offset} slots
+of the picture and redraw the picture in the pane.  The default one
+does this by calling draw-pane, which is inefficient in most cases.
+Therefore, efficient versions are typically written for subclasses.
+
+\item\lfun{zoom-picture}{ pic factor y x}
+Called by the zoom mouse clicks.  {\tt factor} is the amount to zoom
+by, and the {\tt y} and {\tt x} parameters indicate the location of
+the mouse when it was clicked.  The default version in {\bf
+picture.lisp} is often sufficient.
+
+\item\lfun{position-message}{ pic vbl pane x y}
+This should present useful information to the user when they click the
+mouse on the pane at the given coordinates.  It typically calls
+\lsym{pane-coord-to-viewable-coord} to compute the viewable coordinates, and
+then \lsym{status-message} to put the message into the OBVIUS status line.
+The default version does nothing.
+
+\item\lfun{frob-coord-to-viewable-coord}{ pic frob-y frob-x}
+This should convert the coordinates of the frob (these are typically
+the same as the pane coordinates, but with the offset and zoom
+removed) to those of the viewable.  It is called by the 
+\lsym{pane-coord-to-viewable-coord} method.
+
+\item\lfun{title-bar-string}{ pic}
+Returns a string to be put in the title bar of the pane displaying the
+picture.  This should give to the user any information necessary for
+proper interpretation of the visual display.  The default version
+returns the name of the viewable.
+
+\item\lmeth{present}{picture}{ picture viewable pane}
+This is a triple-method on picture, viewable, and pane sub-classes
+which does the actual displaying.  The pane dispatch is meant to allow
+specialization for different types of screen.  The typical method
+computes the internal system-dependent picture representation by
+calling the {\tt compute-picture} method, and then calls {\tt render}
+to display the picture in the pane.  See {\bf gray.lisp} for an example.
+
+\item\lfun{compute-picture}{ picture viewable}
+This method computes the window-system-dependent intermediate picture
+representation (the ``system-dependent-frob'').  It typically calls a
+system-dependent picture-specific method {\tt draw-\abox{thing}} to
+actually fill the frob.  Note that {\tt compute-picture} is called by
+flipbooks and pasteups on the sub-pictures.  See {\bf gray.lisp} and
+{\bf x-blt.lisp} for an example of how this is done.
+
+\item\lfun{render}{ pane frob y-offset x-offset zoom}
+This method displays the system-dependent intermediate picture
+representation (the ``frob'') in the pane, with the given x-offset,
+y-offset and zoom.
+
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Porting To Other Machines, Window Systems, or Lisp Implementations} 
+
+[***** This section should be elaborated.  Describe the strategy of
+the window-system interface layering.  In particular, the generic
+screen, pane, and frob stuff.
+*****]
+
+Porting to another window system would require replacing the source
+files beginning with an ``x-'' prefix, and would probably require a
+moderate amount of work.  We have deliberately kept our use of
+LispView simple, and have tried to provide a layer of generic
+interface to the window system.  All references to LispView code are
+package-prefixed with the lispview: prefix.  The generic OBVIUS window
+system interface is accessed in the OBVIUS source files (e.g. {\bf
+pane.lisp} and {\bf drawing.lisp}).  It relies on four
+system-dependent types of object: screen, pane, drawable, bltable.
+The screen and pane objects should inherit from the system-independent
+versions defined in pane.lisp (see, for an example, the definitions of
+x-screen and x-pane in x-window.lisp).  The function make-pane should
+be provided.  The drawable and bltable objects do not inherit from any
+system-independent objects, but make-bltable and make-drawable
+functions must be provided.
+
+As for porting to another Lisp implementation, there are three
+Lucid-specific facilities which are heavily used in OBVIUS: 1) the
+foreign function interface, and 2) the multi-processing capability.
+We also make extensive use of Lucid's CLOS implementation, and 3) the
+static array allocation facility.  Calls to lucid-specific functions
+are package-prefixed with {\tt LCL:} (general lucid extensions), {\tt
+CLOS:} (Lucid's implementation of CLOS), or {\tt MP:} (Lucid's
+multi-processing facility).  Changing the syntax of the foreign
+function calls (assuming the alternate Lisp Implementation provides a
+foreign function interface) would probably be relatively simple.  The
+multi-processing is actually only used indirectly through the LispView
+interface to X.  Only the code in {\bf repl.lisp} relies on the
+multi-processing capabilities of Lucid (which are modularized in the
+MP package).  Porting LispView to run in another Lisp would probably
+be difficult.  It might be easier to rewrite the window system
+interface from scratch (see above).
+
+Porting to other machines (assuming the X window system and Lucid
+Common Lisp are both available) necessitates either porting LispView
+to the new machine, or providing your own X windows interface.  Rumor
+has it that Unipress is planning to port LispView to other hardware
+platforms, but it is not certain when this will happen.

@@ -1,0 +1,432 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Viewables}
+\label{sec:viewables}
+
+This section describes the various viewable subclasses.  To add new
+viewable classes to OBVIUS, see section \ref{sec:hacking} of this
+manual.  The currently defined viewables are are (indentation
+indicates inheritance):
+\begin{tabbing}
+image \= \\
+\> one-d-image \\
+\> slice \= \\
+\> bit-image \\
+viewable-matrix \\
+\> image-matrix \\
+\> viewable-sequence \\
+\> \> image- \= sequence \\
+\> \> \> color-image \\
+\> \> \> image- \= pair \\
+\> \> \> \> one-d-image-pair \\
+\> \> \> \> one-d-complex-image \\
+\> \> \> \> complex-image \\
+\> \> \> \> polar-image \\
+\> \> complex-discrete-function \\
+filter \\
+\> separable-filter \\
+\> hex-filter \\
+discrete-function \\
+\> histogram \\
+\> log-discrete-function \\
+\> periodic-discrete-function \\
+pyramid \\
+\> gaussian-pyramid \\
+\> laplacian-pyramid \\
+\> steerable-pyramid \\
+\> qmf-pyramid \\
+overlay-viewable \\
+\> overlay-gray-viewable \\
+\end{tabbing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Images}
+\label{sec:images}
+\index{{\ptt image}}
+
+This section describes images and the functions provided for their
+manipulation.  OBVIUS has several other related types of viewables
+(e.g., bit-image, image-pair, complex-image, polar-image,
+image-sequence, and one-d-image) that are also described below.
+
+The following files in the \abox{obv}  directory contain source
+code that is relevant to images:
+\begin{itemize}
+\item {\bf image.lisp} --  contains the definition of the
+image class, accessors for the slots of images, and standard methods
+and utilities for images.
+\item {\bf lucid-image-loops.lisp} -- contains macros such as 
+\lsym{loop-over-image-pixels} for efficient image accessing and looping.
+\item {\bf imops.lisp} -- contains the definitions for all
+of the arithmetic methods on images as well as some other assorted
+methods.  See Section \ref{sec:operations} for a complete list.
+\item {\bf fft.lisp} -- contains a fast Fourier transform, a Hilbert transform,
+and a discrete cosine transform.
+\item {\bf synth.lisp} -- contains functions as described below for
+generating synthetic images.
+\end{itemize}
+
+\mysubsubsec{Make-image}
+
+The function \lsym{make-image} may be used to make a new image:
+\begin{verbatim}
+(make-image dims &key display-type name)
+\end{verbatim}
+This function returns a new image of the specified dimensions,
+initialized to zeros.  The dims parameter must be a list of two
+fixnums, the first specifying pthe y-dimension and the second
+specifying the x-dimension.
+
+{\bf Note}: The convention in OBVIUS is always to specify y first and
+x second.  This is consistent with the row-major storage of arrays in
+both Common Lisp and C.
+
+If only one dimension is specified or if one of the dimensions is 1,
+then {\tt make-image} will return a {\tt one-d-image}.  This is a
+subclass of image that is displayed as a graph.  Otherwise, its
+behavior should be the same as any other image.
+
+The {\tt :display-type} argument must be the name of a picture
+sub-class that is compatible with the image.  The default display-type
+is either {\tt 'gray} or {\tt 'dither}.  The default may be set from
+the {\tt Viewable Default} sub-menu of the {\tt Parameters} menu on
+the control panel.
+
+\mysubsubsec{Iref}
+
+``Iref is to images as aref is to arrays''.  It returns the value of the
+image at the specified location, and may be used with setf to modify the
+image values.  For example,
+\begin{verbatim}
+(setf (iref im 20 30) 5.1)
+\end{verbatim}
+sets pixel {\tt (20,30)} to the value {\tt 5.1}.  NOTE: It is not
+efficient to use \lsym{iref} in loops, since it is a method and
+therefore has substantial dispatch-time overhead (relative to the
+operation being performed).  Instead, you should either: 1)
+restructure your algorithm to use existing OBVIUS functions, which
+call C code, 2) write C code to perform your operation, 3) use the
+looping macros \lsym{loop-over-image-pixels},
+\lsym{loop-over-image-positions}, or with-images (see section
+\ref{sec:hacking}), 4) write lisp code that extracts the data arrays
+and uses aref to access them efficiently. \index{{\ptt iref},efficiency}
+
+\mysubsubsec{Print-values}
+
+The \lsym{print-values} function is used to generate a formatted printout
+of the values in some part of an image.  For example,
+\begin{verbatim}
+(print-values image :y 0 :x 0 :y-size 10 :x-size 10)
+\end{verbatim}
+prints the top-left 10x10 pixels of the image.  The keyword 
+parameters {\tt :x} and {\tt :y} specify the location of the upper-left
+hand corner of the subimage to be printed, and {\tt :x-size} and {\tt
+:y-size} specify the size of that sub-image.  If these keywords are
+nil then the subimage is determined by the global parameters
+\lsym{*x-print-range*} and \lsym{*y-print-range*}.  Each of these global
+parameters is a list of two floats between 0 and 1.  For example if
+\lsym{*x-print-range*} is '(0.0 0.5) and \lsym{*y-print-range*} is
+'(0.5 1.0) then the lower left quarter of the image will be printed.
+The subimage is subsampled so that no more than
+\lsym{*max-print-vals*} samples are printed on each line.  The globals
+{\tt *max-print-vals*}, {\tt *x-print-range*}, and {\tt
+*y-print-range*} parameters may be reset from the {\tt Globals} dialog
+box that is accessed from the {\tt Parameters} menu on the control
+panel.
+
+The {\tt print-values} function is also defined for arrays, and for
+{\tt image-pairs}.  
+
+\mysubsubsec{Pictures of Images}
+
+Images may be displayed as {\tt gray} (see section \ref{sec:gray}),
+{\tt dither} (see section \ref{sec:dither}), as {\tt
+surface-plot} (see section \ref{sec:surface-plot}), or as 
+{\tt contour-plot} (see section \ref{sec:contour-plot}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{One-d-images and Slices}
+\label{sec:one-d-images}
+
+One-d-images are really the same as images except that one of the
+dimensions is 1.  So, all of the image operations that are defined for
+images work on one-d-images as well.  The only difference is that a
+one-d-image is (by defaults) displayed as a {\tt one-d-graph}.  A
+one-d-image can be generated using make-image, e.g.,
+\begin{verbatim}
+(make-image '(100 1) :-> '1d-im)
+\end{verbatim}
+or any of the synthetic image generating functions.  The \lsym{slice}
+viewable class is a subclass of the {\tt one-d-image} class.  The
+one-d-image class and the slice class are defined in the file {\bf
+image.lisp}.  \lsym{one-d-image}s are typically displayed as
+{\tt graph} pictures (see section \ref{sec:graph}).  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Discrete Functions and Histograms}
+\label{sec:discrete-function}
+
+The viewables \lsym{discrete-function}, \lsym{periodic-discrete-function}, and
+\lsym{log-discrete-function} are defined in the file {\bf
+discrete-function.lisp}.  The class \lsym{histogram}s are a subclass
+of {\tt discrete-functions}.  {\tt Discrete-functions} are also used
+as lookup tables to do fast nonlinear point operations on images (see
+the function \lsym{point-operation} in Section \ref{sec:operations}).
+
+{\tt Discrete-functions} are essentially a lookup table of function
+values --- they are made up of a {\tt data} array, an {\tt origin},
+and an {\tt increment}.  The first entry in the {\tt data} array is
+taken to be the value of the function evaluated at {\tt origin}, the
+next entry is taken to be the value of the function evaluated at {\tt
+(+ origin increment)}, etc.  The {\tt evaluate} function is used to
+evaluate a discrete-function at a particular value.  If that value
+falls between samples, then the result is interpolated.
+
+{\tt Periodic-discrete-functions} are the same as {\tt
+discrete-functions} except they are interpreted as one full period of
+a periodic function.  If the periodic function is defined from 0 to 1,
+evaluating at 1.5 is the same as evaluating it at 0.5.  {\tt
+Log-discrete-functions} are sampled on a log axis.
+
+The following functions are used to make and evaluate discrete
+functions.  
+\begin{description}
+\item\lfun{make-discrete-function}{ func min max \&key size
+interpolator endpoint name \res} Makes a discrete function of the
+function {\tt func}, from {\tt min} to {\tt max}, with {\tt :size}
+samples.  The default for {\tt :interpolator} is {\tt
+'linear-interpolation} which does linear interpolation.  If {\tt
+:endpoint} is non-nil then the discrete-function includes a sample at
+{\tt max}.  Otherwise, the last sample is slightly below {\tt max}.
+An example is given in the OBVIUS tutorial.
+
+\item\lfun{make-periodic-discrete-function}{ func min max \&key size
+interpolator endpoint name \res} 
+The default {\tt :interpolator} {\tt 'periodic-linear-interpolation}
+which does linear interpolation, modulo {\tt min} and {\tt max}.
+
+\item\lfun{make-log-discrete-function}{ func min max \&key size
+base interpolator endpoint name \res} 
+The default for {\tt :base} is 10.  Example:
+\begin{verbatim}
+(make-log-discrete-function '(lambda (x) (log x 10)) 
+                            0.01 10.0 :base 10 :size 4)
+\end{verbatim}
+The {\tt discrete-function} includes samples at .01, .1, 1, and 10.
+
+\item\lmeth{evaluate}{discrete-function}{ discrete-function value}
+Evaluates the discrete-function function at value.  Interpolates if
+value is between two entries in the table.
+\end{description}
+
+{\tt Discrete-functions} are displayed by default as {\tt graph}
+pictures (see section \ref{sec:graph}), but they may also be displayed
+as {\tt polar-plot} pictures (see section \ref{sec:polar-plots}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Bit-images}
+\label{sec:bit-image}
+
+The \lsym{bit-image} class is a subclass of the {\tt image} class.
+{\tt Bit-images}, utilities for using {\tt bit-images}, and operations
+on {\tt bit-images} are defined in the file {\bf bit-image.lisp} (see
+section \ref{sec:bitmap}).  {\tt Bitmaps} are the only display-type
+for {\tt bit-images}.  The threshold functions {\tt greater-than},
+{\tt less-than}, {\tt equal-to}, {\tt greater-than-or-equal-to}, and
+{\tt less-than-or-equal-to} discussed in Section \ref{sec:operations}
+can be used to make {\tt bit-images} from images.
+
+Bit-images are just like images except that they have only one bit of
+data at each pixel (the bit-image data is stored using common-lisp bit
+arrays).  So, some of the functions and accessors are inherited from
+images (e.g., {\tt iref}, {\tt dimensions}, {\tt x-dim}, {\tt y-dim},
+{\tt total-size}).  Other methods are functionally equivalent to those
+defined on images (e.g., {\tt mul}, {\tt copy}, {\tt similar}, {\tt
+crop}, and {\tt paste}).  Other methods are modified somewhat (e.g.,
+add is modified to perform a logical-or operation on bit-images).  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Sequences}
+\label{sec:sequence}
+
+The classes \ldef{image-sequence} and \ldef{viewable-sequence} are defined
+in the file {\bf sequence.lisp}.  
+
+{\tt Image-sequences} may be used to work with temporal sequences of
+images or 3d image data (e.g., volumetric data used in medical
+imaging).  Since {\tt image-sequences} are made up of {\tt images},
+all of the image operations that are defined for {\tt images} work on
+{\tt image-sequences} as well.  Image Sequences may be displayed as
+{\tt pasteup} pictures (see section \ref{sec:pasteup}), or as flipbook
+pictures (see section \ref{sec:flipbook}).  
+
+A {\tt viewable-sequence} consists of a number of sub-viewables, all
+of the same type.  See the example in the OBVIUS tutorial.  General
+(non-image) sequences can be displayed as {\tt flipbooks} or as {\tt
+overlays}.
+
+%%% *** Needs work!
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Image Pairs, Complex Images, and Polar Images}
+\label{sec:image-pair}
+
+The file {\bf image-pair.lisp} contains the definitions of the
+\ldef{image-pair}, \ldef{complex-image}, and \ldef{polar-image}
+classes, that are compound images formed from a pair of standard
+images.  {\tt Image-pairs} are used to store the left and right frames
+of a stereo pair or the y- and x-components of a flow field.  {\tt
+Complex-images} are used for Fourier transforms.  {\tt Polar-images}
+store the magnitude and complex-phase of a {\tt complex-image}.  Since
+{\tt image-pairs} are made up of {\tt images}, all of the image
+operations that are defined for {\tt images} work on {\tt image-pairs}
+as well.
+
+{\tt Horizontal-pasteup} pictures are the default display type for
+{\tt image-pairs}.  These are a subclass of \lsym{pasteup} pictures
+(see Section \ref{sec:pasteup}).  {\tt Image-pairs} may also be
+displayed as \lsym{vector-field}s (see section \ref{sec:vector-field}).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Filters}
+\label{sec:filters}
+
+The viewable subclasses \ldef{filter} and \ldef{separable-filter} are
+defined in the file {\bf filter.lisp}.  Currently, all filters are
+considered to be finite impulse response (FIR) filters -- infinite
+impulse response (IIR) filters will be implemented in a future
+release.  Display methods are provided to plot them as \lsym{graph}s
+(for one-dimensional filters) or as \lsym{gray}s (for two-dimensional
+filters).  The user may also create three-dimensional filters for
+application to image sequences: these are currently not displayed.
+
+Filters are made up of a kernel array, an edge-handler, and a grid.
+For purposes of efficiency, filters are implemented to allow
+subsampling of the output.  The grid slot specifies the subsampling to
+be performed in the convolution (see make-filter examples below).  The
+edge-handler specifies how to handle the edges of the image while
+convolving.  Current choices for edge-handler are nil
+(circular-convolution), and the keywords \lsym{:reflect1} (reflect the
+image through the edge pixel),
+\lsym{:reflect2} (reflect the image about the edge), \lsym{:zero}, and
+\lsym{:repeat}.  Separable filters are compound viewables 
+containing two filters.
+
+The function \lsym{make-filter} is
+used to make filters.  The first argument to these function should be a
+vector, a list, or an array specifying the filter kernel.  Additional
+keyword arguments may be provided: \lsym{:step-vector},
+\lsym{:start-vector}, \lsym{:edge-handler}.  Examples:
+\begin{verbatim}
+(make-filter '(1.0 2.0 1.0))
+(make-filter '((1.0 2.0 1.0) (2.0 4.0 2.0) (1.0 2.0 1.0)))
+(make-filter 2darray :step-vector '(2 2))
+\end{verbatim}
+The first of these makes a 1d filter, and the second makes a 2d
+filter.  The last example makes a filter that will downsample by a
+factor of two when the \lsym{apply-filter} function is called (or
+upsample by a factor of two when the \lsym{expand-filter} function is
+called).
+
+The function  \lsym{make-separable-filter}  may be used to create
+filters that are applied separably (i.e., two one dimensional filters,
+applied in the x- and y- directions).  This function takes two
+filters, or two arrays, or two nested lists as arguments, along with
+all of the keywords described above.  The first filter will be applied
+in the vertical (y) direction.  You can also make higher dimensional
+separable filters (although the dimensionality cannot exceed that of
+the thing you are applying them to).  For example, you can make a
+separable filter out of a 1D and a 2D filter, and apply it to an image
+sequence.  The 2D filter may be separable or non-separable.  
+
+The {\tt :edge-handler} argument determines what happens at the
+borders of an image when the \lsym{apply-filter} or
+\lsym{expand-filter} functions are called.  Any local linear
+edge-handling scheme may be implemented.  Some examples are
+implemented in the file {\bf \abox{obv}/c-source/edges.c}.  The
+associated with each type of edge-handler is a C function that
+computes a new filter (set of weights) to be used when computing one
+of the edge samples of the convolution.  The arguments to this
+edge-handler function are described in the file {\bf
+\abox{obv}/c-source/edges.c}.
+
+\mysubsubsec{3D filtering}
+Three-dimensional filtering (on image-sequences) is also supported.
+To make a 3D filter, just pass a 3D array (or list) to the {\tt
+make-filter} function.  To make a 3D separable filter, you can call
+{\tt make-separable-filter} with a 2D filter and a 1D filter.
+
+\mysubsubsec{Hexagonal filtering}
+Two-dimensional {\tt hex-filter}s are defined on a hexagonal lattice:
+half of each row of the samples should be zero.  These are a special
+class because the subsampling must be done differently.  They have not
+been fully ported from OBVIUS-1.2 yet.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Pyramids}
+\label{sec:pyramid}
+
+The \ldef{gaussian-pyramid} module may be loaded into OBVIUS by evaluating:
+\begin{verbatim}
+(obv-require 'gaussian-pyramid)
+\end{verbatim}
+Pyramids are built with the function \lsym{make-gaussian-pyramid} and
+reconstructed with the \lsym{collapse} function.  Various subbands may
+be accessed with the \lsym{access-band} function.  Other pyramid
+operations are listed in in section~\ref{sec:operations}.
+
+Pyramids are currently undocumented.  For now, look at example in the
+OBVIUS tutorial, and at the code in {\bf gaussian-pyramid.lisp}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Color Images}
+\label{sec:color-image}
+
+The \ldef{color-image} class is defined in the file {\bf
+color-image.lisp}.  {\tt Color-images} inherit from {\tt
+image-sequences}, but the images in the sequence are interpreted as
+different color bands (e.g., R, G, and B electron beam gun values).
+
+This is unfinished code.  We are writing a full color analysis package
+that keeps track of color-spaces, input devices (e.g., photoreceptors,
+cameras, scanners), output devices (e.g., monitors, printers),
+spectral sensitivities of these input and output devices, and spectral
+properties of surface reflectances.  
+
+For the time being, {\bf color-image.lisp} defines simple color images
+that can be displayed as {\tt color-pictures} or as {\tt pasteups}
+({\tt pasteups} are the default display type).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Viewable Matrices}
+\label{sec:viewable-matrix}
+
+The \lsym{viewable-matrix} and \lsym{image-matrix} are defined in the
+file {\bf viewable-matrix.lisp}.  {\tt Viewable-matrices} contain an
+arrays of sub-viewables.  The {\tt data} slot of a {\tt
+viewable-matrix} is the array of sub-viewables.  A number of other
+viewable types inherit from {\tt viewable-matrices} (e.g.,
+\lsym{image-sequence}s are {\tt viewable-matrices} with a 1xN array of
+images).
+
+{\tt Viewable-matrices} are particularly useful for parallelizing
+pixel-by-pixel matrix operations.  For example, this kind of operation
+is used in OBVIUS to convert {\tt color-images} from one color space
+to another.  For another example, let's say that you had six images.
+At each pixel you want to take the corresponding values out of each of
+the six images, put four of those values in a matrix and the other two
+in a vector, and then compute the inverse of the matrix times the
+vector.  Believe it or not, this type of operation comes up a lot in
+visual modeling and image analysis, and it is very easy to do with
+{\tt viewable-matrices}.
+

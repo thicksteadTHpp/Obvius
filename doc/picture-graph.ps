@@ -1,0 +1,333 @@
+%!PS-Adobe-1.0
+%%Page: ? ?
+/max {2 copy lt {exch} if pop} def
+/min {2 copy gt {exch} if pop} def
+/inch {72 mul} def
+/drawbox
+ {/height exch def
+  /width exch def
+  /y exch def
+  /x exch def
+  gsave newpath
+  x y boxradius add moveto
+  x y height add x width add y height add boxradius arcto pop pop pop pop
+  x width add y height add x width add y boxradius arcto pop pop pop pop
+  x width add y x y boxradius arcto pop pop pop pop
+  x y x y height add boxradius arcto pop pop pop pop
+  boxgray setgray boxkind grestore
+ } def
+/printposter
+ {/rows exch def
+  /columns exch def
+  /bigpictureproc exch def
+  newpath
+    leftmargin botmargin moveto
+    0 pageheight rlineto
+    pagewidth 0 rlineto
+    0 pageheight neg rlineto
+  closepath clip
+  leftmargin botmargin translate
+  0 1 rows 1 sub
+   {/rowcount exch def
+    0 1 columns 1 sub
+     {/colcount exch def
+      gsave
+       pagewidth colcount mul neg
+       pageheight rowcount mul neg
+       translate
+       bigpictureproc
+       gsave showpage grestore
+      grestore
+     } for
+   } for
+ } def
+/xarray 15 array def
+/widtharray 15 array def
+/leftmargin 36 def
+/botmargin 36 def
+/pagewidth 540 def
+/pageheight 720 def
+/boxradius 5 def 
+/boxedge 2 def 
+/boxgray .2 def 
+/boxkind {stroke} def
+/Helvetica findfont 10 scalefont setfont
+widtharray 0 (Picture) stringwidth pop put
+widtharray 1 (Color-Picture) stringwidth pop put
+widtharray 2 (Overlay) stringwidth pop put
+widtharray 3 (Flipbook) stringwidth pop put
+widtharray 4 (Drawing) stringwidth pop put
+widtharray 5 (Contour-Plot) stringwidth pop put
+widtharray 6 (Polar-Plot) stringwidth pop put
+widtharray 7 (Surface-Plot) stringwidth pop put
+widtharray 8 (Graph) stringwidth pop put
+widtharray 9 (Scatter-Plot) stringwidth pop put
+widtharray 10 (Vector-Field) stringwidth pop put
+widtharray 11 (Bitmap) stringwidth pop put
+widtharray 12 (Gray) stringwidth pop put
+widtharray 13 (Pasteup) stringwidth pop put
+widtharray 14 (Dither) stringwidth pop put
+/Helvetica-Oblique findfont 8 scalefont setfont
+widtharray 0 get
+4 add widtharray exch 0 exch put
+widtharray 1 get
+4 add widtharray exch 1 exch put
+widtharray 2 get
+4 add widtharray exch 2 exch put
+widtharray 3 get
+4 add widtharray exch 3 exch put
+widtharray 4 get
+4 add widtharray exch 4 exch put
+widtharray 5 get
+4 add widtharray exch 5 exch put
+widtharray 6 get
+4 add widtharray exch 6 exch put
+widtharray 7 get
+4 add widtharray exch 7 exch put
+widtharray 8 get
+4 add widtharray exch 8 exch put
+widtharray 9 get
+4 add widtharray exch 9 exch put
+widtharray 10 get
+4 add widtharray exch 10 exch put
+widtharray 11 get
+4 add widtharray exch 11 exch put
+widtharray 12 get
+4 add widtharray exch 12 exch put
+widtharray 13 get
+4 add widtharray exch 13 exch put
+widtharray 14 get
+4 add widtharray exch 14 exch put
+xarray 0 0 put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 1 exch put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 2 exch put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 3 exch put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 4 exch put
+xarray 4 get widtharray 4 get add
+20 add xarray exch 5 exch put
+xarray 4 get widtharray 4 get add
+20 add xarray exch 6 exch put
+xarray 4 get widtharray 4 get add
+20 add xarray exch 7 exch put
+xarray 4 get widtharray 4 get add
+20 add xarray exch 8 exch put
+xarray 8 get widtharray 8 get add
+20 add xarray exch 9 exch put
+xarray 4 get widtharray 4 get add
+20 add xarray exch 10 exch put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 11 exch put
+xarray 0 get widtharray 0 get add
+20 add xarray exch 12 exch put
+xarray 12 get widtharray 12 get add
+20 add xarray exch 13 exch put
+xarray 12 get widtharray 12 get add
+20 add xarray exch 14 exch put
+/maximum-x 0
+xarray 0 get widtharray 0 get add max
+xarray 1 get widtharray 1 get add max
+xarray 2 get widtharray 2 get add max
+xarray 3 get widtharray 3 get add max
+xarray 4 get widtharray 4 get add max
+xarray 5 get widtharray 5 get add max
+xarray 6 get widtharray 6 get add max
+xarray 7 get widtharray 7 get add max
+xarray 8 get widtharray 8 get add max
+xarray 9 get widtharray 9 get add max
+xarray 10 get widtharray 10 get add max
+xarray 11 get widtharray 11 get add max
+xarray 12 get widtharray 12 get add max
+xarray 13 get widtharray 13 get add max
+xarray 14 get widtharray 14 get add max
+def
+114 dict begin
+/box0 {
+xarray 0 get 118 widtharray 0 get 14 drawbox
+} def
+/box1 {
+xarray 1 get 203 widtharray 1 get 14 drawbox
+} def
+/box2 {
+xarray 2 get 183 widtharray 2 get 14 drawbox
+} def
+/box3 {
+xarray 3 get 163 widtharray 3 get 14 drawbox
+} def
+/box4 {
+xarray 4 get 103 widtharray 4 get 14 drawbox
+} def
+/box5 {
+xarray 5 get 143 widtharray 5 get 14 drawbox
+} def
+/box6 {
+xarray 6 get 123 widtharray 6 get 14 drawbox
+} def
+/box7 {
+xarray 7 get 103 widtharray 7 get 14 drawbox
+} def
+/box8 {
+xarray 8 get 83 widtharray 8 get 14 drawbox
+} def
+/box9 {
+xarray 9 get 83 widtharray 9 get 14 drawbox
+} def
+/box10 {
+xarray 10 get 63 widtharray 10 get 14 drawbox
+} def
+/box11 {
+xarray 11 get 43 widtharray 11 get 14 drawbox
+} def
+/box12 {
+xarray 12 get 13 widtharray 12 get 14 drawbox
+} def
+/box13 {
+xarray 13 get 23 widtharray 13 get 14 drawbox
+} def
+/box14 {
+xarray 14 get 3 widtharray 14 get 14 drawbox
+} def
+/text0 {xarray 0 get boxedge add 122 moveto (Picture) show} def
+/text1 {xarray 1 get boxedge add 207 moveto (Color-Picture) show} def
+/text2 {xarray 2 get boxedge add 187 moveto (Overlay) show} def
+/text3 {xarray 3 get boxedge add 167 moveto (Flipbook) show} def
+/text4 {xarray 4 get boxedge add 107 moveto (Drawing) show} def
+/text5 {xarray 5 get boxedge add 147 moveto (Contour-Plot) show} def
+/text6 {xarray 6 get boxedge add 127 moveto (Polar-Plot) show} def
+/text7 {xarray 7 get boxedge add 107 moveto (Surface-Plot) show} def
+/text8 {xarray 8 get boxedge add 87 moveto (Graph) show} def
+/text9 {xarray 9 get boxedge add 87 moveto (Scatter-Plot) show} def
+/text10 {xarray 10 get boxedge add 67 moveto (Vector-Field) show} def
+/text11 {xarray 11 get boxedge add 47 moveto (Bitmap) show} def
+/text12 {xarray 12 get boxedge add 17 moveto (Gray) show} def
+/text13 {xarray 13 get boxedge add 27 moveto (Pasteup) show} def
+/text14 {xarray 14 get boxedge add 7 moveto (Dither) show} def
+/edge0 {newpath
+stroke } def
+/edge1 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 1 get 210 lineto
+stroke } def
+/edge2 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 2 get 190 lineto
+stroke } def
+/edge3 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 3 get 170 lineto
+stroke } def
+/edge4 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 4 get 110 lineto
+stroke } def
+/edge5 {newpath
+xarray 4 get widtharray 4 get add 110 moveto
+xarray 5 get 150 lineto
+stroke } def
+/edge6 {newpath
+xarray 4 get widtharray 4 get add 110 moveto
+xarray 6 get 130 lineto
+stroke } def
+/edge7 {newpath
+xarray 4 get widtharray 4 get add 110 moveto
+xarray 7 get 110 lineto
+stroke } def
+/edge8 {newpath
+xarray 4 get widtharray 4 get add 110 moveto
+xarray 8 get 90 lineto
+stroke } def
+/edge9 {newpath
+xarray 8 get widtharray 8 get add 90 moveto
+xarray 9 get 90 lineto
+stroke } def
+/edge10 {newpath
+xarray 4 get widtharray 4 get add 110 moveto
+xarray 10 get 70 lineto
+stroke } def
+/edge11 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 11 get 50 lineto
+stroke } def
+/edge12 {newpath
+xarray 0 get widtharray 0 get add 125 moveto
+xarray 12 get 20 lineto
+stroke } def
+/edge13 {newpath
+xarray 12 get widtharray 12 get add 20 moveto
+xarray 13 get 30 lineto
+stroke } def
+/edge14 {newpath
+xarray 12 get widtharray 12 get add 20 moveto
+xarray 14 get 10 lineto
+stroke } def
+/boxchunk0 {
+box0
+box1
+box2
+box3
+box4
+box5
+box6
+box7
+box8
+box9
+box10
+box11
+box12
+box13
+box14
+} def
+/textchunk0 {
+text0
+text1
+text2
+text3
+text4
+text5
+text6
+text7
+text8
+text9
+text10
+text11
+text12
+text13
+text14
+} def
+/secondtextchunk0 {
+} def
+/edgechunk0 {
+edge0
+edge1
+edge2
+edge3
+edge4
+edge5
+edge6
+edge7
+edge8
+edge9
+edge10
+edge11
+edge12
+edge13
+edge14
+} def
+/drawgraph { gsave
+boxchunk0
+.5 setlinewidth
+1 setlinecap
+.2 setgray
+edgechunk0
+0 setgray
+/Helvetica findfont 10 scalefont setfont
+textchunk0
+/Helvetica-Oblique findfont 8 scalefont setfont
+secondtextchunk0
+grestore } def
+leftmargin botmargin translate
+pagewidth dup maximum-x max div pageheight dup 220 max div min dup scale
+drawgraph showpage end
