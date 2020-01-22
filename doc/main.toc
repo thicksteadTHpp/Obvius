@@ -1,0 +1,119 @@
+\contentsline {section}{\numberline {1}Introduction}{7}
+\contentsline {section}{\numberline {2}Getting Started}{8}
+\contentsline {section}{\numberline {3}Organization of OBVIUS}{10}
+\contentsline {subsection}{\numberline {3.1}Viewables}{10}
+\contentsline {subsubsection}{Displaying Viewables}{11}
+\contentsline {subsubsection}{Modifying Viewables}{11}
+\contentsline {subsubsection}{Destroying Viewables}{12}
+\contentsline {subsubsection}{Orphans}{12}
+\contentsline {subsubsection}{History and Constructor}{13}
+\contentsline {subsection}{\numberline {3.2}Pictures and Panes}{13}
+\contentsline {subsubsection}{Picture Slots and Default Values}{14}
+\contentsline {subsubsection}{Manipulating Pictures and Panes}{15}
+\contentsline {subsubsection}{Zoom}{16}
+\contentsline {subsection}{\numberline {3.3}File System Interface}{17}
+\contentsline {subsection}{\numberline {3.4}Memory Management}{19}
+\contentsline {section}{\numberline {4}Viewables}{21}
+\contentsline {subsection}{\numberline {4.1}Images}{21}
+\contentsline {subsubsection}{Make-image}{22}
+\contentsline {subsubsection}{Iref}{22}
+\contentsline {subsubsection}{Print-values}{23}
+\contentsline {subsubsection}{Pictures of Images}{23}
+\contentsline {subsection}{\numberline {4.2}One-d-images and Slices}{23}
+\contentsline {subsection}{\numberline {4.3}Discrete Functions and Histograms}{24}
+\contentsline {subsection}{\numberline {4.4}Bit-images}{25}
+\contentsline {subsection}{\numberline {4.5}Sequences}{25}
+\contentsline {subsection}{\numberline {4.6}Image Pairs, Complex Images, and Polar Images}{25}
+\contentsline {subsection}{\numberline {4.7}Filters}{26}
+\contentsline {subsubsection}{3D filtering}{27}
+\contentsline {subsubsection}{Hexagonal filtering}{27}
+\contentsline {subsection}{\numberline {4.8}Pyramids}{27}
+\contentsline {subsection}{\numberline {4.9}Color Images}{27}
+\contentsline {subsection}{\numberline {4.10}Viewable Matrices}{28}
+\contentsline {section}{\numberline {5}Pictures}{29}
+\contentsline {subsection}{\numberline {5.1}Display}{29}
+\contentsline {subsection}{\numberline {5.2}Gray Pictures}{29}
+\contentsline {subsection}{\numberline {5.3}Dither Pictures of Images}{30}
+\contentsline {subsection}{\numberline {5.4}Bitmaps}{30}
+\contentsline {subsection}{\numberline {5.5}Color Pictures}{31}
+\contentsline {subsection}{\numberline {5.6}Pasteups}{31}
+\contentsline {subsection}{\numberline {5.7}Surface Plots}{32}
+\contentsline {subsection}{\numberline {5.8}Contour Plots}{33}
+\contentsline {subsection}{\numberline {5.9}Vector Fields}{34}
+\contentsline {subsection}{\numberline {5.10}Graph Pictures}{34}
+\contentsline {subsection}{\numberline {5.11}Polar Plots}{35}
+\contentsline {subsection}{\numberline {5.12}Scatter Plots}{36}
+\contentsline {subsection}{\numberline {5.13}Flipbooks}{37}
+\contentsline {subsection}{\numberline {5.14}Overlays}{38}
+\contentsline {subsection}{\numberline {5.15}Hardcopy}{38}
+\contentsline {section}{\numberline {6}OBVIUS Functions}{40}
+\contentsline {subsubsection}{Result Argument}{40}
+\contentsline {subsubsection}{Point Operation Macros}{40}
+\contentsline {subsection}{\numberline {6.1}Image Utilities}{41}
+\contentsline {subsection}{\numberline {6.2}Generating Images}{41}
+\contentsline {subsection}{\numberline {6.3}Loading and Saving Images and Image-Sequences}{44}
+\contentsline {subsection}{\numberline {6.4}Operations on Images}{44}
+\contentsline {subsubsection}{Numerical Point Operations}{44}
+\contentsline {subsubsection}{Geometrical Operations}{46}
+\contentsline {subsubsection}{Comparison Point Operations}{47}
+\contentsline {subsubsection}{Statistics}{49}
+\contentsline {subsubsection}{Fourier Transform}{49}
+\contentsline {subsubsection}{Filtering Operations}{50}
+\contentsline {subsection}{\numberline {6.5}Functions for One-d-images}{51}
+\contentsline {subsection}{\numberline {6.6}Operations on Bit-Images}{51}
+\contentsline {subsection}{\numberline {6.7}Operations on Image-Pairs, Complex-Images, and Polar-Images}{52}
+\contentsline {subsection}{\numberline {6.8}Operations on Discrete Functions}{54}
+\contentsline {subsection}{\numberline {6.9}Operations on Sequences}{55}
+\contentsline {subsection}{\numberline {6.10}Operations on Color-Images}{57}
+\contentsline {subsection}{\numberline {6.11}Operations on Viewable-Matrices and Image-Matrices}{57}
+\contentsline {subsection}{\numberline {6.12}Operations on Filters}{59}
+\contentsline {subsection}{\numberline {6.13}Operations on Pyramids}{60}
+\contentsline {subsection}{\numberline {6.14}Operations on Arrays}{62}
+\contentsline {subsection}{\numberline {6.15}Operations on Lists}{63}
+\contentsline {subsection}{\numberline {6.16}Operations on Matrices}{63}
+\contentsline {subsubsection}{Matrix Arithmetic}{64}
+\contentsline {subsubsection}{Functions Related to SVD and Other Decompositions}{66}
+\contentsline {subsubsection}{Matrix Utilities}{67}
+\contentsline {section}{\numberline {7}Data Analysis}{71}
+\contentsline {subsection}{\numberline {7.1}Matrix Tools}{71}
+\contentsline {subsection}{\numberline {7.2}Statistical and Simulation Tools}{72}
+\contentsline {subsection}{\numberline {7.3}Curve Fitting}{73}
+\contentsline {section}{\numberline {8}User Interface}{75}
+\contentsline {subsection}{\numberline {8.1}The Mouse}{75}
+\contentsline {subsection}{\numberline {8.2}The Control Panel}{78}
+\contentsline {subsection}{\numberline {8.3}Current Picture, Picture Defaults and Viewable Defaults menus}{79}
+\contentsline {subsection}{\numberline {8.4}Current Screen Parameters}{79}
+\contentsline {subsection}{\numberline {8.5}Global Parameters}{80}
+\contentsline {subsection}{\numberline {8.6}Running OBVIUS on a remote host}{81}
+\contentsline {subsection}{\numberline {8.7}Screens and Windows}{81}
+\contentsline {subsection}{\numberline {8.8}Emacs and OBVIUS}{82}
+\contentsline {subsection}{\numberline {8.9}Help}{83}
+\contentsline {section}{\numberline {9}Hacking}{84}
+\contentsline {subsection}{\numberline {9.1}Writing Additional Image Processing Functions}{84}
+\contentsline {subsubsection}{The with-result macro}{84}
+\contentsline {subsubsection}{Temporary Viewables}{85}
+\contentsline {subsubsection}{Efficient Looping}{86}
+\contentsline {subsubsection}{Calling Foreign Functions}{86}
+\contentsline {subsection}{\numberline {9.2}The Memory Manager}{86}
+\contentsline {subsubsection}{Orphans and OGC}{88}
+\contentsline {subsubsection}{Troubleshooting Memory Problems}{89}
+\contentsline {subsection}{\numberline {9.3}Adding New Viewable Subclasses}{90}
+\contentsline {subsection}{\numberline {9.4}Multi-Processing}{94}
+\contentsline {subsubsection}{Mouse Events}{94}
+\contentsline {subsubsection}{Repl}{94}
+\contentsline {subsubsection}{Adding Menus and Dialog Boxes}{95}
+\contentsline {subsection}{\numberline {9.5}Display of Pictures}{95}
+\contentsline {subsection}{\numberline {9.6}Adding a New Picture Subclass}{98}
+\contentsline {subsection}{\numberline {9.7}Porting To Other Machines, Window Systems, or Lisp Implementations}{100}
+\contentsline {section}{\numberline {A}Installation}{102}
+\contentsline {subsection}{\numberline {A.1}Requirements}{102}
+\contentsline {subsection}{\numberline {A.2}Installation Instructions}{103}
+\contentsline {section}{\numberline {B}Release Notes}{106}
+\contentsline {subsection}{\numberline {B.1}Version 2.1 Release Notes}{106}
+\contentsline {subsubsection}{\numberline {B.1.1}General Changes}{106}
+\contentsline {subsubsection}{\numberline {B.1.2}Specific Notes for OBVIUS Users}{106}
+\contentsline {subsubsection}{\numberline {B.1.3}Notes for OBVIUS Hackers (i.e. non-exported changes)}{110}
+\contentsline {subsection}{\numberline {B.2}Version 2.2beta Release Notes}{111}
+\contentsline {subsection}{\numberline {B.3}Version 2.2 Release Notes}{112}
+\contentsline {section}{\numberline {C}Known Bugs}{114}
+\contentsline {section}{Index}{115}

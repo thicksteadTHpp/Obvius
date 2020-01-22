@@ -1,0 +1,676 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Pictures}
+
+This section describes the various picture subclasses.  To add new
+picture classes to OBVIUS, see section \ref{sec:hacking} of this
+manual.  The currently defined picture classes are listed below.  Not
+every picture is applicable to every viewable.  For example, {\tt
+image}s may be displayed as {\tt gray} or {\tt surface-plot} pictures,
+but not as {\tt graph}s.  The indentation indicates inheritance of
+classes, and the viewables to which each picture type applies are
+listed in parentheses.
+\begin{tabbing}
+gray \= (image) \\ 
+\> pasteup \= (image-matrix, image-sequence, color-image, gaussian-pyramid, \\
+\> \> laplacian-pyramid, image-pair, complex-image, polar-image) \\
+\> dither (image) \\
+color-picture (color-image) \\
+bitmap (bit-image) \\
+drawing \\
+\> graph (image, discrete-function, histogram) \\
+\> vector-field (image-pair) \\
+\> surface-plot (image) \\
+\> contour-plot (image) \\
+\> polar-plot (discrete-function, image-pair, viewable-sequence) \\
+\> scatter-plot (image-pair) \\
+flipbook (viewable-sequence, image-sequence) \\
+overlay (viewable-sequence) \\
+\end{tabbing} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Display}
+\label{sec:display}
+
+Pictures of a given type may be created using the {\tt display}
+function, which is described in section~\ref{sec:pictures}.
+
+\subsection{Gray Pictures}
+\label{sec:gray}
+
+The \lsym{gray} picture subclass is the usual display type for images.
+Each gray picture has several parameters that control its computation
+from the underlying image.  The parameter values of a {\tt gray}
+picture may be changed using the {\tt Current Picture} dialog from the
+{\tt Parameters} menu on the control panel.  The parameter values may
+also be reset using the \lsym{setp} macro (described in section
+\ref{sec:organization}).
+
+The transformation from a (floating point) image pixel value to a gray
+lookup table index is given by:
+\begin{displaymath}
+{\rm round}\left( \frac{x - p}{s} \right),
+\end{displaymath}
+where $p$ is the picture's \lsym{pedestal} parameter, $s$ is the
+\lsym{scale} parameter.
+
+The size of the gray lookup table is determined by the
+\lsym{gray-shades} slot of the screen.  The gray lookup table is a
+vector of indices into the screen colormap.  The indices are ordered,
+from darkest to lightest.  The sequence of gray shades that they refer
+to may not be linear: the {\tt gray-gamma} parameter of the screen
+controls the set of gray values that are allocated.
+
+OBVIUS will make use of the gray shades available.  The screen
+parameter \lsym{gray-dither} is used to decide whether or not to
+dither the gray pictures.  If its value is a number, and if there are
+fewer than \lsym{gray-dither} grays in the color map, then OBVIUS will
+automatically dither the picture.  For example, if there are 8 gray
+shades allocated in the color map, and if \lsym{gray-dither} is
+greater than 8, then OBVIUS will dither the viewable values using a
+simple error-propagating dither algorithm into those 8 gray shades.
+If the value of \lsym{gray-dither} is nil, then OBVIUS will never
+dither.  If it is non-nil (but not a number), then OBVIUS will always
+dither.  All of the screen parameters mentioned ({\tt gray-shades},
+{\tt gray-dither}, {\tt gray-gamma}), may be adjusted from the {\tt
+Current Screen} item on the {\tt Parameters} menu.
+
+If the value of \lsym{scale} is set to {\tt :auto}\index{{\ptt :auto},scale},
+then OBVIUS automaticaly uses the range (max minus min) of the image.
+If the value of \lsym{pedestal} is set to {\tt
+:auto}\index{{\ptt :auto},pedestal}, then OBVIUS automaticaly uses the
+minimum of the image.  Since these are stored on the info list, they
+only need be computed once.
+
+In addition, each gray picture has \lsym{zoom}, \lsym{y-offset}, and
+\lsym{x-offset} parameters (inherited from the general picture class)
+that are described in Section \ref{sec:organization}.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Dither Pictures of Images}
+\label{sec:dither}
+
+A \ldef{dither} picture is like a {\tt gray} picture, except that
+OBVIUS forces it to only use two shades of gray (i.e., black and
+white).  The dither class inherits from the gray class.  This is a
+separate class for two reasons: 1) The user can request an image to be
+displayed in 1-bit dithered format, even on a deeper screen, and 2)
+the internal representation for dithers is more efficient (it uses a
+1-bit deep bltable).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Bitmaps}
+\label{sec:bitmap}
+
+The \ldef{bitmap} picture subclass, defined in the file {\bf
+gray.lisp}, are used for displaying {\tt bit-images}.  The parameters
+of a {\tt bitmap} are:
+\begin{itemize}
+\item \lsym{foreground} specifies the foreground color (e.g., :red or
+:green or any other color supported by LispView).
+\item \lsym{background} specifies the background color (e.g., :red or
+:green or any other color supported by LispView).
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Color Pictures}
+\label{sec:color-picture}
+
+The \ldef{color-picture} class is defined in the file {\bf
+color-picture.lisp}, and may be used for displaying {\tt
+color-images}.  The {\tt color-picture} interprets the sub-images of a
+{\tt color-image} as corresponding to R, G, and B electron beam gun
+values.  The parameters of a color picture are:
+\begin{itemize}
+\item \lsym{scale} analogous to grays and pasteups.
+\item \lsym{pedestal} analogous to grays and pasteups.
+\end{itemize}
+Example:
+\begin{verbatim}
+(progn
+  (obv-require :color)
+  (load-image "/images/clown")
+  (change-class clown 'color-image))
+(display clown 'color-picture)
+\end{verbatim}
+In this example, {\tt clown} is a datfile directory with three data
+files corresponding to R, G, and B.  {\tt Load-image} loads it as an
+{\tt image-sequence} by default, so we use {\tt change-class} to
+convert it to a {\tt color-image}.  Then it can be displayed as a {\tt
+color-picture}.
+
+Unfortunately, LispView (and consequently OBVIUS) does not (yet)
+support 24bit displays, so {\tt color-pictures} are dithered.  The
+parameter \lsym{rgb-bits} specifies how many bits to use for dithering
+each band.  This parameter may be set in the {\tt Current Screen}
+dialog from the {\tt Parameters} button in the control panel.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Pasteups}
+\label{sec:pasteup}
+
+The \ldef{pasteup} picture subclass are used for displaying {\tt
+image-matrices}, {\tt image-sequences}, {\tt color-images}, {\tt
+gaussian-pyramids}, {\tt laplacian-pyramids}, {\tt image-pairs}, {\tt
+complex-images}, and {\tt polar-images}.  {\tt Pasteups} are defined
+in the file {\bf pasteup.lisp}.
+
+A \lsym{pasteup} is a way of laying out (pasting up) a number of
+pictures so that they can all be seen simultaneously.  The {\tt
+pasteup} class inherits from the {\tt gray} class, and thus these
+objects have all of the parameters of {\tt grays}.  In addition, there
+is an {\tt independent-parameters} slot that forces all of the
+individual sub-pictures to have indentical rescaling parameters.  If
+{\tt independent-parameters} is non-nil, then the images that make up
+the {\tt image-sequence} are rescaled independently.  Otherwise, all
+of the images are rescaled with the same {\tt scale} and {\tt
+pedestal}.
+
+The parameter values of a {\tt pasteup} picture may be changed using
+the {\tt Current Picture} dialog from the {\tt Parameters} menu, or
+using the {\tt setp} macro.  The default values (the values used to
+initialize a new picture) for these parameters may be changed using
+the {\tt Picture Defaults} menu.  The parameters are:
+\begin{itemize}
+\item \lsym{independent-parameters}.  If non-nil, then the images are
+rescaled independently.
+
+\item \lsym{scale} is ignored if {\tt independent-parameters} is
+non-nil.  {\tt Scale} is the same as for gray pictures of images, if
+{\tt independent-parameters} is nil.  That is, if {\tt
+independent-parameters} is nil and {\tt scale} is not a number, then
+OBVIUS automatically uses:
+\begin{verbatim}
+(range image)
+\end{verbatim}
+
+\item \lsym{pedestal} is ignored if {\tt independent-parameters} is
+non-nil.  {\tt Scale} is the same as for gray pictures of images, if
+{\tt independent-parameters} is nil.  That is, if {\tt
+independent-parameters} is nil and {\tt scale} is not a number, then
+OBVIUS automatically uses:
+\begin{verbatim}
+(minimum image)
+\end{verbatim}
+
+\item \lsym{border} specifies the spacing between pictures in the
+pasteup.
+
+\item \lsym{pasteup-format} may be either {\tt :horizontal}, {\tt
+:vertical}, or {\tt :square}, specifying the layout of the
+sub-pictures.
+
+\item \lsym{zoom} see Section \ref{sec:pictures}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Surface Plots}
+\label{sec:surface-plot}
+
+The \lsym{surface-plot}  pictures are perspective wire-frame views
+of image intensity data (i.e, they are plots of image intensity as a
+function of image position).  They are defined in the file {\bf
+drawing.lisp}, and the code for creating them is in {\bf
+surface-plot.lisp}.
+
+Surface plots have a number of parameters that control the
+transformation from the image pixel (world) coordinates to the
+display.  The parameter values of a {\tt surface-plot} picture may be
+changed using the {\tt Current Picture} dialog from the {\tt
+Parameters} menu, or using the {\tt setp} macro.  The default values
+(the values used to initialize a new picture) for these parameters may
+be changed using the {\tt Picture Defaults} menu.  The parameters are:
+\begin{itemize}
+
+\item {\tt Theta} and {\tt phi} specify the orientation of the viewer
+relative to the center pixel of the image data.  The viewer always
+points toward the center of the intensity surface.  {\tt theta} is the
+angle (counter-clockwise) from the y-axis.  {\tt phi} is the elevation
+(aximuthal angle) above the x-y plane.
+
+\item \lsym{z-size} determines the height of the surface relative to
+its base.  The height (in world coordinates) will be the product of
+{\tt z-size} and the average of the image dimensions.
+
+\item {\tt r} specifies the distance of the camera from the center of
+the image in world coordinates.  It also controls the perspective
+distortion, since OBVIUS attempts to maintain an image-plane size
+consistent with the {\tt zoom} parameter.  Thus, {\tt focal-length = r
+* zoom}.  If the value is not a number, then OBVIUS automatically
+uses:
+\[
+2\sqrt{\left(\frac{x}{2}\right)^2 + \left(\frac{y}{2}\right)^2 + 
+		\left(\frac{z}{2}\right)^2},
+\]
+where $x$ and $y$ are the image dimensions, and $z$ is the product of
+the {\tt z-size} parameter and the average of the image dimensions.
+This is twice the minimal safe distance: the camera will be far enough
+away not to hit the surface.
+
+\item {\tt Zoom} determines the approximate size of the surface plot (see Section
+\ref{sec:organization}.  It is not exact due to perspective distortion.
+
+\item {\tt X-step} and {\tt y-step} specify the sampling rate for the
+wireframe plot in x- and y- directions respectively.  If the value is
+not a positive integer, then automatically uses:
+\begin{verbatim}
+(round (/ (x-dim image) 20))
+(round (/ (y-dim image) 20))
+\end{verbatim}
+
+\item \lsym{box-p} (either {\tt T} or {\tt nil}) specify whether or
+not to draw a 3D box around the plot.
+
+\lsym{box-color} the color to use for the box (e.g., :red or :green or
+any other color supported by LispView).
+
+\item {\tt retain-bitmap} (either {\tt T} or {\tt nil}) specifies
+whether to draw the surface plot to an off-screen bitmap, or redraw it
+each time it is displayed.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Contour Plots}
+\label{sec:contour-plot}
+
+The \lsym{contour-plot} pictures are defined in the file {\bf
+contour.lisp}.  The code works by constructing 3D triangles from
+sampling the image in a grid.  Then for each z-value, it constructs a
+curve containing segments each of which represents the intersection of
+the constant z-value plane with a particular triangle.  So in the end,
+the contour contains a list of curves.  This is a lot of computation,
+so you should be careful to keep the {\tt num-levels} parameter
+relatively small and the {\tt skip} parameter relatively large.
+
+The parameters for contour-plots are:
+\begin{itemize}
+\item \lsym{z-min} and \lsym{z-max}: are Z-values for the smallest and
+largest contour levels.
+
+\item \lsym{num-levels}: Total number of contour levels.
+
+\item \lsym{skip}: The subsampling factor.  If not a
+number, the sampling will be chosen automatically.
+
+\item \lsym{retain-bitmap}: (either {\tt T} or {\tt nil}) specifies
+whether to keep a copy of the bitmap, or redraw it each time it is
+displayed.
+
+\item \lsym{zoom}: determines the size of the graph.  A zoom factor of
+1 indicates that the samples of the underlying array should be plotted
+one pixel apart in the x-direction.  The height of the graph is
+determined relative to the width using the {\tt aspect-ratio} slot.
+
+\item \lsym{line-width} specifies the width of the graph lines (bars)
+drawn, in pixels.
+
+\item \lsym{color} specifies the color of the vectors (e.g., :red,
+:green, or any other color supported by LispView).
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Vector Fields}
+\label{sec:vector-field}
+
+\ldef{vector-field} pictures, defined in the file {\bf
+drawing.lisp}, may be used to display {\tt image-pairs}.  The first
+image in the pair is interpreted as the y-component and the second is
+interpreted as the x-component.
+
+The parameter values of a {\tt vector-field} picture may be changed
+using the {\tt Current Picture} dialog from the {\tt Parameters} menu,
+or using the {\tt setp} macro.  The default values (the values used to
+initialize a new picture) for these parameters may be changed using
+the {\tt Picture Defaults} menu.  The parameters are:
+\begin{itemize}
+\item \lsym{skip} determines the subsampling factor.  If not a number, the
+sampling will be chosen automatically to give a reasonable vector
+density for the given vector-field size.  The default density can be set
+from the {\tt Picture Parameters} menu.
+
+\item \lsym{zoom} determines the overall size of the vector-field
+picture, relative to the size of the underlying viewable.  If nil,
+then the vector field will be the size of the underlying viewable
+(i.e., they would line up correctly if the vector field were superposed
+on the image).  If t, the zoom will be determined to make the overall
+vector field be the size of the pane.  If a dimension list, this will
+be the size of the vector field.  
+
+\item \lsym{scale} determines the length of the vectors.  The vector
+magnitude will be divided (as for gray) by the scale and the resulting
+number will specify the length of the vector, in units corresponding
+to the distance between the vector bases.
+
+\item \lsym{arrow-heads} If a number, draws vectors with arrow heads of
+that length.  If not a nubmer, draws oriented line segments without
+arrow heads (e.g., for displaying orientation fields rather than flow
+fields).  With arrow heads, the tail of the vector will correspond to
+the appropriate pixel location in the image-pair.  Without arrow
+heads, the {\em middle} of the line will correspond to the appropriate
+pixel location in the image-pair.
+
+\item \lsym{color} specifies the color of the vectors (e.g., :red,
+:green, or any other color supported by LispView).
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Graph Pictures}
+\label{sec:graph}
+
+The \ldef{graph} pictures are defined in the files {\bf drawing.lisp} and
+{\bf graph.lisp}.  The parameter values of a \lsym{graph} picture may
+be changed using the {\tt Current Picture} dialog from the {\tt
+Parameters} menu, or using the \lsym{setp} macro.  The default values
+(the values used to initialize a new picture) for these parameters may
+be changed using the {\tt Picture Defaults} menu.  The parameters are:
+\begin{itemize}
+\item \lsym{graph-type} may be either {\tt :line}, {\tt :point}, 
+or {\tt :bar}.  For most viewables, the automatic choice is {\tt
+:line}.  For {\tt histograms}, the automatic choice is {\tt :bar}.
+
+\item \lsym{x-range} is a list of length 2 specifying the range of
+values covered by the x-axis.  If this is {\tt
+:auto}\index{{\ptt :auto},x-range}, then OBVIUS automatically uses {\tt (list
+0 (total-size image))}.
+
+\item \lsym{y-range} is a list of length 2 specifying the range of
+the y-axis.If this is {\tt :auto}, then OBVIUS
+automatically uses {\tt (list (minimum image) (maximum image))}.
+
+\item \lsym{y-axis} is the x-coordinate position of the y-axis.  If
+this is nil, no y-axis is drawn.
+
+\item \lsym{x-axis} is the y-coordinate position of the x-axis.  If
+this is nil, no x-axis is drawn.
+
+\item \lsym{y-tick-step} and  \lsym{y-tick-step} are the distances 
+(in graph coordinates) between tick marks on the y- and x-axes,
+respectively.  If set to {\tt :auto}\index{{\ptt :auto},tick-step}, OBVIUS
+will choose this to display between 4 and 10 ticks on the axis.
+
+\item \lsym{y-label} \lsym{x-label} [currently not used].
+
+\item \lsym{aspect-ratio} determines the physical (i.e., in screen
+pixel coordinates) ratio of height to width for the graphing region.
+
+\item \lsym{retain-bitmap} (either {\tt T} or {\tt nil}) specifies
+whether to keep a copy of the bitmap, or redraw it each time it is
+displayed.
+
+\item \lsym{zoom} determines the size of the graph.  A zoom factor of
+1 indicates that the samples of the underlying array should be plotted
+one pixel apart in the x-direction.  The height of the graph is
+determined relative to the width using the {\tt aspect-ratio} slot.
+
+\item \lsym{line-width} specifies the width of the graph lines (bars)
+drawn, in pixels.
+
+\item \lsym{axis-color} specifies color of the axes (e.g., :red,
+:green, or any number of other colors defined by LispView).
+
+\item \lsym{color} color of the graph and plot-symbols (e.g., :red,
+:green,or any number of other colors defined by LispView).
+
+\item \lsym{plot-symbol} Either {\tt :circle}, {\tt :square}, or {\tt
+nil} (for no plot symbol).
+
+\item \lsym{symbol-size} specifies size of plot symbol, must be
+integer between 1 and 10.
+
+\item \lsym{fill-symbol-p} specifies whether or not plot symbol is
+filled, must be {\tt T} or {\tt nil}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Polar Plots}
+\label{sec:polar-plots}
+
+The \ldef{polar-plot} pictures, defined in the file {\bf drawing.lisp},
+may be used to display {\tt discrete-functions}.  They may also be
+used to display {\tt image-pairs} or {\tt viewable-sequences} made up
+of pairs of discrete-functions.  
+
+For a single {\tt discrete-function}, the angular coordinate of the
+plot is specified (in radians) by the {\tt origin} and {\tt increment}
+of the {\tt discrete-function}.  The radial coordinate is specified by
+the {\tt discrete-functions}'s data array.  An example is given in the
+OBVIUS tutorial.
+
+For a pair (either {\tt image-pair} or {\tt viewable-sequence} pair),
+the first viewable of the pair is interpreted as the magnitude (radial
+component) and the second is interpreted as the angle (in radians).
+Example: 
+\begin{verbatim}
+(display (make-viewable-sequence
+	  (list (make-discrete-function '(lambda (x) (* 100.0 (cos x))) 
+                                        0.0 2-pi :size 63)
+		(make-discrete-function '(lambda (x) (* 2.0 x)) 
+                                        0.0 2-pi :size 63)))
+	 'polar-plot)
+\end{verbatim}
+
+The parameters of a {\tt polar-plot} are:
+\begin{itemize}
+\item \lsym{maximum} The range of values plotted radially are between
+0 and maximum.
+
+\item \lsym{line-width} specifies the width of the graph lines (bars)
+drawn, in pixels.
+
+\item \lsym{axis-color} *** not implemented yet
+
+\item \lsym{color} color of the graph and plot-symbols (e.g., :red,
+:green,or any number of other colors defined by LispView).
+
+\item \lsym{plot-symbol} Either {\tt :circle}, {\tt :square}, or {\tt
+nil} (for no plot symbol).
+
+\item \lsym{symbol-size} specifies size of plot symbol, must be
+integer between 1 and 10.
+
+\item \lsym{fill-symbol-p} specifies whether or not plot symbol is
+filled, must be {\tt T} or {\tt nil}.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Scatter Plots}
+\label{sec:scatter-plot}
+
+The {\tt scatter-plot} pictures, defined in the file {\bf
+drawing.lisp}, may be used to display data that is stored in an {\tt
+image-pair}.  The parameters of a {\tt scatter-plot} are the same as
+those of a graph.  An example of displaying a scatter-plot is given in
+the OBVIUS tutorial.  The {\tt scatter-plot} method may be also used
+as a shorthand for generating {\tt scatter-plots}:
+\begin{description}
+\item\lmeth{make-scatter}{image}{thing1 thing2 \&rest initargs}
+Thing1 and thing2 may be images, vectors, or lists.  Makes a
+scatter-frob a simple viewable that displays itself as a scatter plot.
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Flipbooks}
+\label{sec:flipbook}
+
+The \ldef{flipbook}s are the standard display type for {\tt
+viewable-sequences} and {\tt image-sequences}.  {\tt Flipbooks} are
+defined in the file {\bf flipbook.lisp}.  {\tt Flipbooks} can be
+thought of as a list of sub-pictures.  For example, {\tt flipbooks} of
+{\tt image-sequences} contain a list of {\tt gray} pictures.
+
+Mouse bindings are provided to cycle through the subpictures in the
+flipbook (see section~\ref{sec:mouse}).  {\tt Flipbook} pictures have
+a number of parameters that control the delay between frames when the
+pictures are played back.  There is also a way to change the scaling
+parameters of the {\tt gray} pictures that make up the {\tt flipbook}.
+
+The parameter values of a {\tt flipbook} picture may be changed using
+the {\tt Current Picture} dialog from the {\tt Parameters} menu, or
+using the {\tt setp} macro.  The default values (the values used to
+initialize a new picture) for these parameters may be changed using
+the {\tt Picture Defaults} menu.  The parameters are:
+\begin{itemize}
+\item \lsym{frame-delay}.  Delay between frames (in approximately
+1/60th secs).
+
+\item \lsym{seq-delay}.  Delay between each repeat (in approximately
+1/60th secs).
+
+\item \lsym{back-and-forth}.  When t, the flip-book is shown forward
+and back during each repeat.
+
+\item \lsym{independent-parameters}.  If non-nil, then the images are
+rescaled independently (see above description of {\tt pasteup}
+pictures).
+
+\item \lsym{zoom}. Described in section~\ref{sec:pictures}.
+
+\item \lsym{sub-display-type} specifies the display types for the
+pictures that make up the {\tt flipbook}.  If T, then OBVIUS chooses
+the display type automatically.  For {\tt flipbooks} of {\tt
+image-sequences}, the automatic choice is for the sub-pictures to be
+{\tt grays}.
+\end{itemize}
+
+The {\tt setp} macro may be used to set the parameters of the
+sub-pictures that make up a {\tt flipbook}.  For example, 
+\begin{verbatim}
+(setp scale 100.0)
+\end{verbatim}
+If {\tt independent-parameters} is non-nil, then this will affect only
+the sub-picture that is currently being displayed.  If {\tt
+independent-parameters} is nil, then this will change the scale for
+all of the sub-pictues.
+
+The parameters for the individual sub-pictures may be set
+independently if {\tt independent-parameters} is non-nil.  The
+parameters may be set using the {\tt Picture Parameters} dialog in
+conjunction with the {\tt previous-frame} (C-M-left) and {\tt
+next-frame} (C-M-middle) mouse bindings.  Bring up the current picture
+dialog (e.g., from the {\tt Parameters} button on the control panel),
+and change the picture parameters of the current sub-picture.  Use the
+mouse bindings to change the current sub-picture.  The dialog box is
+automatically updated to give the parameter settings for the new
+sub-picture.  Then go ahead and change the parameters of the new
+sub-picture.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Overlays}
+\label{sec:overlays}
+
+Some {\tt viewable-sequences} can be displayed as \ldef{overlay}
+pictures.  The {\tt overlay} class is defined in the file {\bf
+overlay.lisp}.  Currently, overlays are supported only for overlaying:
+(1) (1) {\tt graphs} of {\tt discrete-functions}, (2) {\tt graphs} of
+{\tt one-d-images}, (3) {\tt bitmaps} of {\tt bit-images}, and (4) for
+overlaying {\tt bitmaps} of {\tt bit-images} on top of a {\tt gray} of
+an {\tt image}.  Examples are given in the OBVIUS tutorial showing how
+to display {\tt overlays}.  For more examples, look in the {\bf
+overlay.lisp} file.
+
+The parameters for the individual sub-pictures in the overlay may be
+set independently using the {\tt Picture Parameters} dialog in
+conjunction with the {\tt previous-frame} (C-M-left) and {\tt
+next-frame} (C-M-middle) mouse bindings.  Bring up the current picture
+dialog (e.g., from the {\tt Parameters} button on the control panel),
+and change the picture parameters of the current sub-picture.  Use the
+mouse bindings to change the current sub-picture.  The dialog box is
+automatically updated to give the parameter settings for the new
+sub-picture.  Then go ahead and change the parameters of the new
+sub-picture.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Hardcopy}
+\label{sec:hardcopy}
+
+The function \lsym{hardcopy} produces postscript output of OBVIUS
+pictures:
+\begin{verbatim}
+(hardcopy viewable
+          &optional display-type
+          &key path printer
+          x-location y-location x-scale y-scale
+          invert-flag suppress-text make-new
+	  &allow-other-keys)
+\end{verbatim}
+\noindent
+Note that the syntax is quite similar to that of  the \lsym{display}
+function described in section~\ref{sec:display}.
+Produces a postscript version of the viewable.  The parameters for
+{\tt hardcopy} are similar to those of \lsym{display}: any additional
+keywords are used to specify initargs of the picture.  The optional
+parameter
+\lsym{display-type} specifies the picture class for the postscript
+picture.  The function searches for a picture of that display-type in
+one of the panes (starting with the top of the current pane).  If one
+is found, then it is copied to make the postscript picture.  If none
+is found, then it makes a new picture using default parameters.
+Additional keywords may be passed to the hardcopy function (similar to
+the display function) to override the parameters of the on-screen
+picture.  By default, hardcopy passes the keyword-value pair (:zoom
+:auto) so that the resulting picture will fill the page. The argument
+\lsym{:make-new} will force OBVIUS to make a new picture using
+default-parameters.
+
+The keyword argument {\tt :path} specifies a file pathname.  If this
+parameter is nil (the default), OBVIUS writes the postscript to a
+temporary file, ships it to a printer, and then deletes the temporary
+file.  The arguments {\tt :x-location} and :y-location determine the
+location of the picture on the page (default is top-left corner).  The
+arguments {\tt :x-scale} and {\tt :y-scale} specify by how much to
+rescale the size of the the picture (default is 1).  Hardcopy prints
+the name of the viewable on the page just below where the picture
+appears (unless the argument {\tt :suppress-text} is non-nil, in
+which case nothing is printed).  The keyword {\tt :printer} specifies
+which printer to use (default is the global {\tt *default-printer*}).
+
+The mouse binding, C-M-Sh-right, calls hardcopy to print a picture to
+the default printer.
+
+The following global variables must be set for {\tt hardcopy} to work
+properly:
+\begin{itemize}
+\item \lsym{*temp-ps-directory*} -- Directory to hold temporary
+postscript files before they are sent to the printer.  Typical value
+is something like: {\tt "/tmp/"}.
+
+\item \lsym{*default-printer*} -- Name of postscript printer, to be
+inserted into the {\tt *print-command-string*} (e.g., {\tt "laserwriter1"}).
+
+\item \lsym{*print-command-string*} -- Command string for
+sending a postscript file to a printer.  This is used as a format
+string (i.e., an argument to the Common Lisp {\tt format} function)
+with two arguments: the filename and the printer name.  That is, this
+string will be used in the following fashion:
+\begin{verbatim}
+(format nil *print-command-string* <file> <printer>)
+\end{verbatim}
+where {\tt <printer>} will default to the value of {\tt
+*default-printer*}.  On our system, the value of {\tt
+*print-command-string*} is {\tt "cat ~A | lpr -P~A ; rm ~@*~A"}.  The
+{\tt ~@*~A} construct allows us to process the filename twice (see
+Steele, Common Lisp: The Language).  The result of this call to {\tt
+format} will then be run as a shell program.  Thus, the our example
+string will cat the first argument (filename) to the {\tt lpr} command
+with the appropriate printer argument (second argument), and then call
+{\tt rm} on the first argument (deleting the temporary postscript
+file).
+\end{itemize}
+

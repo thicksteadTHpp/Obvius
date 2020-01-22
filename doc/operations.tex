@@ -1,0 +1,1583 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{OBVIUS Functions}
+\label{sec:operations}
+
+OBVIUS provides standard functions for generating viewables, and many
+standard image-processing operations for manipulating them.  Many of
+these image-processing operations are defined for many of the viewable
+classes.  Most of these may be found on the menus in the control
+panel.  In addition, you may use the {\tt C-c C-a} command in Emacs to
+get the argument list for a given function, and {\tt C-c .} to view
+the source code, as explained in Section \ref{sec:help}.  In this
+section, we list many of the operations, giving the name of the
+function and the argument list.
+
+% The format 
+% Below are some examples of the format used to list these
+% fuctions:
+% \begin{description}
+% \item\lfun{add}{ thing1 thing2 \&key \res}
+% \item\lfun{square}{ image \&key \res}
+% \end{description}
+% Here {\tt thing1} and {\tt thing2} may be either viewables or
+% numbers. {\tt image} may be an image or it may be a viewable that is
+% made up of several images (e.g., image-sequence, image-pair, pyramid,
+% etc.)
+
+\mysubsubsec{Result Argument}
+By convention, all of the functions that return viewables are written
+to take an optional keyword argument \lsym{:->}.  The action taken by
+the function depends on the type of argument passed:
+\begin{itemize}
+\item If no argument (or a nil argument) is passed, a new viewable is
+created with a nil name slot, and the result is written into the newly
+created viewable.  This is the default behavior: it is wasteful (since
+it always creates a new viewable), but avoids destructive modification
+which can be dangerous.
+
+\item If the argument is an existing viewable, the result is
+written into that viewable, thus destructively replacing the contents
+of the original viewable.
+
+\item If the argument is a symbol, a new viewable is created with
+the name slot bound to the symbol, the global value of the symbol
+(i.e., its value in the current package) is bound to the newly created
+viewable, and the result is written into the newly created viewable.
+
+\item If the argument is a string, a new viewable is created with 
+the name slot bound to the string, and the result is written 
+into the newly created viewable.
+\end{itemize}
+	
+
+\mysubsubsec{Point Operation Macros}
+There are a set of point-operation macros defined to mimic many of the
+standard Common Lisp functions.  The names of these macros are the
+same as the names of the Common Lisp functions, augmented by a period
+(``point'').  The current list of these point-operation macros is as
+follows: {\tt +. -. *. /. sqr. sqrt.  expt. exp. log.  abs.  mod.
+round. truncate. floor.
+sin. cos. min. max. average. realpart. imagpart. phase.  incf. decf.
+fill. append. subseq.} 
+
+Where possible, these functions are written to take arguments like
+their Common Lisp counterparts. For example, the macro \lsym{+.} takes
+multiple viewable arguments and calls \lsym{add} on them iteratively.
+As we go through the operations in the following sections, we will
+mention equivalent point-operation macros for some of the functions.
+
+\subsection{Image Utilities}
+
+The following are utilities and accessors for images: 
+\begin{description}
+\item\lmeth{iref}{image}{ image y x}
+See Section \ref{sec:images}.
+
+\item\lfun{image-p}{ thing}
+Returns t if thing is an image, nil if not.
+
+\item\lmeth{dimensions}{image}{ image}
+Returns a list of the dimensions (y-dimension first).
+
+\item\lfun{rank}{ image}
+Returns 1 for a {\tt 'one-d-image} and 2 otherwise.
+
+\item\lmeth{x-dim}{image}{ image}
+
+\item\lmeth{y-dim}{image}{ image}
+
+\item\lmeth{total-size}{image}{ image}
+The total number of pixels in the image.
+
+\item\lmeth{print-values}{image}{ image \&key y x y-size x-size}
+See Section \ref{sec:images}.
+\end{description}
+
+\subsection{Generating Images}
+
+The following is a list of functions for making new images, and for
+making synthetic images:
+\begin{description}
+\item\lfun{make-image}{ dims \&key display-type \res}
+Returns a new image of the specified dimensions, initialized to
+zeros, with the name set to the value of the keyword parameter :\res.
+The dims parameter must be a list of two fixnums, the first specifying
+the y-dimension and the second specifying the x-dimension.  
+
+\item\lmeth{similar}{image}{ image \&key \res}
+Makes a new blank image using the argument {\tt image} as a model
+(i.e., the new image will have the same dimensions and display-type as
+the model).  Note that {\tt similar} is defined for most viewable
+types.
+
+\item\lmeth{copy}{image}{ image \&key \res}
+Returns a copy of {\tt image}.
+
+\item\lfun{image-from-array}{ array \&key \res}
+Makes an image from an array.  
+
+\item\lfun{make-synthetic-image}{ dims func \&key x-range y-range \res}
+This function provides a general facility for mapping a function of
+two variables onto an image.  The {\tt dims} argument specifies the
+size of the image (in pixels).  The argument {\tt func} should be
+something that can be passed to funcall (e.g. a symbol with a function
+binding, a lambda expression, or an actual function).  It will be
+applied to two floating point numbers {\em and must return a floating
+point value}.  The optional keyword arguments specify the range of
+argument values over which to map the function (i.e., the pixel values
+of the synthetic image will correspond to the evaluation of the
+function at discretely sampled points over this range, with the
+endpoints set to the start and end of the range).  The defaults
+are '(-1.0 1.0) for the {\tt :x-range}, and the {\tt :y-range}
+defaults to the value of {\tt :x-range}.  Example:
+\begin{verbatim}
+(make-synthetic-image '(128 128) '(lambda (y x) x) :-> 'xramp)
+\end{verbatim}
+Several more examples are provided at the end of the {\bf synth.lisp} file.
+
+\item\lfun{make-impulse}{ dims \&key amplitude \res}
+
+\item\lfun{make-ramp}{ dims \&key orientation pedestal slope origin \res}
+Makes a ramp image of the given dimensions.  {\tt :pedestal} is the
+value in the center of the image (i.e., at the (d-1)/2 pixel
+position).  {\tt :slope} is measured in change per pixel distance.
+{\tt :orientation } is in radians relative to the +X axis."  {\tt
+origin} is a list of two numbers specifying the (y x) coordinates of
+the pixel to which the pedestal applies.
+
+\item\lfun{make-grating}{dims func period \&key orientation phase \res}
+Makes an image of a one-dimensional periodic function.  {\tt func}
+must be a valid argument for the Common Lisp function {\tt funcall}.
+{\tt :period} indicates the desired period of the function in pixels.
+{\tt func} will be evaluated at {\tt *default-df-size*} points between
+0 and {\tt :period}. Linear interpolation will be used between these
+points.  {\tt :phase} should be in the interval [0,{\tt :period}] and
+defines the argument to the function at the center of the image.
+
+\item\lfun{make-square-grating}{ dims \&key period orientation phase \res}
+
+\item\lfun{make-saw-tooth-grating}{ dims \&key period orientation phase \res}
+
+\item\lfun{make-sin-grating}{ dims \&key period orientation phase
+amplitude dc frequency x-freq y-freq \res}
+Specify either: (1) {\tt :period} and {\tt :orientation}; or (2) {\tt
+:frequency} and {\tt :orientation}, or (3) {\tt :x-freq} and {\tt :y-freq}.
+
+\item\lfun{make-atan}{ dims \&key center phase \res}
+Makes an angle (arc-tangent) image (i.e., each pixel contains its
+angular coordinate) between $-\pi$ and $\pi$.
+
+\item\lfun{make-r-squared}{ dims \&key center \res}
+Make an image of the function $f(r) = r^2$, where $r$ is the distance
+from the point specified by {\tt :center}.  Default center is computed
+as $(d-1)/2$, where $d$ will be respective image dimensions in pixels.
+
+\item\lfun{make-1-over-r}{ dims \&key center exponent amplitude zero-val \res}
+Computes $f(r) = a r^{-\beta}$ where $r$ is the distance from the center of
+the image in pixels, $a$ is specified by the keyword {\tt :amplitude},
+$\beta$ is specified by the keyword {\tt :exponent}, and the keyword
+{\tt :zero-val} specifies what value to use at $r=0$.
+
+\item\lfun{make-zone-plate}{ dims \&key amplitude phase \res}
+Makes a zone plate ($f(r) = \cos(r^2)$) with given {\tt :amplitude}
+and {\tt :phase}. Phase is in radians and refers to the origin.
+
+\item\lfun{make-pinwheel}{ dims \&key \res}
+
+\item\lfun{make-disc}{ dims \&key radius origin transition-width \res}
+
+\item\lfun{make-left}{ dims \&key \res}
+
+\item\lfun{make-top}{ dims \&key \res}
+
+\item\lfun{make-uniform-noise}{ dims \&key \res}
+Makes image with values randomly distributed between 0 and 1.
+
+\item\lfun{make-gaussian-noise}{ dims \&key mean variance iterations \res}
+Approximation to normal distribution that is faster than using {\tt
+make-normal-random-image}. Better approximation (and slower) as {\tt
+:iterations} is increased. 
+
+\item\lfun{make-random-dots}{ dims \&key density \res}
+{\tt :density} is a value between 0 and 1.  Returns a 'bit-image.
+
+\item\lfun{make-fractal}{ dims \&key fractal-dimension \res}
+\end{description}
+
+
+\subsection{Loading and Saving Images and Image-Sequences}
+
+The following functions are used for loading and saving images to and
+from datfiles.  Datfiles are described in more detail in section~\ref{sec:datfile}.
+
+\begin{description}
+\item\lfun{load-image}{ path \&key ysize xsize reverse-bytes \res}
+\item\lmeth{save-image}{image}{ image path \&key element-type auto-scale reverse-bytes df-keys}
+\item\lfun{load-image-sequence}{ path \&key start-index end-index \res}
+\item\lmeth{save-image}{image-sequence}{ sequence path \&key element-type auto-scale reverse-bytes df-keys start-index end-index}
+
+\item\lfun{save-picture}{ path}
+Saves the image displayed in the current pane as an 8-bit datfile.
+Rescales the image according to the current scale and pedestal as
+specified in the title bar of the pane.  This function only works on
+{\tt 'gray} pictures of {\tt 'image} viewables.
+\end{description}
+
+
+\subsection{Operations on Images}
+
+The following operations take images as arguments and return images as
+their results.  These functions are also defined for viewables that
+are made up of compound images (e.g., image-sequences, image-pairs,
+pyramids, etc.)
+
+\begin{description}
+
+\item\lmeth{zero!}{image}{ image}
+Sets all the image values to 0.0, destructively modifying the image.
+
+\item\lmeth{fill!}{image}{ image value}
+Sets all the image values to {\tt value}, destructively modifying the
+image.
+\end{description}
+
+\mysubsubsec{Numerical Point Operations}
+
+\begin{description}
+\item\lmeth{add}{image}{ thing1 thing2 \&key \res}
+equivalent macro \lsym{+.} \\
+This method and the next few methods operate on the images point 
+by point.  Thing1 and thing2 are either viewables or numbers.
+
+\item\lmeth{sub}{image}{ thing1 thing2 \&key \res}
+equivalent macro \lsym{-.}
+
+\item\lmeth{mul}{image}{ thing1 thing2 \&key \res}
+equivalent macro \lsym{*.}
+
+\item\lmeth{div}{image}{ thing1 thing2 \&key zero-val suppress-warning \res}
+equivalent macro \lsym{/.} \\ 
+Attempting to divide by zero prints a 
+\index{foreign functions,floating-point exceptions}
+warning message describing the number of pixels that were zero, and
+sets the result to either the positive or negative value of {\tt
+zero-val}, depending on the sign of the numerator.  The default value
+for zero-val is given by the global parameter
+\lsym{*div-by-zero-result*}.  The warning message can be avoided by
+setting the {\tt suppress-warning} keyword to t (default is nil).
+
+\item\lmeth{linear-xform}{image}{ image scale offset \&key \res}
+This returns (image * scale) + offset.
+
+\item\lmeth{negate}{image}{ image \&key \res}
+equivalent macro \lsym{-.} (unary).
+\item\lmeth{square}{image}{ image \&key \res}
+equivalent macro \lsym{sqr.} (Note that OBVIUS provides a function on
+numbers called \lsym{sqr}).
+
+\item\lmeth{square-root}{image}{ image \&key \res}
+equivalent macro \lsym{sqrt.} \\ 
+Signed square root on the image, e.g., {\tt (square-root -4.0)} gives -2.0.
+
+\item\lmeth{abs-value}{image}{ image \&key \res}
+equivalent macro \lsym{abs.}
+
+\item\lmeth{power}{image}{ image thing \&key \res}
+equivalent macro \lsym{expt.} \\
+{\tt Thing} may be an image or a number.  If a number, then this
+function raises each pixel in {\tt image} that number.  If an image,
+then it raises each pixel in {\tt image} to the correponding pixel
+value in {\tt thing}.
+
+\item\lmeth{natural-logarithm}{image}{ image \&key zero-val \res}
+Attempting to take the log of zero prints an warning message and uses
+the value of {\tt zero-val}.  The default value for zero-val is given
+by the global parameter *div-by-zero-result*.  
+\index{foreign functions,floating-point exceptions}
+
+\item\lmeth{gamma-correct}{image}{im gamma \&key below above binsize \res}
+Clips between {\tt below} and {\tt above}, and calls point operation
+to gamma correct the rest of the values.  Defaults for {\tt below} and
+{\tt above} are the minimum and maximum, respectively.  For that
+default case, it computes $m + (M-m) [(x-m)/(M-m)]^\gamma$, where $m$
+and $M$ are the minimum and maximum.
+
+\item\lmeth{point-operation}{image}{ image function \&key binsize \res}
+{\em function} must take a single float argument and return a float.
+If {\em binsize} is a number, this method creates a discrete-function
+(a type of viewable) by evaluating the function at intervals of {\em
+binsize}.  This is then used as a lookup table and the result image is
+computed using linear interpolation to generate values between the
+sample points.  If binsize is nil (the default), the function is
+applied directly at each pixel (this can be very slow!).  Example:
+\begin{verbatim}
+(point-operation einstein '(lambda (x) (/ 1.0 (+ 1.0 x))))
+\end{verbatim}
+If the function being applied is periodic, it is advisable to use the
+function {\tt periodic-point-operation} instead.  
+
+\item\lmeth{periodic-point-operation}{image}{ image function period \&key binsize \res}
+Apply {\tt function} with given {\tt period} to {\tt image} using a
+lookup table and linear interpolation.  This is different from the
+{\tt point-operation} function in that the lookup table is built to
+cover {\em one period}, with an extra point on the end.  See {\bf
+synth.lisp} for useful examples.
+
+\item\lmeth{clip}{image}{ image below above \&key \res}
+Returns an image identical to the argument except that values
+less than {\em below} are replaced with {\em below} and values greater
+than {\em above} are replaced with {\em above}.
+
+\item\lmeth{round.}{image}{ \&key divisor \res}
+Round to nearest integer value.  If divisor is passed, divide by this
+value before rounding (Same as round function in common lisp).
+
+\item\lmeth{floor.}{image}{ \&key divisor \res}
+Compute greatest integer value less than each pixel value.  If divisor
+is passed, divide by this value before flooring (Same as floor
+function in common lisp).
+
+\item\lmeth{quantize}{image}{ image \&key binsize origin \res}
+Image is quantized into bins.  The value of each pixel is set to the
+{\em mean} (not the midpoint) of the containing bin.
+The default {\tt :binsize} is the range of the image divided by the global
+parameter *default-number-of-bins* and the default orgin is the mean
+of the entire image.
+\end{description}
+
+
+\mysubsubsec{Geometrical Operations}
+
+\begin{description}
+\item\lmeth{circular-shift}{image}{ image \&key offset y x \res}
+This translates the pixels of an image, wrapping around at the edges.
+It is written so that the result may be the same image as the
+original.  Note: parmeters are redunant, since {\tt offset = (y x)}.
+
+\item\lmeth{upsample}{image}{ image \&key start-vector step-vector hex-start \res}
+For a full description of these keywords, see the description of
+{\tt filters} in Section \ref{sec:filters}.
+
+\item\lmeth{downsample}{image}{ image \&key start-vector step-vector hex-start \res}
+For a full description of these keywords, see the description of
+{\tt filters} in Section \ref{sec:filters}.
+
+\item\lmeth{subsample}{image}{ image \&key start-vector step-vector hex-start \res}
+Same as downsample.
+
+\item\lmeth{resample}{image}{ image \&key dimensions expansion-factor interpolator}
+Resample the image.  {\tt dimensions} is the dimension list for the
+resulting image.  Alternatively, specify a number or pair of numbers
+for {\tt expansion-factor}.  {\tt interpolator} must be either {\tt
+:cubic} (the default), or {\tt :linear}.
+
+\item\lmeth{crop}{image}{ image \&key offset y x dimensions y-dim x-dim \res}
+Returns the specified (rectangular) sub-image.  Default {\tt :offset}
+is {\tt '(0 0)}, and default dimensions are the dimensions of the
+image minus the offset. Note that the parameters are redundant: you
+can pass {\tt :offset} or {\tt :x} and {\tt :y} separately.
+
+\item\lmeth{paste}{image}{ im big-im \&key offset x y \res}
+Pastes the image into a larger image.  Clips if im hangs over the
+edge.  Again, parameters are redundant: {\tt offset  = (y x)}.
+
+\item\lfun{side-by-side}{ im1 im2 \&key space \res}
+Puts both images next to each other in a new image image twice larger.
+The keyword :space leaves the specified number of columns blank to
+separate the two images in the result.
+
+\item\lfun{transpose}{ image \&key \res}
+Transpose of the image: swap X and Y axes.
+
+\item\lfun{flip-x}{ im \&key \res}
+Flips the image around the center vertical axis.
+
+\item\lfun{flip-y}{ im \&key \res}
+Flips the image around the center horizontal axis.
+
+\item\lmeth{rotate}{image}{ im \&key angle interpolator origin}
+Rotate image about position specified by {\tt origin} (a pair of
+numbers defaulting to center of image).  {\tt angle} is specified in
+radians and defaults to $\pi/2$.  {\tt interpolator} must be either {\tt
+:cubic} (the default), or {\tt :linear}.
+
+\item\lmeth{warp}{image}{ im image-pair \&key interpolator}
+Warp the image according to the image-pair.  The image-pair is
+interpreted as a field of vectors, one associated with each pixel in
+the result image.  Each result pixel is computed by moving to a
+position in the image specified by the corresponding vector and
+interpolating a value.   {\tt interpolator} must be either {\tt
+:cubic} (the default), or {\tt :linear}.
+
+\end{description}
+
+\mysubsubsec{Comparison Point Operations}
+
+\begin{description}
+\item\lmeth{greater-than}{image}{ thing1 thing2 \&key \res}
+equivalent macro \lsym{>.} \\
+Arguments {\tt thing1} and {\tt thing1} can both be images or one of
+them can be a number.  If they are both images, then the function does
+a point by point comparison.  Returns a {\tt bit-image}.
+
+\item\lmeth{less-than}{image}{ image thing  \&key \res}
+equivalent macro \lsym{<.}
+
+\item\lmeth{equal-to}{image}{ image thing \&key result-type \res}
+equivalent macro \lsym{=.}
+
+\item\lmeth{greater-than-or-equal-to}{image}{ image thing \&key result-type \res}
+equivalent macro \lsym{>=.}
+
+\item\lmeth{less-than-or-equal-to}{image}{ image thing \&key result-type \res}
+equivalent macro \lsym{<=.}
+
+\item\lmeth{point-minimum}{image}{ thing1 thing2 \&key \res}
+{\tt Thing1} and {\tt thing2} may be images or numbers.  Computes
+minimum as a pointop on two inputs.  Each pixel of the result is the
+lesser of the two corresponding input values.
+
+\item\lmeth{point-maximum}{image}{ thing1 thing2 \&key \res}
+
+\item\lfun{square-error}{ image1 image2 \&key \res}
+Returns the square of the difference of the two images.
+
+\item\lfun{abs-error}{ image1 image2 \&key \res}
+Returns the absolute value of the difference of the arguments.
+
+\item\lfun{mean-square-error}{ image1 image2}
+\item\lfun{mean-abs-error}{ image1 image2}
+\item\lfun{max-abs-error}{ image1 image2}
+
+\item\lfun{zero-crossings}{ image \&key \res}
+Computes a {\tt bit-image} containing the zero-crossings of {\tt
+image}.
+
+\item\lfun{correlate}{ im1 im2 \&key x y x-dim y-dim \res}
+Correlate images, circular-shifting one over top of the other.
+{\tt x-dim} and {\tt y-dim} specify to the area over which to correlate
+(these default to the dimensions of {\tt im1}).
+{\tt x} and {\tt y} specify to the shift at which to begin correlation
+(that is, the value corresponding to a shift of {\tt x} and {\tt y}
+will appear in the upper-left pixel of the result). These default to zero.
+
+\end{description}
+
+
+\mysubsubsec{Statistics}
+
+The following operations return numbers.  These functions are also
+defined for viewables that are made up of compound images (e.g.,
+image-sequences, image-pairs, pyramids, etc.)  All but the last two
+store their computed values on the info-list of the viewable.
+
+\begin{description}
+\item\lmeth{minimum}{image}{ image}
+Equivalent macro \lsym{min.} (unary).  Returns minimum pixel value found in
+the image.
+
+\item\lmeth{maximum}{image}{ image}
+Equivalent macro \lsym{max.} (unary).
+
+\item\lmeth{minimum-location}{image}{ image}
+Returns (y,x) position of the minimum.
+
+\item\lmeth{maximum-location}{image}{ image}
+Returns (y,x) position of the minimum.
+
+\item\lmeth{range}{image}{ image}
+Returns difference between maximum and minimum.
+
+\item\lmeth{mean}{image}{ image \&key ignore-zeros}
+If {\tt ignore-zeros} is non-nil, then the mean is computed without
+counting any of the zero values.
+
+\item\lfun{variance}{ image \&key ignore-zeros}
+\item\lfun{skew}{ image}
+\item\lfun{kurtosis}{ image}
+
+\item\lfun{entropy}{ image \&key binsize origin numbins}
+The parameters are the same as for make-histogram.
+
+\end{description}
+
+
+\mysubsubsec{Fourier Transform}
+
+\begin{description}
+\item\lmeth{fft}{image}{ image \&key dimensions inverse center
+pre-center post-center \res} Returns a {\tt complex-image} that is the
+DFT of the {\tt image} argument.  The algorithm used is a
+multidimensional radix-2 FFT (source code in {\bf fft.c}.  The {\tt
+image} may be an {\tt image}, an {\tt image-pair}, or a {\tt
+complex-image}.  The size of the result may be specified with the {\tt
+:dimensions} keyword and should be a list of two numbers, each a power
+of 2.  By default, the X (Y) dimension of the result is the smallest
+power of two greater than the X (Y) dimension of the image.  Computes
+the inverse FFT if the {\tt :inverse} parameter is non-nil.  If the
+{\tt :pre-center} argument is non-nil, the image is circular-shifted
+before computing the transform.  If the {\tt :post-center} argument is
+non-nil, the resulting transform is circular-shifted, placing the
+origin (DC value) in the {\em center} of the image.  Both of these
+keywords default to the value of the {\tt :center} keyword, thus
+allowing the user to pre- and post- center by passing a single
+keyword.
+
+\item\lmeth{power-spectrum}{image}{ image \&key center dimensions
+\res}
+Computes the squared magnitude of the Fourier transform.  See the
+explanation of the {\tt :center} and {\tt :dimensions} arguments for
+the \lsym{fft} function.
+
+\item\lfun{dct}{}
+Not yet implemented.
+
+\item\lfun{hilbert-transform}{ im \&key orientation \res}
+This function does a ninety degree phase shift of all frequencies in
+the direction of a vector at angle ({\tt orientation}) to the
+horizontal.  Frequencies that are low with respect to this vector (ie,
+lie near the line perpendicular to this vector) create visual
+artifacts.
+
+\item\lfun{derivative}{ im \&key orientation \res}
+Multiply the FFT by $j\omega$, then inverse transform.
+\end{description}
+
+
+\mysubsubsec{Filtering Operations}
+
+\begin{description}
+\item\lmeth{apply-filter}{image}{ thing1 thing2 \&key \res (direction 0)}
+The argument thing1 may be a filter and thing2 an image or vice versa.
+This method is also defined on image-sequences.  Correlates the image
+with the filter, (this is correlation because the filter is not
+flipped) downsampling as specified by the grid of the filter.  Notice
+that the result argument (:\res) cannot be equal to the image
+argument.  Also, the thing must be at least the size of the filter if
+the edge-handler is non-nil.  The {\tt :direction} keyword argument
+determines the orientation of the filter.  For example, if you apply a
+one dimensional filter to an image, it will be applied in the x
+direction.  To apply it in the y direction, set the {\tt :direction}
+argument to 1.  See section~\ref{sec:filters} for more information.
+
+\item\lmeth{expand-filter}{image}{ thing1 thing2 \&key (zero t) \res}
+The argument thing1 may be a filter and thing2 an image or vice versa.
+Upsamples the image (as specified by the filter grid), then convolves
+the image with the filter.  If the zero keyword parameter is nil (the
+default), the result of the convolution will be added into the result
+image; otherwise it replaces the contents of the result image.  See
+section~\ref{sec:filters}.
+
+\item\lmeth{gauss-in}{image}{ image \&key resample edge-handler kernel \res}
+Does upsampling followed by gaussian convolution (like a zoom-in with
+blurring).  The default is to upsample by a factor of two and use a
+five-tap separable binomial filter.
+
+\item\lmeth{gauss-out}{image}{ image \&key  resample edge-handler kernel \res}
+Does a gaussian convolution and downsampling (like a zoom-out with
+averaging).  The default is to use a five-tap separable binomial
+filter and then downsample by a factor of two.
+
+\item\lmeth{blur}{image}{ image \&key level kernel edge-handler \res}
+Recursive blurring method.  If level is 1 (the default), it does a
+gauss-out followed by a gauss-in.  If level is n, it does n
+gauss-out's followed by n gauss-in's.
+\end{description}
+
+
+\subsection{Functions for One-d-images}
+
+One-d-images are really the same as images except that one of the
+dimensions is 1.  So, nearly all of the image operations that are
+defined for images work on one-d-images as well.  There are some image
+processing operations that are not implemented for {\tt one-d-images}
+including \lsym{flip-x}, \lsym{flip-y},\lsym{upsample}, \lsym{downsample},
+\lsym{subsample}, \lsym{transpose}, \lsym{side-by-side}.  The following
+functions are particular for one-d-images:
+\begin{description}
+\item\lfun{one-d-image-p}{ thing}
+Returns t if thing is a one-d-image, nil if not.
+
+%%% ***** ???? This is not defined on one-d-images
+\item\lmeth{make-slice}{image}{ image \&key x y z display-type \res}
+Makes a slice from {\tt image} or {\tt image-pair}.  One (and only
+one) of {\tt :x} and {\tt :y} may be specified.  This
+function creates a one-dimensional image that is a slice of a two
+dimensional image.  This function may be called via a mouse click as
+described in Section \ref{sec:mouse}.  The function is also defined on
+image sequences.
+\end{description}
+
+
+\subsection{Operations on Bit-Images}
+
+Bit-images are just like images except that they have only one bit of
+data at each pixel (the bit-image data is stored using common-lisp bit
+arrays).  So, some of the functions and accessors are inherited from
+images (e.g., \lsym{iref}, \lsym{dimensions}, \lsym{x-dim}, \lsym{y-dim},
+\lsym{total-size}).  Other methods are functionally equivalent to those
+defined on images (e.g., \lsym{mul}, \lsym{copy}, \lsym{similar}, {\tt
+crop}, and \lsym{paste}).  Other methods are modified somewhat (e.g.,
+add is modified to perform a logical-or operation on bit-images).  
+
+Bit-images may be made by performing any of several comparison
+operations on images (listed above), e.g., \lsym{greater-than}, {\tt
+less-than}, \lsym{equal-to}, \lsym{zero-crossings}.
+
+The following functions are defined for bit-images:
+\begin{description}
+\item\lfun{bit-image-p}{ thing}
+Returns t if thing is a bit-image, nil if not.
+
+\item\lmeth{x-dim}{bit-image}{ im}
+\item\lmeth{y-dim}{bit-image}{ im}
+\item\lmeth{iref}{bit-image}{ im y x}
+
+\item\lfun{make-bit-image}{ dims \&key display-type \res}
+Same arguments as for \lsym{make-image}.
+
+\item\lfun{image-from-bit-image}{ bit-image \&key \res}
+
+\item\lfun{coerce-to-float}{ bit-image \&key \res}
+Same as \lsym{image-from-bit-image}.
+
+\item\lmeth{similar}{bit-image}{ image \&key \res}
+\item\lmeth{copy}{bit-image}{ image \&key \res}
+\item\lmeth{crop}{bit-image}{ image y x y-size x-size \&key \res}
+\item\lmeth{paste}{bit-image}{ im big-im x-offset y-offset \&key \res}
+
+\item\lmeth{invert}{bit-image}{ bit-image \&key \res}
+equivalent macro \lsym{not.}
+
+\item\lmeth{add}{bit-image}{ bit-image1 bit-image2 \&key \res}
+equivalent macro \lsym{or.}
+
+\item\lmeth{mul}{bit-image}{ bit-image1 bit-image2 \&key \res}
+equivalent macro \lsym{and.}
+
+\end{description}
+
+
+\subsection{Operations on Image-Pairs, Complex-Images, and Polar-Images}
+
+Since {\tt image-pairs} are made up of lists of images, many of the
+image processing functions described above are defined on image-pairs.
+The functions \lsym{mul} and \lsym{div} are redefined for complex images
+to perform complex arithmetic.  
+
+The arithmetic functions (e.g., \lsym{add}, \lsym{sub}, \lsym{mul}, and
+\lsym{div}) are not yet defined correctly for {\tt polar-images}.
+Convert them to complex images first (using \lsym{polar-to-complex}),
+and then do the arithmetic.
+
+The following additional functions are defined for image pairs and
+complex images:
+\begin{description}
+\item\lfun{make-image-pair}{ dims \&key display-type \res}
+The argument {\tt dims} may be either a dimension list or a list of two
+images.  If it is a list of images then the first image in the list is
+taken as the y-component (or left-image), and the second is taken as
+the x-component (or right-image).
+
+\item\lfun{make-complex-image}{ dims \&key display-type \res}
+The argument {\tt dims} may be either a dimension list or a list of
+two images.  If it is a list of images then the first image in the
+list is taken as the imaginary part, and the second is taken as the
+real part.
+
+\item\lfun{make-polar-image}{ dims \&key display-type \res}
+
+\item\lmeth{make-slice}{image-pair}{ image-pair \&key x y display-type \res}
+See above description under image operations. 
+
+\item\lfun{image-pair-p}{ thing}
+\item\lfun{complex-image-p}{ thing}
+\item\lmeth{print-values}{image}{ image-pair \&key y x y-size x-size}
+See Section \ref{sec:images}.
+
+\item\lfun{first-image}{ image-pair \&key \res}
+If called without a result argument, this acts as a standard accessor
+function, returning the y component of the image pair.  If called with
+a result argument, this copies the y component into the argument (or
+into a new image with the appropriate name if the argument is a symbol
+or string).
+
+\item\lfun{second-image}{ image-pair \&key \res}
+See description of first-image.
+
+\item\lfun{y-component}{ image-pair \&key \res}
+Same as \lsym{first-image}.
+
+\item\lfun{x-component}{ image-pair \&key \res}
+Same as \lsym{second-image}.
+
+\item\lfun{left-image}{ image-pair \&key \res}
+Same as \lsym{first-image}.
+
+\item\lfun{right-image}{ image-pair \&key \res}
+Same as \lsym{second-image}.
+
+\item\lfun{imaginary-part}{ complex-image \&key \res}
+Same as \lsym{first-image}.
+
+\item\lfun{real-part}{ complex-image \&key \res}
+Same as \lsym{second-image}.
+
+\item\lmeth{magnitude}{polar-image}{ polar-image \&key \res}
+Same as \lsym{first-image}.
+
+\item\lmeth{complex-phase}{polar-image}{ polar-image \&key \res}
+Same as \lsym{second-image}.
+
+\item\lfun{switch-components}{ image-pair}
+
+\item\lmeth{magnitude}{image-pair}{ image-pair \&key \res}
+Returns the square root of the sum of the squares of the two sub-images.
+
+\item\lfun{square-magnitude}{ image-pair \&key \res}
+Returns the sum of the squares of the two sub-images.
+
+\item\lmeth{complex-phase}{polar-image}{ image-pair \&key \res}
+Returns the arctangent of real-part/imaginary-part (values between -pi
+and pi).
+
+\item\lfun{complex-conjugate}{ complex-image \&key \res}
+\item\lfun{complex-to-polar}{ complex-image \&key \res}
+Returns a {\tt polar-image}.
+
+\item\lfun{polar-to-complex}{ polar-image \&key \res}
+Returns a {\tt complex-image}.
+
+\item\lmeth{fft}{complex-image}{ complex-image \&key inverse \res}
+Returns a complex image that is the FFT of the image.  The x (y) size
+of the result is the smallest power of two greater than the x (y)
+dimension of the image.  Computes the inverse FFT if the :inverse
+parameter is non-nil.
+\end{description}
+
+
+\subsection{Operations on Discrete Functions}
+
+Most of the image processing functions (listed above) are also defined
+for {\tt discrete-functions} and {\tt complex-discrete-functions}.
+Most of the functions defined for {\tt complex-images} are also
+defined for {\tt complex-discrete-functions}.  In addition, the
+following functions are defined for discrete-functions:
+\begin{description}
+\item\lfun{make-discrete-function}{ func min max \&key size interpolator display-type \res}
+Makes a discrete function of {\tt func} from {\tt min} to {\tt max}.
+The number of bins is specified by the keyword argument {\tt :size}.
+{\tt :interpolator} is the function used to interpolate between
+samples.  Example of use is given in Section
+\ref{sec:discrete-function}.
+
+\item\lfun{make-histogram}{ image \&key display-type range binsize bincenter size \res}
+Returns a histogram of the image values.  May be called via a mouse
+click (see Section \ref{sec:mouse}).  The default number of bins ({\tt
+size}) may be set from the {\tt viewable defaults} menu.  The default
+{\tt binsize} is the range of the image divided by the number of bins.
+{\tt Bincenter} is the position of the center of any of the bins,
+i.e., {x : x = (bincenter + i * binsize)}, for integer i, is the set
+of bin centers.  {\tt Range} can be used to specify a subrange of the
+image values.  If range and binsize are both passed, then they
+determine the number of bins.  For example:
+\begin{verbatim}
+(make-histogram im :binsize 1.0 :range '(100 200)}
+\end{verbatim}
+histograms values between 100 and 200, with binsize 1.0 (i.e., size =
+102, including the endpoints).
+
+\item\lfun{evaluate}{ discrete-function value}
+Evaluates the function at value.  Interpolates if value is between two
+entries in the table.
+
+\item\lfun{distribution-mean}{ discrete-function}
+Mean of a df, treated as a probability distribution.  For example, if
+you make a histogram from an image, then {\tt (mean image)} and {\tt
+(distribution-mean histogram)} are the same.
+
+\item\lfun{distribution-variance}{ discrete-function}
+Variance of a df, treated as a probability distribution.
+
+\item\lfun{distribution-mean-and-variance}{ discrete-function}
+Returns multiple values.
+
+\item\lfun{range}{ discrete-function}
+Returns multiple values (max-min, min, max).
+
+\item\lfun{domain}{ discrete-function}
+Returns multiple values, (max-min, min, max).
+
+\item\lfun{make-soft-threshold-df}{cutoff width \&key invert \res}
+\end{description}
+
+
+\subsection{Operations on Sequences}
+
+Since image-sequences are made up of lists of images, many of the
+image processing functions described above are also defined for
+image-sequences.  In addition, the following functions are particular
+for sequences:
+
+\begin{description}
+\item\lfun{make-viewable-sequence}{ list \&key length sub-viewable-spec display-type \res}
+List must be a list of viewables or nil.  If it is nil, must provide
+:length and :sub-viewable-spec.
+
+\item\lfun{make-image-sequence}{ list \&key length sub-viewable-spec display-type \res}
+The argument {\tt list} may be either a list of images or a dimension
+list or nil.  If it is nil, must pass either (1) :length and
+:sub-viewable-spec or (2) :length and :dimensions.  The dim-list can
+be (z y x) or (y x).  In the latter case, the :length keyword must
+also be provided.  If im-list is 2 integers it is interpreted as
+:dimensions.  If im-list is 3 integers, it is interpreted as
+:dimensions=(cdr im-list) and :length=(car im-list).
+
+\item\lfun{viewable-sequence-p}{thing}
+\item\lfun{image-sequence-p}{thing}
+
+\item\lmeth{viewable-list}{viewable-sequence}{sequence}
+Conses a list of the viewables in the sequence.
+\item\lmeth{image-list}{image-sequence}{sequence}
+Conses a list of the images in the sequence.
+
+\item\lmeth{dimensions}{sequence}{ sequence}
+Returns the (y,x) dimensions of the images in the sequence.
+\item\lmeth{x-dim}{sequence}{ sequence}
+\item\lmeth{y-dim}{sequence}{ sequence}
+\item\lfun{sequence-length}{ sequence}
+equivalent macro \lsym{length.}
+
+\item\lmeth{frame}{number viewable-sequence}{n sequence \&key \res}
+or {\tt (frame sequence n \&key \res)} \\ 
+Accessor for the sub-images of a sequence.  Returns the nth frame of
+the sequence as an image.  If the result arg is nil, the existing
+sub-image is returned.  If it is a symbol, the existing sub-image is
+returned, after altering its name.  If an image is passed, then the
+appropriate sub-image is {\em copied} into that sub-image.
+
+\item\lfun{sub-sequence}{ seq start-frame \&optional end-frame \&key \res}
+\item\lfun{append-sequence}{ seq1 seq2 \&key \res}
+equivalent macro \lsym{append.}
+
+\item\lfun{make-iterated-image}{ im func length \&rest func-args}
+Makes a sequence of images, starting with {\tt im}, by iteratively
+applying {\tt func} (this must be a function which takes an image
+argument).
+
+\item\lmeth{make-slice}{sequence}{ seq \&key x y z display-type \res}
+Slices through the three-D volume of the sequence.  If one coord is
+supplied, this will return a 2D image.  If two are supplied, it will
+return a 1D image.
+
+\item\lfun{make-synthetic-image-sequence}{dims func \&key length
+x-range y-rante z-range display-type \res}
+Analogous to {\tt make-image-sequence}.
+
+\item\lfun{reduce.}{func seq \&key start end from-end initial-value
+\res} 
+Modeled on common Lisp reduce.
+
+\item\lfun{map.}{func seq \&rest args}
+Modeled on common Lisp map.  Args can be more sequences and a \res
+argument.
+\end{description}
+
+
+\subsection{Operations on Color-Images}
+
+{\tt Color-images} are just like {\tt image-sequences} except that
+the sub-images in the sequence are interpreted as different color
+bands.  All of the methods defined for sequences apply to color-images
+as well.
+
+The following additional functions are defined for color-images:
+\begin{description}
+\item\lfun{color-image-p}{ thing}
+Returns t if thing is a color-image, nil if not.
+
+\item\lfun{make-color-image}{ list \&key length display-type \res}
+The argument {\tt list} may be either a list of images or a dimension
+list.  If it is a dimension list then the {\tt :length} keyword must
+be specified.
+
+\item\lmeth{div}{color-transform}{ color-image array \&key \res}
+Calls {\tt (matrix-mul-transpose color-image array \res \res)}.  See
+the section on {\tt viewable-matrix} operations for details.
+
+\item\lmeth{div}{rgb->yiq}{ color-image array \&key \res}
+Calls color-transform with standard array for converting from rgg to
+yiq.
+
+\item\lmeth{div}{yiq->rgb}{ color-image array \&key \res}
+Calls color-transform with standard array for converting from yiq to
+rgb.
+\end{description}
+
+
+
+\subsection{Operations on Viewable-Matrices and Image-Matrices}
+
+Operations on {\tt viewable-Matrices} and {\tt image-matrices} are
+defined in the file {\bf viewable-matrix.lisp}.  The {\tt data} slot
+of a {\tt viewable-matrix} contains an array of sub-viewables, as
+discussed in section \ref{sec:viewable-matrix}.  The majority of the
+operations defined on {\tt viewable-matrices} are the standard image
+processing operations discussed above, e.g., add, mul, copy, similar,
+point-operation, minimum, mean, etc. (see {\bf viewable-matrix.lisp}
+for complete list).  Additional functions specific for
+viewable-matrices are listed below.  These include some matrix-mul
+operations, analogous to those that are defined for arrays.  These
+matrix-mul operations are defined for any combination of a
+viewable-matrix, an array, and a vector.  In other words, you can
+multiply a viewable-matrix by another viewable-matrix or you can
+multiply a viewable-matrix by an array (of numbers).  ***Some of the
+methods on viewable-matrix/vector are not finished yet.
+\begin{description}
+\item\lfun{make-viewable-matrix}{ data \&key display-type \res}
+Data can be a nested-list of viewables, or an array of viewables.
+
+\item\lfun{make-image-matrix}{ data \&key size sub-viewable-spec display-type \res}
+Data can be a nested-list of images, an array of images, a dim-list, or
+nil.  If data is nil, must pass either (1) :size and
+:sub-viewable-spec or (2) :size and :dimensions.  If data is a
+dim-list, then :size must also be specified.
+
+\item\lfun{diagonal-image-matrix}{ im-list \&key display-type \res}
+Makes a new image-matrix putting images from im-list along the diagonal.
+
+\item\lfun{viewable-matrix-p}{ thing}
+Returns t if thing is a viewable-matrix, nil if not.
+
+\item\lfun{image-matrix-p}{ thing}
+Returns t if thing is a image-matrix, nil if not.
+
+\item\lmeth{dimensions}{viewable-matrix}{ vbl-mat}
+Returns the dimensions of one of the sub-viewables.
+
+\item\lmeth{x-dim}{viewable-matrix}{ vbl-mat}
+Returns the x-dim of one of the sub-viewables.
+
+\item\lmeth{y-dim}{viewable-matrix}{ vbl-mat}
+Returns the y-dim of one of the sub-viewables.
+
+\item\lmeth{x-dim}{viewable-matrix}{ vbl-mat}
+Returns the x-dim of one of the sub-viewables.
+
+\item\lmeth{y-dim}{viewable-matrix}{ vbl-mat}
+Returns the y-dim of one of the sub-viewables.
+
+\item\lmeth{row-dim}{viewable-matrix}{ vbl-mat}
+Returns the row-dim of one of the data slot (the number of rows in the
+matrix).
+
+\item\lmeth{col-dim}{viewable-matrix}{ vbl-mat}
+Returns the col-dim of one of the data slot (the number of cols in the
+matrix).
+
+\item\lmeth{size}{viewable-matrix}{ vbl-mat}
+Returns a list of (row-dim col-dim).
+
+\item\lmeth{total-size}{viewable-matrix}{ vbl-mat}
+Returns (* row-dim col-dim).
+
+\item\lmeth{vectorize}{viewable-matrix}{ vbl-mat \&key size x-offset y-offset \res}
+
+\item\lmeth{columnize}{viewable-matrix}{ vbl-mat \&key size x-offset y-offset \res}
+
+\item\lmeth{matrix-transpose}{viewable-matrix}{ vbl-mat \&key \res}
+
+\item\lmeth{determinant}{viewable-matrix}{ vbl-mat \&key \res}
+Works only for 2x2 or 3x3 matrices for the time-being.
+
+\item\lmeth{matrix-inverse}{viewable-matrix}{ vbl-mat \&key \res}
+Works only for 2x2 or 3x3 matrices for the time-being.
+
+\item\lmeth{matrix-mul}{viewable-matrix}{ thing1 thing2 \&key \res}
+Thing1 and thing2 may be viewable-matrices, arrays, or vectors.
+
+\item\lmeth{matrix-mul-transpose}{viewable-matrix}{ thing1 thing2 \&key \res}
+
+\item\lmeth{matrix-transpose-mul}{viewable-matrix}{ thing1 thing2 \&key \res}
+
+\item\lmeth{dot-product}{viewable-matrix}{ thing1 thing2 \&key \res}
+
+\item\lmeth{normalize}{viewable-matrix}{ thing1 thing2 \&key norm \res}
+
+\item\lmeth{outer-product}{viewable-matrix}{ thing1 thing2 \&key \res}
+
+\end{description}
+
+
+\subsection{Operations on Filters}
+
+\begin{description}
+\item\lfun{make-filter}{ kernel \&key display-type edge-handler start-vector step-vector hex-start \res}
+(described in section~\ref{sec:filters}).
+
+\item\lfun{make-separable-filter}{ y-kernel x-kernel \&key display-type edge-handler start-vector step-vector \res}
+(described in section~\ref{sec:filters}).
+
+\item\lmeth{x-dim}{filter}{ filter}
+
+\item\lmeth{y-dim}{filter}{ filter}
+
+\item\lmeth{dimensions}{filter}{ filter}
+
+\item\lfun{volume}{ filter}
+Equivalent function: \lsym{sum-of}.
+
+\item\lfun{filter-p}{ thing}
+
+\item\lfun{separable-filter-p}{ thing}
+
+\item\lmeth{copy}{filter}{ filter \&key \res}
+
+\item\lmeth{negate}{filter}{ filter \&key \res}
+
+\item\lmeth{mul}{filter}{ filter thing \&key \res}
+Thing may be a number or another filter.
+
+\item\lmeth{add}{filter}{ filter thing \&key \res}
+Thing may be a number or another filter.
+
+\item\lmeth{sub}{filter}{ filter thing \&key \res}
+Thing may be a number or another filter.
+
+\item\lfun{shift-by-pi}{ filter \&key \res}
+Defined on one-dimensional filters only.  Returns a filter with taps
+that are frequency-modulated from the original filter taps (i.e.,
+multiplies every other sample by -1).
+
+\item\lfun{interpolate-hex-image}{ im \&key filter \res}
+Does a simple interpolation from a hex image to a full-density
+(rectangular) image.  Half of the samples in a hex image are zero
+(every other pixel on a line, with lines staggered).
+\end{description}
+
+
+\subsection{Operations on Pyramids}
+
+The pyramid module is loaded into OBVIUS by evaluating:
+\begin{verbatim}
+(obv-require :pyramid)
+\end{verbatim}
+Since pyramids are made up of lists of images, many of the image
+processing functions described above are also defined for pyramids,
+including {\tt mul}, {\tt sub}, {\tt div}, {\tt add}, {\tt
+square-error}, {\tt abs-error}, {\tt linear-xform}, {\tt clip}, {\tt
+abs-value}, {\tt square}, {\tt square-root}, {\tt zero!}, {\tt
+point-operation}, {\tt apply-filter}, {\tt expand-filter}, {\tt blur},
+{\tt greater-than}, {\tt greater-than-or-equal-to}, {\tt less-than},
+{\tt less-than-or-equal-to}, {\tt minimum}, {\tt maximum}, {\tt
+range}.
+
+In addition, the following functions are particular for gaussian
+pyramids, laplacian pyramids, and qmf-pyramids.  Take a look at
+{\tt <obv>/tutorials/image-processing/pyramid-tutorial.lisp} for
+examples of how to use these functions.
+
+\begin{description}
+\item\lfun{make-gaussian-pyramid}{ image \&key level display-type filter \res}
+Make a gaussian-pyramid (a low-pass pyramid) from an image, and expand
+the pyramid to the specified level.
+
+\item\lfun{gaussian-pyramid-p}{ thing}
+
+\item\lfun{make-laplacian-pyramid}{ image \&key level display-type
+forward-filter inverse-filter \res}
+Make a laplacian-pyramid (a bandpass pyramid) from an image, and
+expand the pyramid to the specified level.
+
+\item\lfun{laplacian-pyramid-p}{ thing}
+
+\item\lfun{make-separable-qmf-pyramid}{ image \&key level display-type
+lo-filt edge-handler \res}
+Make a QMF-pyramid (a bandpass pyramid) from an image, and expands the
+pyramid to the specified level.  Lo-filt is the kernel of an
+appropriate low-pass filter.  The other filters are automatically
+contructed from this kernel.
+
+\item\lfun{qmf-pyramid-p}{ thing}
+
+\item\lmeth{build}{pyramid}{ level}
+Extend the pyramid to the specified level.
+
+\item\lmeth{access}{pyramid}{ level \&key \res}
+Returns the viewable that is at the specified level of the pyramid.
+
+\item\lmeth{access-band}{pyramid}{ level band \&key \res}
+Returns the viewable that is at the specified level (and band) of the
+pyramid, i.e., use this to get the vertical band on the second level
+of a qmf pyramid.
+
+\item\lmeth{low-band}{pyramid}{}
+Returns the low-pass band (top level) of the pyramid.
+
+\item\lmeth{collapse}{pyramid}{}
+See pyramid-tutorial for details.
+
+\item\lmeth{height}{pyramid}{}
+Returns the height (the number of levels built so far) of the
+pyramid.
+\end{description}
+
+
+
+
+\subsection{Operations on Arrays}
+
+\comment {EJC
+* Need to fix methods to be \lmeth. Ugh.
+* should we export displaced-row?
+* where should covariance go? stats or matrix? correlation?
+* what about simplex? Shuold there be a fitting module?
+should regress go with stepit in fitting module?
+* stats, stepit, regression.
+}
+
+Many of the image operations are also defined for arrays.  These
+methods call C code if the arguments are all {\tt single-float}
+arrays, or if they are all {\tt fixnum} arrays.  If they are some
+other array type, or undeclared type, or if they are mixed array
+types, then the operation is done in lisp (and is slower).  Some of
+the operations only make sense for vectors or for 2d arrays. Some
+image processing operations that are not yet implemented for
+arrays.  
+
+Below, a few routines are documented in detail since they are
+not defined on images. At the end, a list of array operations 
+that work like viewable operations is given.
+\begin{description}
+\item\lfun{almost-equal}{ thing1 thing2 \&key tolerance}
+Compare two arrays and return the first array if 
+the maximum difference between the two arrays is 
+no more than {\tt tolerance}. Otherwise return nil.
+The default tolerance is set in the global variable {\tt *tolerace*}.
+
+\item\lfun{scalar-multiple}{ thing1 thing2 \&key tolerance}
+Compare two arrays and return the first array if 
+the first array is nearly a scalar multiple of the other.
+This is decided as follows. The least-squares 
+scaling coefficient between the arrays is computed, 
+and the maximum difference between the first array
+and the scaled copy of the second array is compared
+to {\tt tolerance}. If the difference is no larger
+than {\tt tolerance}, the first array is returned.
+Otherwise nil is returned.
+The default tolerance is set in the global variable {\tt *tolerace*}.
+
+\item\lfun{randomize}{ array number \&key \res }
+Return an array with the elements of {\tt array}
+individually randomized by adding uniformly distributed
+values between {\tt - number} and {\tt number}.
+
+\item\lfun{shuffle}{ array \&key \res }
+Return an array that contains the elements of {\tt array}
+randomly reordered.
+\end{description}
+
+\begin{verbatim}
+with-displaced-vectors
+total-size dimensions
+check-size rank z-dim y-dim x-dim similar copy
+coerce-to-float print-values zero! fill! normalize
+mean variance third-moment fourth-moment sum-of
+product-of maximum minimum range mean-square-error
+mean-abs-error max-abs-error point-minimum point-maximum
+square-error abs-error add mul sub div negate square abs-value
+linear-x-form square-root power natural-logarithm
+point-operation periodic-point-operation quantize clip
+circular-shift crop paste 
+greater-than less-than equal-to
+greater-than-or-equal-to less-than-or-equal-to 
+covariance correlate array-magnitude
+array-abs-value array-square-magnitude array-complex-phase
+array-cross-product
+\end{verbatim}
+
+
+\subsection{Operations on Lists}
+Many arithmetic operations are also define on lists.
+They usually work just like the array or image equivalents.
+Some operations (for example, {\tt mean})
+will function on lists of viewables, arrays, etc.
+Many only make sense for lists of numbers
+(for example, {\tt minimum}).
+
+Below, a few routines are documented in detail since they are
+not defined on arrays. At the end, a list of list operations 
+that work like array operations is given.
+\begin{description}
+\item\lfun{elements}{ array \&key \res }
+Returns a list containing the elements of {\tt array}.
+\end{description}
+
+\begin{verbatim}
+add sub mul div maximum minimum mean variance
+square square-root natural-logarithm negate abs-value normalize
+fill! dimensions total-size similar copy shuffle 
+vector-length vector-distance randomize almost-equal scalar-multiple 
+\end{verbatim}
+
+
+\subsection{Operations on Matrices}
+
+The matrix module may be loaded into OBVIUS by evaluating:
+\begin{verbatim}
+(obv-require 'matrix)
+\end{verbatim}
+The following is a list of matrix operations that are defined on
+arrays and vectors.  Many of these methods are implemented only for
+float arrays.  By convention, vectors are treated as row vectors.
+Using a row vector in a place where a column vector is required will
+generate a continuable error, where you will usually have the option to
+transpose the row-vector.  To work with column vectors, you must use
+Nx1 arrays.  Various utilities are provided to simplify row and column
+operations and conversions.
+
+\index{floating-point exceptions}
+Note also that some of the C code called by these methods is not
+protected against floating-point exceptions.  By default, Lisp will
+generate a continuable error if a floating-point exception is
+encountered while executing a foreign function.   To turn this
+behavior off, evaluate {\tt (setf (enabled-floating-point-traps) nil)}.
+Note that you will no longer receive {\em any} indication that these
+errors have occured!
+
+OBVIUS Matrix operations are divided into three categories:
+basic matrix arithmetic, 
+operations related to the SVD and other decompositions,
+and utilities (such row and column operations).
+
+
+\mysubsubsec{Matrix Arithmetic}
+
+\begin{description}
+
+\item\lmeth{matrix-mul}{array}{ thing1 thing2 \&key \res}
+{\tt Thing1} and {\tt thing2} may be arrays or vectors (subject to the
+row-vector restrictions described above).
+
+\item\lmeth{matrix-transpose}{array}{ array \&key \res}
+
+\item\lfun{matrix-transpose-mul}{array}{ thing1 thing2 \&key \res}
+Multiplies the (tranpose of {\tt thing1}) with {\tt thing2}, without
+actually having to compute the transpose.  {\tt Thing1} and 
+{\tt thing2} may both be arrays, or one may be an array and the other a
+vector (subject to the row-vector restrictions described above).
+
+\item\lmeth{matrix-mul-transpose}{array}{ thing1 thing2 \&key \res}
+Multiplies the {\tt thing1} times (tranpose of {\tt thing2}).  {\tt
+Thing1} and {\tt thing2} may both be arrays, or one may be an array
+and the other a vector (subject to the row-vector restrictions
+described above).
+
+\item\lmeth{outer-product}{vector}{ vector1 vector2 \&key \res}
+
+\item\lmeth{cross-product}{vector}{ vector1 vector2 \&key \res}
+
+\item\lmeth{dot-product}{vector}{ thing1 thing2 \&key \res}
+Same as {\tt matrix-transpose-mul}, but returns a scalar.
+
+\item\lmeth{vector-length}{vector}{ vector }
+Euclidean length of the vector.
+
+\item\lmeth{vector-length}{vector}{ vector1 vector1 }
+Euclidean distance between vectors.
+
+\item\lmeth{normalize}{vector}{ vector \&key \res}
+Returns multiple values.  First, a vector of unit length in the
+direction of the argument {\tt vector}.  
+Second, the length of the argument {\tt vector}.
+
+\item\lmeth{matrix-inverse}{array}{ array \&key dimension-limit
+condition-number-limit  singular-value-limit \res}
+Computes the Moore-Penrose left pseudo-inverse using the SVD.  
+SVD returns $(W,U,V)$ such that $M = S U V^t$.  
+Pseudo-inverse is $M^{\sharp} = V 1/W U^t$.  
+Allows the calling function to restrict the dimensions of the
+pseudo-inverse.
+If {\tt dimension-limit} is non-nil (it must be a
+whole number N), throw away all but the first N dimensions by setting
+those singular values to 0.  If {\tt singular-value-limit} is non-nil (it
+must be a number x), set to zero those singular values smaller than x.
+Default {\tt singular-value-limit} is *machine-tolerance*.
+If {\tt condition-number-limit} is non-nil (it must be a number x), 
+set to zero those singular values with condition numbers larger than
+x.
+The values returned are the inverse matrix, 
+the minimum singular value (not including any zeros),
+the maximum singular value,
+and the number of nonzero singular values used
+(after the clipping of singular values as described above).
+
+\item\lfun{determinant}{ matrix \&key ignore-zeros u v}
+Uses SVD to compute determinant of a square matrix.  {\tt
+:Ignore-zeros} is an option to ignore any singular values that are zero,
+implicitly assuming that the matrix is nonsingular.  The
+The arguments {\tt :u} and {\tt :v} may be used to pass u and v matrices
+to this function (and on to the SVD), to avoid consing.
+
+\item\lfun{symmetric-p}{ array} ***
+\item\lfun{square-p}{ array} ***
+\item\lfun{diagonal-p}{ array} ***
+\item\lfun{identity-p}{ array} ***
+\item\lfun{unitary-p}{ array} ***
+\item\lfun{orthogonal-p}{ array} ***
+\item\lfun{singular-p}{ array} ***
+
+\item\lfun{identity-matrix}{ size \&key \res}
+Returns a {\tt size} by {\tt size} identity matrix.
+
+\item\lfun{diagonal-matrix}{ thing \&key \res}
+{\tt Thing} may be either a list or a vector.  Returns a diagonal
+matrix with entries from thing.
+
+\item\lfun{diagonal}{ matrix \&key \res}
+Returns a vector with the diagonal entries of {\tt matrix}
+as its contents.
+
+\item\lfun{matrix-trace}{ matrix }
+Returns the sum of the  diagonal entries of {\tt matrix}.
+
+\end{description}
+
+
+\mysubsubsec{Functions Related to SVD and Other Decompositions}
+
+\begin{description}
+
+\item\lfun{singular-value-decomposition}{ matrix \&key u v s}
+equivalent macro \lsym{svd} Computes the singular values and complete
+orthogonal decomposition of a real rectangular matrix, $M$. The matrix
+is decomposed into $U W V^t$, where $U$ and $V$ are orthogonal
+matrices, that consist of the eigenvectors of $M M^t$ and $M^t M$
+respectively.  The entries of $W$ are nonnegative, the singular
+values, which are the square roots of the eigenvalues of $M^t M$,
+ordered in decreasing sequence.  If $M$ is a square symmetric matrix,
+the columns of $U$ are its eigenvectors and the elements of $S$ are
+its eigenvalues.  The function returns the multiple values $(S,U,V)$
+($S$ is returned as a vector of values on the diagonal of the $W$
+matrix). Should the function fail to compute the decomposition nil is
+returned and a warning is signalled.  The arguments {\tt :s}, {\tt :u}
+and {\tt :v} can be passed to avoid consing new arrays.
+
+\lfun{with-svd}{ (s u v) matrix . body}
+*** not documented
+
+\lfun{with-static-svd}{ (s u v) matrix . body}
+*** not documented
+
+\item\lfun{singular-values}{ matrix }
+Returns a vector of the singular values of the matrix, in decreasing
+order (see description of singular-value-decomposition).
+
+\item\lfun{left-singular-matrix}{ matrix }
+Returns the U matrix from the singular-value-decomposition.
+
+\item\lfun{right-singular-matrix}{ matrix }
+Returns the V matrix from the singular-value-decomposition.
+
+\item\lfun{principal-components}{ matrix \&key dimension scale}
+Returns multiple values.  First, the principal components of the rows
+of {\tt matrix} in a matrix of the same dimension, with most important
+components first.  Second, a vector with the principal values of {\tt
+matrix}.  Third, a vector with the singular values of {\tt matrix}.
+When {\tt scale} is t, the row of the principal components matrix are
+scaled by the principal values. By default they have unit length.  The
+{\tt dimension} argument allows you to restrict how many components
+(rows) you want in the resulting component matrix,
+
+\item\lfun{condition-number}{ array}
+Returns square-root of quotient of minimum singular value divided by
+maximum singular value.
+
+\item\lfun{quadratic-decomposition}{ matrix \&key \res}
+Given matrix $M$, returns a matrix $A$ such that $M = A A^t$.  Uses A
+sufficient conditions is that $M$ be positive-definite symmetric. Uses
+SVD.  Generates an error if the matrix cannot be decomposed in this
+way.
+
+\item\lfun{row-space}{ matrix \&key \res singular-value-limit}
+Return an orthogonal basis for the space spanned by the rows of the
+matrix. The basis is generated using the SVD. The rows
+of the basis matrix returned are the principal components,
+and are in order of decreasing singular values. 
+Any basis rows with singular values below {\tt singular-value-limit} 
+are not included in the basis. {\tt singular-value-limit} defaults to 0.0.
+
+\item\lfun{row-null-space}{ matrix \&key \res singular-value-limit}
+Return an orthogonal basis for the space of vectors
+orthogonal to the rows of the matrix.
+See {\tt row-space} for details.
+
+\item\lfun{col-space}{ matrix \&key \res singular-value-limit}
+
+\item\lfun{col-null-space}{ matrix \&key \res singular-value-limit}
+
+\item\lfun{solve-eigenvalue}{ matrix \&key \res}
+Find unit vector $x$ such that $x$ minimizes $x^t M x$, for square
+symmetric matrix $M$.  Finds the eigenvector corresponding to the
+smallest eigenvalue of $M$.  Uses SVD.
+
+\item\lfun{qr-decomposition}{ matrix \&key q r}
+equivalent macro \lsym{qrd} \\ This function computes the QR
+decomposition of the matrix, such that matrix = q r, where q is
+orthonormal and r is upper triangular.  The function returns a list of
+q and r.  The arguments {\tt :q} and {\tt :r} may be used to pass q
+and r matrices to this function, to avoid consing.
+
+\item\lfun{row-space-qr}{ matrix \&key q r \res}
+Uses QR-decomposition instead of SVD.
+
+\item\lfun{col-space-qr}{ matrix \&key r \res}
+Uses QR-decomposition instead of SVD.
+
+\item\lfun{row-null-space-qr}{ matrix \&key q r tmp tol \res}
+Uses QR-decomposition instead of SVD.
+
+\item\lfun{col-null-space-qr}{ matrix \&key q r tmp tol \res}
+Uses QR-decomposition instead of SVD.
+
+\item\lfun{determinant-qr}{ matrix \&key ignore-zeros q r}
+Uses QR-decomposition instead of SVD.
+
+\end{description}
+
+\mysubsubsec{Matrix Utilities}
+Unless otherwise noted, all row operations have corresponding column
+operation counterparts. Row and column indices begin at 0.
+
+\begin{description}
+
+\item\lfun{make-matrix}{ \&rest stuff }
+Return a matrix whose contents is {\tt stuff}.
+The latter may be numbers, lists of numbers,
+lists of lists of numbers, vectors, or arrays.
+An {\tt single-float} matrix of the appropriate size is made
+and filled with {\tt stuff}. 
+In the case of vectors and lists of numbers, 
+the rows of the resulting array are filled in order.
+
+\item\lfun{vectorize}{ matrix size x-offset y-offset}
+Returns a vector whose contents is the entire contents
+of {\tt matrix}. The result is displaced to the original matrix.
+The keyword arguments allow you to displace the vector to any location
+and control its size.
+
+\item\lfun{columnize}{ matrix size x-offset y-offset}
+Same as vectorize, except makes a {\tt size} by 1 displaced array.
+
+\item\lfun{row}{ row matrix }
+Returns a vector whose contents is a copy of 
+the specified row of {\tt matrix}.
+
+\item\lfun{displaced-row}{ row matrix }
+Returns a vector {\em displaced to} the specified row of the matrix.
+Hence, if the resulting vector is modified, 
+the data in the original matrix will be modified.
+This function has no column-operation counterpart.
+
+\item\lfun{rows}{ row matrix }
+Returns a list of vectors which are copies 
+of the rows of {\tt matrix}.
+
+\item\lfun{displaced-rows}{ row matrix }
+Returns a list vectors displaced to the rows of {\tt matrix}.
+This function has no column-operation counterpart.
+
+\item\lfun{col}{ col matrix }
+Returns an Nx1 matrix whose contents is a copy of 
+the specified column of the {\tt matrix}.
+
+\item\lfun{cols}{ col matrix }
+Returns a list of copies of the columns of {\tt matrix}.
+
+\item\lfun{row-dim}{ matrix }
+Returns the number of rows of {\tt matrix}.
+
+\item\lfun{col-dim}{ matrix }
+
+\item\lmeth{add-rows}{matrix vector}{ matrix vector \&key \res }
+Add a row vector to each row of a matrix.
+Arguments can be given in either order.
+
+\item\lmeth{add-rows}{vector matrix}{ vector matrix \&key \res }
+
+\item\lmeth{add-cols}{matrix vector}{ matrix vector \&key \res }
+
+\item\lmeth{add-cols}{vector matrix}{ vector matrix \&key \res }
+
+\item\lmeth{sub-rows}{matrix vector}{ matrix vector \&key \res }
+Subtract {\tt vector} from each row of {\tt matrix}.
+
+\item\lfun{sub-rows}{vector matrix}{ vector matrix \&key \res }
+Subtract a each row of {\tt matrix} from {\tt vector}.
+
+\item\lmeth{sub-cols}{matrix vector}{ matrix vector \&key \res }
+
+\item\lmeth{sub-cols}{vector matrix}{ vector matrix \&key \res }
+
+\item\lfun{mean-rows}{ matrix \&key \res }
+Returns the row vector whose contents is the mean of all the rows
+of {\tt matrix}.
+
+\item\lfun{mean-cols}{ matrix \&key \res }
+
+\item\lfun{normalize-rows}{ matrix \&key \res }
+Returns a matrix with the rows of {\tt matrix} independently
+normalized to a vector length of 1.0.
+
+\item\lfun{normalize-cols}{ matrix \&key \res }
+
+\item\lfun{sum-rows}{ matrix \&key \res }
+Returns the row vector whose contents is the sum of all the rows
+of {\tt matrix}.
+
+\item\lfun{sum-cols}{ matrix \&key \res }
+
+\item\lfun{covariance-rows}{ matrix \&key \res sample}
+Calculates the covariance matrix associated with a matrix.  The matrix
+is treated as many multivariate observations, with each observation in
+a row.  Hence, the ijth entry of the resulting covariance matrix is
+the covariance between the ith and jth columns of {\tt matrix}.
+If sample is t, the sample covariance is calculated,
+using (n-1) rather than n as the divisor.
+
+\item\lfun{covariance-cols}{ matrix \&key \res sample}
+
+\item\lfun{shuffle-rows}{ matrix \&key \res }
+Returns a matrix with the rows of {\tt matrix} randomly shuffled.
+This function has no column-operation counterpart.
+
+\item\lfun{swap-rows}{ matrix first-row second-row \&key \res }
+Returns a matrix identical to {\tt matrix},
+but with rows numbered {\tt first-row} and {\tt second-row} swapped.
+This function has no column-operation counterpart.
+
+\item\lfun{sort-rows}{ matrix predicate \&key key \res }
+Returns a matrix containing the rows of {\tt matrix} 
+sorted according to {\tt predicate}, using {\tt key}.
+This arguments are analagous to the Common Lisp {\tt sort} function,
+except that {\tt matrix} is not modified.
+This function has no column-operation counterpart.
+
+\item\lfun{paste-rows}{ matrices \&key \res }
+Paste a list of matrices into one big matrix,
+such that each row of the result is a row from one of the
+source matrices. In other words, paste the matrices
+on top of one another.
+
+\item\lfun{paste-cols}{ matrices \&key \res }
+
+\item\lfun{append-rows}{ \&rest matrices }
+Like {\tt paste-rows}, except that the matrices
+are passed directly as arguments, rather than as a list.
+
+\item\lfun{append-cols}{ matrices \&key \res }
+
+\end{description}
+
+
+

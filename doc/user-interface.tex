@@ -1,0 +1,491 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{User Interface}
+\label{sec:userface}
+
+This section describes the user interface provided for OBVIUS.
+
+\subsection{The Mouse}
+\label{sec:mouse}
+
+Mouse clicks within OBVIUS panes are captured and interpreted by
+OBVIUS.  WARNING: Some X11 or OpenWindows window managers override
+the mouse bindings in obvius.  In particular, twm allows the user to
+bind mouse-clicks in their .twmrc file.  If your mouse is not
+responding -- check your window manager manual pages.
+
+All mouse-handling code is in the file {\bf x-mouse.lisp}.  The
+bindings can be altered within this file.  The mouse can be used to
+cycle through the stacks of pictures, zoom, pan, and select images,
+among other things.
+
+The following is a list of the current mouse bindings, organized
+according to the ``bucky'' keys (Shift, Control, and Meta).  All
+actions are performed on the pane containing the mouse at the time of
+the button click.
+
+\begin{tabular}{|l|ccc|}
+\hline
+buckies & left button       & middle button  & right  button       \\
+\hline
+Raw	& select-viewable   & refresh        & select-pane/position-message    \\
+Control & previous-picture  & next-picture   & move-to-here        \\
+Shift 	& zoom-in           & zoom-out       & numerical-magnifier \\
+Meta	& describe-viewable & picture-parameters & picture-menu    \\
+C-Sh	& pop-picture       & center         & drag                \\
+C-Sh-M	& destroy-viewable  & unbound        & hardcopy             \\
+\hline
+\end{tabular}
+
+The following are picture-specific mouse bindings for gray pictures:
+
+\begin{tabular}{|l|ccc|}
+\hline
+buckies & left button       & middle button  & right  button       \\
+\hline
+M-C	& boost-contrast  & reduce-contrast  & histogram    \\
+M-Sh	& x-slice           & y-slice        & crop           \\
+\hline
+\end{tabular}
+
+The following are picture-specific mouse bindings for flipbooks:
+
+\begin{tabular}{|l|ccc|}
+\hline
+buckies & left button       & middle button  & right  button       \\
+\hline
+M-C	& previous-frame  & next-frame  & show-movie    \\
+\hline
+\end{tabular}
+
+
+\begin{description}
+
+\item [Raw] (no bucky keys):  
+\begin{itemize}
+\item Left: {\bf Select viewable}.  Selecting a viewable that is bound
+to a symbol prints that symbol into an emacs buffer at current prompt
+position (the ``point''), where it is then ready to be evaluated.  
+Of course, if the viewables have symbols bound to them, you can simply
+type the symbol name yourself.
+
+If the selected viewable has a nil name or a string name, then OBVIUS
+prints a more cryptic functional expression like (obvius::pid 1) that
+will also evaluate to the viewable.  This allows easy, interactive
+manipulation of viewable objects.  Examples are given in the OBVIUS
+tutorial.
+
+You can also access unnamed viewables via the variables *, **, and ***
+that are bound to the last three values returned by lisp. Also, the
+variables @, @@, and @@@ are bound to the last three viewables
+selected with a raw left mouse-click.
+
+This mouse-click also selects the pane as the current pane.
+
+\item Center: {\bf Refresh}.  The top picture on the picture stack is
+recomputed (if necessary) and then redisplayed.  Calls (refresh pane).
+
+\item Right: {\bf Select pane/Position Message}.  The pane containing
+the mouse is set to be the current pane and some information that
+depends on the picture type is printed in the Emacs minibuffer.  For
+example, clicking right on a grey picture of an image gives the
+(x,y)-position and the floating-point intensity value of the {\em
+image} (not the picture).  This information is updated dynamically if
+you drag the mouse.  Note that many other mouse clicks will also
+select the pane.
+\end{itemize}
+
+\item [Control]:
+\begin{itemize}
+\item  Left: {\bf Previous picture}.  The stack of pictures in the
+pane is cycled.  The pane is selected.  Calls (cycle-stack pane nil).
+\item  Middle: {\bf Next picture}. The stack of pictures in the pane
+is cycled in the opposite direction as Control-Left.  This pane is
+selected.  Calls (cycle-stack pane t).
+\item  Right: {\bf Move to here}.  The picture on top of the current
+pane is moved to the top of this pane.  Selects this pane.
+\end{itemize}
+
+\item [Shift]:
+\begin{itemize}
+\item  Left: {\bf Zoom in}.  Pixel-replication is used to produce an
+enlarged version of the image.  The zoomed picture can be dragged
+using C-Sh-middle.
+\item Middle: {\bf Zoom out}.  This reduces the magnification of a
+picture.  This will subsample below the resolution of the original
+image.
+\item  Right: Numerical magnifying glass  [Currently unimplemented].
+\end{itemize}
+
+\item [Meta]:
+\begin{itemize} 
+\item Left: {\bf Describe viewable}.  This prints out a description of the
+viewable in the lisp listener. 
+\item  Middle: {\bf Edit picture parameters}.  Pops up a dialog to view and edit
+the parameters of the picture.
+\item  Right: {\bf Picture menu}.  Pops up a menu to select (i.e., cycle to
+the top) any picture.  Faster than using next-picture or
+previous-picture if the pane has a large stack.
+\end{itemize}
+
+\item [Control-shift]:
+\begin{itemize}
+\item Left: {\bf Pop}.  This mouse click calls (pop-picture pane),
+which is described in section \ref{sec:pictures}.  The picture on the
+top of the picture stack is destroyed. The viewable is not explicitly
+destroyed, although {\em it will no longer be accessible if it did not
+have a symbol name slot}.
+\item  Middle: {\bf Center}.  Recenters the picture in the pane if it
+has been dragged.
+\item  Right: {\bf Drag}.  Allows interactive re-positioning of
+pictures within the pane.
+\end{itemize}
+
+\item [Control-meta-shift]:
+\begin{itemize}
+\item Left: {\bf Destroy}.  This mouse click calls the method destroy
+on the viewable.  All static memory used by the viewable its pictures
+is relinquished, the pictures are removed from the picture stacks, and if
+the viewable has a symbol name, it is unbound.  If the viewable has
+inferiors that are otherwise unaccessable, then the inferiors are also
+destroyed.  If the viewable has superiors, then this causes a
+continuable error that allows the user to destroy both the viewable
+its superior.
+\item Right: {\bf Hardcopy}.  Prints the picture to a postscript
+printer.  The global parameter *default-printer* specifies which
+printer it goes to.
+\end{itemize}
+
+\item [Meta-Shift]:  These bindings are {\em picture specific}!
+
+\noindent
+For gray pictures:
+\begin{itemize}
+\item  Left: {\bf X-slice}. This produces a new viewable, a
+one-dimensional ``slice'' of a two-dimensional image, and pushes a
+one-d-graph picture of it onto the stack of the current pane.  The
+y-coordinate of the slice is selected by the position of the
+mouse-click in the original picture.
+\item  Middle: {\bf Y-slice}. Orthogonal to x-slice.
+\item Right: {\bf Interactive Crop}. Hold down the mouse and drag to
+define a square subregion of a picture.  Releasing mouse creates a new
+viewable, cropped from the original.
+\end{itemize}
+
+\item [Meta-Control]:  These bindings are {\em picture specific}!
+
+\noindent
+For gray pictures:
+\begin{itemize}
+\item Left: {\bf Boost-contrast}.
+\item Middle: {\bf Reduce-Contrast}.
+\item  Right: {\bf Histogram}.  This computes a histogram viewable, with
+a bin size which is controlled by the global parameter {\bf
+*default-number-of-bins*}, and pushes a one-d-graph picture of it onto
+the stack of the current pane.  This calls the function make-histogram
+which is described in section \ref{sec:images}.
+\end{itemize}
+
+\noindent
+For flipbook pictures:
+\begin{itemize}
+\item Left: {\bf Previous Frame}.  Cycle through flip-book picture of a sequence.
+\item Middle: {\bf Next Frame}. Cycle through flip-book picture of a sequence.
+\item Right: {\bf Display Sequence}.  Display all frames of a
+sequence.  See Section \ref{sec:flipbook} for a description of the
+parameters that control delay between frames, etc.  Any mouse button
+will stop the display.
+\end{itemize}
+
+\end{description}
+
+
+\subsection{The Control Panel}
+\index{control panel}
+The control panel displays status information that tells you what the
+OBVIUS listener (top-level process) is doing.  It also displays
+on-line, passive (i.e., you don't have to do anything to get it),
+mouse documentation.  This means that when you move the mouse into an
+OBVIUS pane, the relevant mouse bindings are echoed in the message
+line; if you press a bucky key (shift, meta, or control), the
+documentation is updated accordingly.
+
+To create a control panel, use the command 
+\lfun{make-control-panel}{\&key left right top bottom}
+You may wish to put this in your {\tt .obvius} initialization file.
+To destroy the control panel, call \ldef{destroy-control-panel}.
+
+The control panel also has several menu buttons.  Holding the right
+mouse button down on a menu button reveals the pull-down menu.  Some
+of the menu choices bring up dialog boxes.  The dialog box is created
+by releasing the mouse button on that choice.  Some of the menu
+choices are set up to reveal sub-menus.  The sub-menus are revealed by
+moving the mouse to the right while continuing to hold down the right
+button.
+
+Within a dialog box, click left to move the cursor around and type as
+usual.  Many of the dialog boxes are interfaces to function calls.
+The functions are executed by clicking either the {\tt Execute} button
+or the {\tt OK} button.  When this is done OBVIUS prints an expression
+in the *lisp* buffer and evaluates it.  Clicking left on an OBVIUS
+pane selects a viewable for the function argument, by inserting it at
+the cursor position in the dialog box.
+
+At any given moment, there can only be a single function dialog box.
+If you try to bring up another one, OBVIUS will destroy the first one.
+You can add functions to the menus by adding them to particular global
+variables in the file {\tt x-control-panel.lisp}.  FOr example, you
+could add a new function {\tt foo} to the  ``Misc'' menu, but adding
+the symbol {\tt 'foo} to the value of the variable
+\lsym{obvius::*obvius-misc-functions*}. Changes to these
+variables are {\em dynamically} incoporated into the menus.
+
+\index{menus}
+The menus on the control panel are:
+\begin{description}
+
+\item [Parameters]: This menu allows you to adjust parameters of the
+current picture, the screen, the default slots of pictures and
+viewables, and global parameters.  The items on the menu are described
+in more detail below.
+
+\item [Statistics]: Menu of operations for computing viewable
+statistics (e.g., mean or variance of an image or image-sequence).
+Each menu choice brings up a dialog box for entering the function
+arguments.
+
+\item [Arith Ops]: Menu of statistics operations (e.g., mean,
+variance, maximum, minimum, etc.).
+
+\item [Filter Ops]: Menu of filtering operations (e.g., apply-filter,
+fft, etc.).
+
+\item [Geom Ops]: Menu of geometric operations (e.g., crop, paste,
+slice, flip-x, etc.).
+
+\item [Compare]: Menu of comparison operations (e.g., greater-than,
+less-than, mean-square-error, etc.).
+
+\item [Synth]: Menu of synthetic image functions (e.g., make-impulse,
+make-sine-grating, make-zone-plate, etc.).
+
+\item [Matrix]: Menu of matrix operations (e.g., matrix-multiply,
+singular-value-decomposition, etc.).
+
+\item [Misc]: Menu of miscillaneous operations (e.g., print-values,
+hardcopy, etc.), and a submenu of optional modules that may be loaded.
+\end{description}
+
+\subsection{Current Picture, Picture Defaults and Viewable Defaults menus}
+\begin{description}
+\item [Current Picture]: Brings up a dialog box to change parameters
+of the current picture (picture on top of the current pane).  Buttons
+at the bottom allow user to Apply the changes to the picture (the
+display will be updated), revert to the current slot values, revert to
+the default slot values, or quit the dialog.
+
+\item [Viewables]: Reveals a sub-menu that allows you to change
+the default parameters of a particular viewable class.  The parameters
+for each viewable class are described in section \ref{sec:viewables}.
+The default parameters are used to initialize a new viewable when it
+is first created.  Changing the default parameter values with this
+menu has no effect on viewables that have already been created.
+
+\item [Pictures]: Reveals a sub-menu that allows you to change
+default parameters of a particular picture class.  The parameters for
+each picture class are described in section \ref{sec:viewables}.  The
+default parameters are used to initialize a new picture when it is
+first created.  Changing the default parameter values with this menu
+has no effect on pictures that have already been created.  The
+parameters of the current picture may be changed with the {\tt Current
+Picture Parameters} menu (mentioned above).
+\end{description}
+
+
+\subsection{Current Screen Parameters}
+
+The user can change the following screen parameters from the {\tt
+Parameters} menu on the control panel (see above):
+\begin{description}
+\item [Gray-shades]: Number of grays to allocate in the color map.  If
+OBVIUS fails to allocate the requested number, it tries again with a
+smaller number.
+\item [Gray-gamma]: Default gamma value in the allocated gray-shades.
+\item [Gray-dither]: If gray-shades is less than gray-dither, then
+gray pictures will automatically be dithered.
+\item [Foreground]: Foreground color used for graphics (e.g., it is
+the color used for each new graph pictures).
+\item [Background]: Background color of each pane.
+\end{description}
+
+\subsection{Global Parameters}
+
+There are a number of global parameters that affect how OBVIUS
+operates.  The user can change the values of these globals from the
+{\tt Parameters} menu on the control panel (see above).  The function
+of each parameter is describe below:
+
+\begin{description}
+\item \lsym{*default-printer*}: Name of a PostScript printer.
+
+\item \lsym{*max-print-vals*}: Maximum number of values which the
+print-values method prints in a line of the image.  See print-values,
+Section \ref{sec:images}.
+
+\item \lsym{*y-print-range*} and \lsym{*x-print-range*}: Default range of
+values in an image to be printed by the print-values function.  Should
+be a list of two numbers between 0 and 1.  See print-values, Section
+\ref{sec:images}.
+
+\item \lsym{*auto-bind-loaded-images*}: If t, automatically binds images
+loaded from files to symbols matching their filenames.  See
+load-image, Section \ref{sec:datfile}.
+
+\item \lsym{*auto-update-pictures*}: If non-nil, out-of-date pictures will
+be updated when they are revealed.  If nil (the default), user must
+explicitly refresh the pane to update an out-of-date picture.
+
+\item \lsym{*auto-destroy-orphans*}: Slightly risky parameter causes
+viewables to be destroyed when 1) their names are rebound if they have no
+pictures or superiors, 2) their only picture is popped off of the pane
+and they do not have a symbol name or superiors, 3) their only
+superior is destroyed, and they do not have a symbol name or any
+pictures.  These three cases are the situations in which OBVIUS can
+prevent the creation of orphans.  Note that this does not prevent the
+user from creating their own orphans (e.g., make a new image with no
+name and don't display it).  See also section~\ref{sec:memory} on
+memory management.
+
+\item \lsym{*auto-display-viewables*}: If non-nil, viewables returned to the
+top-level listener are automatically displayed on the currently
+selected pane.  This is the normal mode of operation.
+
+\item \lsym{*heap-growth-rate*}: Number of elements to expand the heap
+when out of memory.  See Section \ref{sec:memory}.
+
+\item \lsym{*auto-expand-heap*}: When non-nil, expand heap automatically
+when out of memory.  See Section \ref{sec:memory}.
+
+\item \lsym{*div-by-zero-result*}: Default result used by /-0 and div
+functions when the divisor is zero.  See Section \ref{sec:operations}.
+\end{description}
+
+
+\subsection{Running OBVIUS on a remote host}
+
+The networking capabilities of X Windows (or OpenWindows) make it
+possible to open OBVIUS windows on a machine other than the one on
+which the OBVIUS process resides. Like other X clients, OBVIUS
+examines the value of the shell environment variable, DISPLAY, in
+order to determine which screen to open its windows on. If your X
+server finds more than one screen, you will be able to open obvius
+panes on any of them using the {\tt :screen} keyword argument to {\bf
+new-pane}. This will typically be the case if you have two monitors
+attached to one workstation, or if your framebuffer has a separate
+overlay plane.  The list of screens that OBVIUS knows about is kept in
+the (unexported) global variable {\tt obvius::*screen-list*}.
+
+Because X is a server-based window system, each bitblt requires that
+data be transferred between the OBVIUS (lisp) process, and the X
+server process. Displaying a picture for the first time will be
+delayed by the time it takes for this transfer, but the remote
+(server) copy of the data is retained as an X pixmap, and subsequent
+redisplay, via refresh or cycling a pane, is free of this penalty.
+
+
+\subsection{Screens and Windows}
+
+OBVIUS maintains a list of {\bf screens} on which its panes reside.
+This mechanism makes it possible to have OBVIUS panes on several
+screens which may have different capabilities at the same time, and
+leaves open the possibility of using different window systems on the
+various screens. System-independent code which defines windows and
+screens is in pane.lisp, while system-dependent window code for X is
+in the file {\bf x-window.lisp}.
+
+OBVIUS panes are described in section \ref{sec:pictures}.  These panes
+are built on top of LispView window objects and thus inherit all of
+the attributes of those windows.  Accordingly, panes can be moved,
+resized, refreshed, hidden, closed, or opened in the same manner as
+any other X11 window.  NOTE: if you are using X11 (as opposed to
+OpenWindows), you should not destroy an OBVIUS pane from the window
+manager as this will destroy the client process (i.e., Lisp)!!  Use
+the OBVIUS destroy method to destroy a pane (this can be invoked from
+the {\tt misc} menu on the control panel).
+
+In LispView, mouse events are handled by a separate Lisp process.
+Multiprocessing poses particular difficulties for OBVIUS because some
+of the mouse clicks may result in lots of computation, or they may
+need to destructively modify data structures that are being
+simultaneously accessed by the main process.  OBVIUS has two different
+solutions for handling these problems:
+\begin{enumerate}
+\item If the mouse click involves only modification of pictures,
+the computation {\em is} performed by the mouse process.  To avoid
+data structure collisions (e.g., the mouse process and main process
+both trying to display something in the same pane), OBVIUS ``locks''
+the pane being modified, using the macro
+\lsym{with-locked-pane} to give exclusive access to one process (see
+{\bf pane.lisp} for examples of use).
+
+\item If the mouse click requires substantial computation or
+creation of viewables, OBVIUS does not let the mouse process handle
+the event directly.  Rather, OBVIUS hands off compute-intensive
+evaluation to the main lisp process via an evaluation queue.  The
+main lisp process polls the eval queue each time it goes through its
+read-evel-print loop.  The upshot of this is that some mouse events
+are handled immediately (e.g., cycle stack) whereas others are not
+(e.g., make-slice).  If the event is going to be handled in a delayed
+fashion, OBVIUS will notify you by putting up the status message
+``Enqueued form: <form>''.
+\end{enumerate}
+
+
+\subsection{Emacs and OBVIUS}
+
+The user interface of OBVIUS is greatly enhanced when it is run as a
+sub-process of the Emacs editor.  The following capabilities are available:
+\begin{itemize}
+\item Quick entry of viewable arguments to commands [left
+mouse click (select-viewable)].
+\item Passive mouse documentation and system messages in the Emacs
+minibuffer (the bottom line of the Emacs window) (Note: this is only
+true in the absence of the contol panel).
+\item Interactive Lisp shell buffer with command history mechanism.
+\item Evaluation of lisp expressions from Emacs file buffers [{\tt C-c
+e}], and In-package compilation of lisp functions from Emacs file
+buffers [{\tt C-c c}].
+\item Function argument lists [{\tt C-c C-a}], documentation strings [{\tt
+C-c C-d}], symbol apropos [{\tt C-c C-h}], symbol description [{\tt
+C-c C-i}], macro expansion [{\tt C-c C-m}], and source file editing
+[{\tt C-c .}].
+\item Filename completion for load-image requests [{\tt C-c l}].
+\item Complete record of interaction with OBVIUS (in the form of an
+Emacs buffer).
+\end{itemize}
+
+The extensions to Emacs that provide this functionality are contained
+in the \abox{emacs-source} files.  For more information, see the file
+\abox{emacs-source}/cl-shell.doc.
+
+\subsection{Help}
+\label{sec:help}
+
+The following helpful functions are provided:
+\begin{description}
+\item ({\bf obvius-parameters} \&key doc) \\
+Prints out a list of the system
+parameters and their current values.  If the optional {\em doc}
+argument is non-nil, the documentation of each parameter will also be
+printed. Documentation of each parameter is also
+available via a call to the Common Lisp documentation function:
+(documentation '\abox{symbol} 'variable).
+\item ({\bf obvius-commands}) \\
+Prints out a list of all OBVIUS functions which are exported.
+\item ({\bf obvius-variables}) \\ 
+Currently not implemented.
+\end{description}
+In addition, the source code for any OBVIUS function may be found in
+using the ``C-c.'' command.  Also, the Common Lisp function {\tt
+(apropos <piece-of-symbol-or-string>)} will search for all symbols
+containing the given symbol or substring.

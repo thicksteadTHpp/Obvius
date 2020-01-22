@@ -1,0 +1,24 @@
+
+all: main.ps
+
+############################################################################
+
+LISP = /d/vision3/lucid-4.0.2
+
+TEXFILES = main.tex copyright.tex intro.tex organization.tex \
+	viewables.tex pictures.tex operations.tex data-analysis.tex \
+	user-interface.tex hacking.tex install.tex release-notes.tex bugs.tex
+
+############################################################################
+
+main.ps: main.dvi
+	dvips -o main.ps main.dvi
+
+main.dvi: main.toc index.tex
+	latex main.tex
+
+index.tex: main.idx
+	$(LISP) -n -eval "(load \"index.lisp\")" -eval "(make-index)" -eval "(quit)"
+
+main.toc main.idx: $(TEXFILES)
+	latex main.tex

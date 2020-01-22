@@ -1,0 +1,28 @@
+\section{Known Bugs}
+
+This appendix is a partial list of known bugs in Obvius.  Other bugs
+are listed in the file {\tt \abox{obv}/TODO.soon} and {\tt
+\abox{obv}/TODO}.  They will be fixed in a future release of the
+system.
+
+\begin{description}
+
+\item {\bf 1D/2D} images have some inconsistencies.  In particular,
+many of the synthetic image generating functions break on
+one-d-images, and you can not setf iref a one-d-image.  We plan to
+extend Obvius so that images (and all viewables) can be any rank (like
+arrays).
+
+\item {\bf Hardcopy} still needs lots of work.
+
+\item {\bf Multiple Screens} are not yet supported.
+
+\item {\bf 24bit Displays} are not yet supported.
+
+\item {\bf Pyramids} do not necessarily work correctly on
+one-d-images.  Qmf-pyramids do not work at all.
+
+\item {\bf Screen color} does not update all pictures, e.g., pasteups
+and graph flipbooks will have the wrong background color.
+
+\end{description}

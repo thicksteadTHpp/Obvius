@@ -1,0 +1,90 @@
+%%%% From amt:/lisp/cake/doc
+
+% Include these definitions in a LaTeX file to document Lisp
+%
+% General form for Lisp documentation, a la Steele.
+% Arg 1: Name
+% Arg 2: List of argument names and lambda-list keywords
+% Arg 3: Type (e.g., Function, Macro)
+% Produces roughly:
+% {\tt name} {\em arg1 arg2 ...} \hspace*{\fill}[{\em type}]
+\makeatletter
+\newcommand{\lispdoc}[3]{\par\bigskip
+  \tripartite{{\tt #1}}{{\em\lowercase{#2}}}{[{\em #3\/}]}\index{{#1}{#2}{#3}}\par
+  \nopagebreak\smallskip
+  \global\@nobreaktrue
+  \everypar{\if@nobreak\global\@nobreakfalse{\setbox0=\lastbox}\fi\everypar{}}}
+\makeatother
+\newcommand{\indexentry}[1]{\indexdoc#1}
+\newcommand{\indexdoc}[4]{%
+  \tripartite{\makebox[.35in][l]{#4}{\tt #1}}{{\em\lowercase{#2}}}{[{\em #3\/}]}\par}
+%
+\newlength{\namespace}
+\newlength{\typespace}
+\newlength{\argspace}
+\newcommand{\tripartite}[3]{{\hyphenpenalty=10000\exhyphenpenalty=10000
+  \settowidth{\namespace}{#1}
+  \settowidth{\typespace}{#3}
+  \setlength{\argspace}{\textwidth}
+  \addtolength{\argspace}{-1\namespace}
+  \addtolength{\argspace}{-1\typespace}
+  \addtolength{\argspace}{-1\tabcolsep}
+  \noindent\begin{tabular*}{\textwidth}[t]{@{}l@{~}p{\argspace}@{\extracolsep{\fill}}r@{}}
+  #1\ & 
+  {\begin{minipage}[t]{\argspace}\raggedright\noindent\vphantom{p}#2\vphantom{p}\end{minipage}}
+  & #3 \\
+  \end{tabular*}}}
+%
+% Specializations of lispdoc
+% For Functions:
+\newcommand{\fndoc}[2]{\lispdoc{#1}{#2}{Function}}
+\newcommand{\sfndoc}[2]{\fndoc{#1}{#2}\marginpar{Symbolics Only}}
+% For Inline Functions
+\newcommand{\indoc}[2]{\lispdoc{#1}{#2}{Inline}}
+\newcommand{\sindoc}{\marginpar{*}\indoc}
+% For New Inline Functions (Previously Macros)
+\newcommand{\newindoc}[2]{\lispdoc{#1}{#2}{Inline}\draftnote{Was a macro}}
+\newcommand{\snewindoc}{\marginpar{*}\newindoc}
+% For Keywords
+\newcommand{\keydoc}[2]{\lispdoc{#1}{#2}{Keyword}}
+\newcommand{\skeydoc}{\marginpar{*}\keydoc}
+% For Macros
+\newcommand{\macdoc}[2]{\lispdoc{#1}{#2}{Macro}}
+\newcommand{\smacdoc}{\marginpar{*}\macdoc}
+% For Variables
+\newcommand{\vardoc}[1]{\lispdoc{#1}{\hspace{\fill}}{Variable}}
+\newcommand{\svardoc}{\marginpar{*}\vardoc}
+% For Constants
+\newcommand{\condoc}[1]{\lispdoc{#1}{\hspace{\fill}}{Constant}}
+\newcommand{\scondoc}{\marginpar{*}\condoc}
+% For Prefixes
+\newcommand{\predoc}[1]{\lispdoc{#1}{\hspace{\fill}}{Prefix}}
+% For Properties 
+\newcommand{\propdoc}[2]{\lispdoc{#1}{#2}{Property}}
+% For gluing two def lines together in a row
+\newcommand{\doubledoc}{\par\addvspace{-3ex}}
+%
+% For typesetting the values of optional and keyword arguments
+% Puts argname and default value in roman parentheses, separated by nb space.
+\newcommand{\optarg}[2]{\mbox{{\rm (}{#1}~{#2\/}{\rm )}}}
+% Puts argname in roman square braces
+\newcommand{\optmacarg}[1]{\mbox{{\rm [}#1\/{\rm ]}}}
+%
+% For Kleene closures of arguments (e.g., defstruct on p. 307 of Steele)
+% Surrounds arg with {...} and trails with superscript + or *.
+\newcommand{\kleeneplus}[1]{\mbox{{\rm \{}#1\/{\rm \}$^{+}$}}}
+\newcommand{\kleenestar}[1]{\mbox{{\rm \{}#1\/{\rm \}$^{*}$}}}
+%
+% Abbreviations for Common Lisp lambda-list keywords
+\newcommand{\optional}{{\tt \&optional}\/}
+\newcommand{\rest}{{\tt \&rest}\/}
+\newcommand{\key}{{\tt \&key}\/}
+\newcommand{\aok}{{\tt \&allow-other-keys}\/}
+\newcommand{\allow}{{\tt \&allow-other-keys}\/}
+\newcommand{\aux}{{\tt \&aux}\/}
+\newcommand{\body}{{\tt \&body}\/}
+\newcommand{\whole}{{\tt \&whole}\/}
+\newcommand{\env}{{\tt \&environment}\/}
+\newcommand{\returns}{$\rightarrow$\/}
+\newcommand{\plus}{{\tt \&Plus}\/}
+\newcommand{\keys}{\tt\ }

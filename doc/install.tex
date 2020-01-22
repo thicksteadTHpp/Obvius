@@ -1,0 +1,235 @@
+%%% Keep this file consistent with the INSTALL file in the top directory.
+
+\section{Installation}	
+\label{sec:install}
+
+This section gives step-by-step instructions for installing OBVIUS on:
+
+\begin{itemize}
+\item{{\bf Sun workstations}}
+
+With Lucid (Sun) Common Lisp 4.1, with CLOS and LispView.  Currently,
+OBVIUS runs comfortably on Suns with 8 bit frame buffers (color or
+gray-scale monitors), or monochrome (1bit) frame buffers.
+
+\item{{\bf SGI workstations}}
+
+With Lucid (SGI) Common Lisp 4.1 (beta) with CLOS.  In order to run
+OBVIUS, you will need at least this version of Common Lisp from Lucid;
+older versions like version 3.0.2+ will not work.  The current version
+of OBVIUS for this platform was developed on both the Indigo and the
+Personal Iris.  It supports both 8 and 24 bit frame buffers.
+
+\end{itemize}
+
+
+\subsection{Requirements}
+
+You need a fairly large swap space (virtual memory, paging area) in
+order to use OBVIUS to its fullest potential (we generally allot 50
+Megabytes or more).  20 Megabytes is a bare minimum to get OBVIUS to
+load; this amount of swap space will not allow you to do very much in
+the way of image processing as the image storage space restrictions
+will be overly stringent.
+
+If you are accustomed to working with Lisp, these requirements will
+not be very remarkable.  If they do seem somewhat voracious, remember
+that if you do image processing with individual binary programs and
+shell scripts, as many people do, you will end up storing all of your
+results as files on the disk and may soon frequently require easily
+this much storage space for your intermediate, temporary results.
+
+The OBVIUS directory, which contains Lisp and C source and binary
+files and documentation, occupies around 4Mb of disk space.  The
+complete lisp image (including Lucid 4.0, CLOS, OBVIUS, possibly
+LispView) will occupy at least 15Mb, so you should have that much disk
+space to devote to OBVIUS.
+
+In order to make use of the user interface features, you should also
+have GNU emacs. You can obtain GNU emacs via anonymous ftp from
+prep.ai.mit.edu.
+
+OBVIUS 3.0 runs under the X window system.  X was developed at MIT and
+there are public domain servers available for a number of different
+architectures.  You can ftp a copy of X from expo.lcs.mit.edu.  Or,
+you can get Openwindows (available from Sun), that includes both the X
+and News window systems.
+
+You also need LispView, an object-oriented lisp-interface to X, if you
+are running OBVIUS on a Sun.  LispView is available from Sun
+Microsystems with Sun (Lucid) Common Lisp, version 4.0.  LispView is
+not required for the SGI platform as OBVIUS uses the native SGI
+graphics library (GL).  The lisp-interface to the GL is included in
+the OBVIUS distribution.
+
+
+\subsection{Installation Instructions}
+
+The symbol \abox{obv} will be used throughout this document to
+indicate the pathname of the primary OBVIUS directory.
+
+\begin{enumerate}
+
+\item 
+Decide where the OBVIUS source directory tree (approx. 3-5 Mbytes)
+will live in your filesystem.  We will refer to this directory as
+\abox{obv}.  On our machines, this is /usr/local/obvius. Also decide
+where the OBVIUS executable binary file (the lisp image, approximately
+15 Mbytes) will live. We'll refer to this directory as
+\abox{bin-path}.  On our system, this is /usr/local/bin.  This
+directory must be in each OBVIUS user's PATH environment variable.
+
+\item  
+Extract the OBVIUS directory tree from the tape or from the
+compressed tarfile (you have probably already done this!):
+\begin{itemize}
+\item	{\tt mkdir \abox{obv}}
+\item	{\tt cd \abox{obv}/..}
+\item	If you are using a tape, insert the tape and wait for the
+whirring to stop.  If you are starting from a compressed tar file
+(obvius.tar.Z), put the tarfile in the current directory and
+uncompress it using {\tt uncompress obvius.tar.Z}.
+\item	For a tape, execute {\tt tar xvf /dev/nrst8}.  From a
+tarfile, execute {\tt tar xvf obvius.tar}.
+\end{itemize}
+The distribution contains several source subdirectories (lisp-source,
+c-source and emacs-source), a documentation subdirectory (doc), and a
+set of top-level files (README, INSTALL, lucid-defsys.lisp, etc).  You
+may move the individual source subdirectories anywhere in your file
+system.  Also, decide where you want the Lisp and C binaries to live
+(see next instruction).
+
+\item	
+In the directory \abox{obv}/c-source, there are two makefiles:
+Makefile-sun4 (for sun 4's) and Makefile-sgi (for SGI's).  Edit these
+makefiles to refer to the appropriate binary pathnames.  The default
+is for the binaries to go in subdirectories sun4-bin and sgi-bin of
+the \abox{obv} directory.  Also edit the {\tt INCLUDES} line in these
+makefiles to refer to the appropriate pathnames for the Xlib.h and X.h
+include files (this is required for the Sun platform only).  Create
+the necessary binary directories using mkdir.
+
+\item
+In file \abox{obv}/site-paths.lisp, edit the definitions for
+*obvius-directory-path*, *lisp-source-path*, *c-source-path*,
+*binary-path*.  Usually these will be \abox{obv}/,
+\abox{obv}/lisp-source/, \abox{obv}/c-source/, and the appropriate
+binary subdirectory for the given machine (must be consistent with the
+directory chosen in the previous item).  Also, edit the defvar for
+*obvius-image-path*.
+
+\item  
+In file \abox{obv}/lucid-site-paths.lisp, edit the defvars for
+*temp-ps-directory* (usually /tmp/), *default-printer* (should be the
+name of a postscript printer), and *print-command-string* (this will
+probably need to be changed depending on your printing configuration).
+
+\item	
+Edit the file \abox{obv}/lucid-site-init.lisp.  This file should load
+any optional modules that you want to be part of the basic OBVIUS lisp
+image at your site.  The list of modules appears in the
+lucid-defsys.lisp file.
+
+\item 
+Start up a lisp world that includes CLOS.  Use ``lisp -n'' to start
+lisp without loading your personal lisp-init.lisp file.
+
+\item
+If you are running on a Sun platform, load LispView by typing: {\tt
+(load "<lispview>/lispview.sbin")}.  You can get this compiled
+lispview file (lispview.sbin) via anonymous ftp from
+white.stanford.edu.
+
+If you are compiling LispView from scratch, you must add the following
+lines to the file "build.lisp":
+\begin{verbatim}
+   ...
+   (in-package "USER")
+
+   ;; add these lines to get lispview to complie correctly
+   (proclaim '(optimize (compilation-speed 0) (speed 3) (safety 1)))
+   (proclaim '(notinline make-instance))
+   ...
+\end{verbatim}
+
+\item 
+To compile and load OBVIUS, type {\tt (load
+"\abox{obv}/lucid-defsys")} and then type {\tt (obvius::run-obvius)}.
+This takes a while.  Note that if you do not have a lot of swap space,
+lisp may die during the compilation.  Just quit the lisp and start
+again.  It will load the files that have already been compiled and
+then compile the rest of them.
+
+\item To save an OBVIUS lisp image:
+\begin{itemize}
+\item 
+You should have already compiled all of the OBVIUS source (see
+previous instruction), and tested to see that it works (take a look at
+<obv>/obvius-tutorial.lisp and try evaluating some of the expressions).
+
+\item Start up a lisp world that includes CLOS.
+
+\item Load LispView if you are running on a Sun platform by typing
+{\tt (load "\abox{lispview}/lispview.sbin")}.
+
+\item 
+Type {\tt (load "\abox{obv}/lucid-defsys")} and then
+type {\tt (obvius::make-obvius)}.  WARNING: We have found that
+attempting a ``disksave'' over an NFS connection sometimes fails.  If
+your OBVIUS image does not work correctly, then try making it from
+your file server.
+\end{itemize}
+
+\item
+OBVIUS will run without Gnu Emacs, but there are many advantages to
+running with it.  If you will be using emacs, you will need to install
+the emacs extensions which are included in the tarfile in the
+emacs-source subdirectory.  Copy the directory of emacs-extensions
+whereever you like in your filesystem.  If you prefer, you can put
+them in with your standard distribution.  We will refer to this
+directory as \abox{emacs-extensions}.  On our machines, this is {\tt
+"<obv>/emacs-source"}.  Add the following lines to your .emacs file:
+\begin{verbatim}
+(setq load-path (cons \abox{emacs-extensions} load-path)) \\
+(setq *obvius-program* \abox{obvius-image}) \\
+(autoload 'run-obvius  "cl-obvius" "" t) \\
+\end{verbatim}
+The symbol {\tt \abox{obvius-image}} should be the pathname for the lisp
+image containing OBVIUS.  To start OBVIUS from a saved OBVIUS lisp
+image, run emacs and type {\tt M-x run-obvius}.
+
+If you have not yet made an OBVIUS lisp image, or want to run from the
+compiled binary files, you may put the following definition in your
+.emacs file:
+\begin{verbatim}
+(defun run-development-obvius ()
+  (interactive)
+  (load "cl-obvius")
+  (let ((*cl-replacement-prompt*  "OBVIUS-3.0> "))
+    (run-cl "<lisp-view>"))
+  (setq default-directory "<obv>/lisp-source/") ;VISCI
+  (cl-send-string "(load \"<obv>/lucid-defsys\")\n") ;VISCI
+  (cl-send-string "(obvius::run-obvius)\n")
+  (cl-add-obvius-key-bindings))	;add bindings to cl-shell-mode and lisp-mode
+\end{verbatim}
+where {\tt <lisp-view>} refers to the pathname of a lisp world
+containing LispView and CLOS.  To run OBVIUS, you may type {\tt M-x
+run-development-obvius} in Emacs.
+
+\item 
+If you want to use the same emacs environment for running Common Lisp,
+you may want to put the following lines in your .emacs file as well:
+\begin{verbatim}
+(setq *cl-program* \abox{lisp-image}) \\
+(autoload 'run-cl "cl-shell" "" t) \\
+\end{verbatim}
+where \abox{lisp-image} refers to the pathname for a lisp-image.  On
+our machines, this is in {\tt /usr/local/bin/Lucid-4.0}.  To start up
+Common Lisp inside emacs, type {\tt M-x run-cl}.  Documentation for
+the cl-shell environment is in the file
+\abox{emacs-extensions}/cl-shell.doc.  Further extensions to emacs are
+included with the source, and examples of how to use these may be
+found in the file {\tt <obv>/emacs-source/example.emacs}.
+
+\end{enumerate}
+

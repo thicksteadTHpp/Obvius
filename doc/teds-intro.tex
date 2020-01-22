@@ -1,0 +1,734 @@
+Introduction: An overview of OBVIUS
+
+OBVIUS (Object Based Vision and Image Understanding System) is a
+package for working with images.  It is being developed by the Vision
+Science group at the MIT Media Lab, for research in image processing,
+machine vision, and models for human vision.  It is designed with the
+following buzz-words in mind: interactive, object-oriented,
+machine-independent, user-friendly, extensible.
+
+OBVIUS runs under Common LISP.  Currently we are running in Lucid Common Lisp
+on Sun 3's and HP 300 workstations, and in Symbolics Common Lisp on
+Symbolics Lisp Machines.
+
+We have developed OBVIUS for our own use, but hope that others may
+find it useful as well.  OBVIUS is available, WITHOUT SUPPORT OR
+WARRANTY, to researchers in the academic vision community.  OBVIUS is
+by no means a polished product; it is somewhat buggy, and future versions
+will not necessarily be compatible with the current version. MIT holds
+rights to the code, and it is possible that at some future date MIT
+will wish to impose licensing fees on a future version.
+
+
+The goals of OBVIUS.
+
+OBVIUS is designed with a number of goals in mind.  The first is to
+make interactive image hacking as convenient as possible.  The second
+is to allow for growth, as new functions are developed and
+incorporated into OBVIUS packages.  The third is to prevent duplicated
+effort by encouraging users to build tools that can be shared in
+a standard context.
+
+There are certain tasks that always accompany research with images.
+Images must be created, modified, stored, retrieved, manipulated,
+and displayed.  This involves a lot of unpleasant system-dependent
+code, which most researchers do not wish to deal with.  OBVIUS
+provides a set of standard routines to take care of these things.
+
+But OBVIUS in not merely a collection of helpful utilities.  It is an
+extension of Common Lisp that allows images (and other objects)
+and image operations to be integrated into the programming environment
+in a natural way.  OBVIUS also provides a convenient user interface,
+with basic support for windows and a mouse (although it does not currently
+have a thoroughly mouse/menu-driven interface like a Macintosh).  When
+the X window standard settles down we will use it; for now we are using
+Suntools on the Suns, ***, etc.
+
+Common Lisp was chosen for a number of reasons.  (1) Lisp is
+interactive, so that you can easily experiment with new ideas and see
+the results.  (2) Common Lisp is a standard that is available on many
+machines.  (3) Common Lisp provides a standard syntax that can be
+readily extended to image operations.  Thus we can describe image
+operations without inventing a new language, with a new syntax, and a
+new parser; Lisp takes care of it all.  (4) An object oriented
+standard, called CLOS, will soon be established for Common Lisp.  We
+currently use PCL, which is virtually the same, and the transition to
+CLOS should be painless. (5) It is easy to extend the environment by
+adding new operations and new image types. (6) Lisp environments
+traditionally have provided good tools for program development, to
+make efficient use of a programmer's time.
+
+There are certain disadvantages to using Lisp, although they are not
+as bad as many C/Unix hackers would have you believe.  Lisp requires a
+lot of space: to run OBVIUS you need at least 8 megabytes of RAM and 30
+megabytes of swap space on your disc.  Lisp code tends to run slower
+than C code, although not by much; in our experience the Lucid Lisp
+compiler produces code that runs from ** to ** slower than equivalent
+C code.  If you demand maximum speed, you can write intensive routines
+in C and call them from Lisp; this is what we have done for operations
+such as convolution.
+
+Some of the ideas in OBVIUS are derived from the Image-calc [sp?]
+package written by Lynn Quam at SRI.
+
+
+
+
+The basics of OBVIUS:
+
+You run OBVIUS from within a Lisp listener.
+The preferred editor is EMACS, since we have added a lot of
+special patches to EMACS that make it do wonderful things with
+OBVIUS. Once you have opened an EMACS buffer, you can start OBVIUS by
+saying,
+
+M-x run-obvius
+
+This starts up a Lisp listener, loads in the OBVIUS files, and
+sets up enough swap space for image processing.
+OBVIUS gives you a prompt, ``OBVIUS>'',
+and waits for you to input Lisp functions.  You can do anything
+you would normally do in Lisp, such as adding two numbers:
+
+OBVIUS> (+ 10 20)
+30
+OBVIUS>
+
+You can also do image operations, such as adding two existing images,
+using the ``+.'' operator:
+
+OBVIUS> (+. image1 image2)
+[***what comes here?]
+OBVIUS>
+
+OBVIUS adds the two images, and puts the result in a new image.
+
+Typically you will want to give a name to the resulting image,
+which you can do as follows:
+
+OBVIUS>(+. image1 image2 :-> 'image3)
+[***]
+
+OBVIUS provides functions to create,
+save, load, manipulate, display, and make measurements on images.
+Actually, an image is just a special case of a more general object
+called a ``viewable,'' which will be explained later; we will refer to
+images to simplify the discussion for the moment.  Here are some
+examples:
+
+
+1. Creating images.
+
+OBVIUS provides a set of functions to synthesize images.
+
+OBVIUS> (make-uniform-random-image '(128 128) :-> 'my-noise)
+#<IMAGE MY-NOISE (128 128)>
+OBVIUS>
+
+makes a new image, 128 x 128 pixels, consisting of random noise drawn
+from a uniform distribution, and names it ``my-noise'', and returns a
+description of the new object. 
+
+
+
+2. Saving images to disc.
+
+You can save an image with by using the function ``save-image'',
+as shown here:
+
+[ ** this should be made to work **
+(save-image my-noise)
+
+This will save the image to the default directory [??], which is normally [??],
+and will give the file the same name as the image. **]
+
+OBVIUS> (save-image my-noise ``/usr/smith/images'') [***???]
+
+will save it to the file specified by the pathname inside the double quotes.
+[** must make this more convenient: have a thing like C-c l, that
+prompts you for completions.  Even better, do it mac-like.**]
+
+3. Loading images from disc.
+
+To load an image from the disc, say
+
+OBVIUS> (load-image ``/images/my-image'')
+#<IMAGE MY-IMAGE (128 128)>
+
+This looks for the image in the file specified by the double-quoted
+pathname.  The image name defaults to the
+filename.  To load it into an image with a different name, say
+
+OBVIUS> (load-image ``/images/my-image'' :-> 'new-image)
+#<IMAGE NEW-IMAGE (128 128)>
+
+A more convenient way to load images is to use the EMACS key sequence
+C-c l.  EMACS will prompt you for a pathname, and will offer possible
+completions if you type <space> or <tab>. [??**]
+
+
+
+4. Viewing images.
+
+The pixel values of an image reside in an array; in order to see them
+you must display them.  Image data can be displayed in many ways.  For
+instance, it can be printed out in numeric format, it can be graphed
+as a surface plot, or it can be shown as a greyscale ``picture'' on a
+CRT.  In OBVIUS terminology, a picture is not the same as an image --
+a picture is merely a particular way of displaying the information contained
+within an image, while the image is the object that contains the 
+actual information.
+
+Greyscale pictures are displayed in special windows called ``panes''.
+Panes hold circular stacks of pictures.  A new pane may be created by saying:
+
+OBVIUS> (new-pane)
+#<OBVIUS::WINDOW 145035663>
+
+A new pane pops onto the screen, and its [descriptor] is returned.
+
+At any given time, one particular pane is the active, or ``current'' pane, and
+you can place a picture on it by saying
+
+OBVIUS> (display my-image)
+T
+
+In practice, images are usually displayed automatically whenever they
+are loaded or modified, so you will rarely have to issue a display command.
+In addition, you can see an image by simply evaluating it:
+
+OBVIUS> my-image
+#<IMAGE MY-IMAGE (128 128)>
+
+The resulting picture is automatically displayed (unless you have
+turned off the auto-display function).
+
+
+5: Manipulating images.
+
+In Lisp, you can add two variables and put the result in a third
+variable.  If a = 3 and b = 4, then you can say:
+
+OBVIUS> (setq c (+ a b))
+7
+
+When working with images, the same sorts of operations can be performed
+but with a slightly different syntax, as was noted above:
+
+OBVIUS> (+. im1 im2 :-> 'im3)
+#<IMAGE IM3 (128 128)>
+
+[Footnote: The reason for this syntax is to give the user better
+control over memory allocation than would occur with setq.  In Common
+Lisp, every time you call setq you create an entirely new data object,
+even if you keep using the same name.  That is, the memory allocated
+by (setq x 1) is different from the memory allocated for (setq x 2),
+or, for that matter, a second call of (setq x 1).  The old memory
+formerly bound to x is abandoned after each new (setq x ...), and
+eventually it must be retrieved through garbage collection.  Because
+images take up so much space, this would be intolerable when working
+with images.]
+
+This creates a new object of the appropriate class, names it im3, and
+fills it with the sum.
+If an image named im3 already exists, the old image will be renamed ``nil''
+[**how about renaming it #im3, ##im3, etc**??].
+To save space and reduce the need for garbage collection, you can
+destructively modify an existing image by leaving off the quote:
+
+OBVIUS> (+. im1 im2 :-> im3)
+#<IMAGE IM3 (128 128)>
+
+This will re-use to old space assigned to im3.
+
+If you leave do not specify a location for the result, OBVIUS will create
+an image named ``nil'', and will return its descriptor as ``unnamed''.
+
+OBVIUS> (+. im1 im2)
+#<IMAGE Unnamed (128 128)>
+
+You can also also do operations between images and scalars.  For
+instance, to double the amplitude of an image, just say
+
+OBVIUS> (*. my-image 2.0 :-> my-image)
+#<IMAGE MYNOISE (128 128)>
+
+All of the standard Lisp arithmetic functions will work on images;
+the OBVIUS versions of the functions are followed by a dot (.) to
+distinguish them.  Examples include: 
+
++.	-.	*.	/. [...???]
+
+At present, all OBVIUS greyscale images are floating point, i.e., the
+pixels are 32 bit FLOATs, and all image arithmetic is floating point
+as well.  This slows down the computation and uses up extra space,
+and so many users may ask why we do not support  8 or 16-bit integer
+image processing.  It is our experience that integer image
+processing tends to introduce many subtle and devious errors
+into the research process, and that the efficiencies are outweighed by
+the dangers.  Nonetheless we will allow integer processing in
+a future version of OBVIUS.
+
+Arithmetic comparisons work as you would expect.  For instance,
+to do a binary thresholding at the pixel value 10.0, you can say:
+
+OBVIUS> (>. image1 10.0 :-> 'image2)
+[***]
+
+And to find all the points where two images are equal, say:
+
+OBVIUS> (=. image1 image2 :-> 'image3)
+[***]
+
+These operations return ``bit-images,'' which have values 0 and 1.[??]
+You can do Boolean operations on bit images.  Thus, to pick out the
+pixels that have grey levels between 10.0 and 20.0, you can say:
+
+OBVIUS> (and. (>. image1 10.0) (<. image1 20.0) :-> 'threshimage)
+[***]
+
+
+6. Making measurements on images.
+
+To find the variance of an image, say:
+
+OBVIUS> (variance my-image)
+0.334588
+
+The variance is returned.
+The same approach works for mean, min, max,  and other image statistics.
+To see a histogram of an image, say
+
+OBVIUS> (make-histogram my-image)
+#<HISTOGRAM Histogram of MYNOISE>
+
+and OBVIUS will compute the histogram, draw a picture of it, and
+display it in the current pane.  A histogram, by the way, is another
+object of the type viewable, just as an image is.  Unlike an image,
+however, a histogram's default view-method is [***].
+[** Note: I would like to be able to give histograms names just like images:
+(make-histogram my-image :-> 'hist1) **]
+
+
+7. Extending OBVIUS.
+
+It is straightforward to define new functions in OBVIUS.
+Since OBVIUS works with objects, these are called methods,
+and they are defined to work in different ways with different
+object classes.  To understand how to define methods, you
+need to know something about the object system (PCL), but
+the following example will give the idea.
+
+Suppose we want to define a method called ``double'', that multiplies
+the value of all pixels in an image by 2. Then we can write:
+
+OBVIUS> (defmethod double ((im image) &key ->)
+	(with-result-image ((result ->) im **??)  [**??]
+	(*. im 2.0)))
+[**returned value]
+
+[** would like to have a macro that does:
+(defmethod double ((im image)) (*. im 2.0))  **]
+
+The method is now defined for images.  To use it for other
+viewables, it will be necessary to write method for each of the
+other viewables.
+
+It is also possible to add new objects [** how do you do this? **]
+
+
+8. The user interface.
+
+OBVIUS is designed to run in an interactive environment with windows
+and a mouse.  The details depend on the machine that you are using.
+Our primary development is on Sun 3's running Unix ** and Suntools **.
+We strongly recommend using the
+EMACS editor; OBVIUS includes a special package of EMACS
+functions that are specifically designed to enhance its utility
+for working in OBVIUS.
+
+You will typically have several windows open at a given time.
+The EMACS window will contain a Lisp process running OBVIUS,
+and will usually contain a scratch buffer in which you are developing code.
+The scratch buffer should be in ``Lisp'' mode (not Lisp-interaction mode),
+which you can achieve by saying M-x lisp-mode.
+
+You will normally have a few panes open for displaying pictures.
+By using the mouse and clicking on panes you can perform many common
+operations.  The mouse bindings will
+appear in the EMACS minibuffer whenever you put the mouse inside a pane.
+
+We refer to the mouse buttons as LEFT, MIDDLE, and RIGHT; these can be
+clicked in conjunction with the special keys CONTROL (C), SHIFT (S)
+and META (M). (Unfortunately, on the Sun, the META key is labeled
+``Left''.  Try not to be confused.
+
+If you want to cycle through the stack of pictures in a pane,
+successively click C-LEFT.  To cycle the other way, click C-MIDDLE
+To get a histogram of an image, click on its pane with M-RIGHT.
+To destroy an image, hold down the CONTROL, META, and SHIFT
+buttons at the same time, and click LEFT; i.e. click C-S-M-LEFT.
+
+Clicking LEFT on a pane selects an viewable, which means that it echos
+the name of the viewable into the OBVIUS Lisp buffer.  Therefore
+you can enter an image name into ..***
+
+
+USER'S MANUAL
+
+Vocabulary: get rid of ``picture'' -- it carries too much baggage.
+Replace with ``view'' or ``vista'' or ``disp-obj'', or ``pic-obj''.
+Or ``rendering'' -- perhaps the most expressive.
+``Viewable'' is perhaps funny too.  Use ``im-obj'' or ``im-thing''.
+
+0. The basic structure.
+	Variables in Lisp.  Functions in Lisp.  Objects in Lisp.  Methods
+in Lisp.
+	Objects in OBVIUS.  Methods in OBVIUS.  
+
+1. Loading viewables.  	
+	Should be able to say (setqv view-name ``pathname'') 	
+	or ``pathname'' :-> viewname.  Shouldn't have to say
+	load-image-sequence, etc.
+
+2. Storing/saving viewables.
+	Should be able to say (store view-name) and have it default to
+	home directory or home image directory.
+
+3. Generating viewables.
+	All generating functions start with ``gen''? or ``make'' or ``create''
+	Default to *default-size*. specify keyword: :x-size, :y-size.
+	All are specified in pixel coordinates.  With 0,0 at middle or not?
+	All produce float images as defaults, but can be int or bit w/keys.
+	Can you gen a viewable that isn't an image? or only images?
+
+	(gen-line [the equation of the line]) anti-aliased?
+	(gen-edge [eqn of edge]) anti-aliased?
+	(gen-rect [coords])
+	(gen-zone-plate [specs])
+	(gen-pinwheel [specs])
+	(gen-bulls-eye [inverse zone plate])
+	(gen-disc [radius, center])
+	(gen-gauss [gaussian blob])
+	(gen-uni-noise [seed, range])
+	(gen-gau-noise [seed, variance])
+	(gen-rnd-dots [density]) -- note-- makes floats)
+	(gen-sqr-grat [ori, freq, phase])
+	(gen-sin-grat)
+	(gen-tri-grat)?
+	(gen-saw-grat)?
+	(gen-general [function])
+	(gen-zero) makes an image full of zeros.
+	(gen-nil) makes an image full of nils
+
+Drawing operations: these add information to a currently existing images.
+	Added info is normally float.  Lines, etc., can be anti-aliased
+	or not. (draw = normal; draaw = anti-aliased?  or keyword)
+	Info can be added in several ways:
+		:max -- replaces val w/new val if new is greater. like OR
+		:min -- replaces with the lesser. Like AND
+		:?? how to get something like EXOR?
+		:add -- this is the normal method
+		:mul -- like filter densities
+		:replace -- replace old pixels with non-nil new ones.
+	Operations:
+	(draw-line)
+	(draw-edge) or (draw-step)
+	(draw-rect)
+	(draw-disc)
+	(draw-font)
+	(draw-sprite)
+	(draw-uni-noise)
+	(draw-image)  this does a blit to a portion of existing image;
+		Blitted image should be smaller.
+	(?? allow one to draw all of the things that one can gen?)
+
+4. Point operations on pixels:
+	abs.
+	signum.
+	sin. cos. tan. asin. acos. atan.
+	
+	General operation: (general-pointop. [function])
+	Defining new point-op: 
+		(defun-pointop name (general-pointop. [function]))	
+
+4a. Operations on complex images
+	conjugate.
+	phase.
+
+
+5. Binary operations:
+
+	+.  -.  *.  /. 
+
+	=.  /=.  <.  >.  <=.  >=. [Comparisons lead to floats unless
+bit is specified? 
+ 	mag.  	phase.
+	
+6. Ternary operations:
+	(matte. im1 im2 mask-image)
+
+7. Image statistics:
+	mean
+	variance
+	min, max, median, mode
+	Also predicates: pyramidp, floatimagep, x-size, y-size
+
+8. Local operations (Neighborhood ops)
+	Convolutions
+	Correlations
+	Median filter
+	General local filter (define what happens in neighborhood).
+	Space variant filter?
+	Local-ops usually have kernels.  For linear convolutions, the kernels
+	are the weights.  For median filters, the kernels are the
+	binary masks (which also can include weights).
+
+	Is it possible to define predicates like right-edgep, up-right-cornerp,
+	so that it is convenient to define new local-ops that do edge
+	handling right?
+
+8. General image modifiers:
+	(some of these are really point operations)
+	clip
+	contrast-stretch
+	hist-equalize
+	gamma-correct
+	local-agc
+	warp
+	resample
+	subsample
+	type-convert
+
+9. Operations on multiple images (e.g. complex, RGB, volumes, sequences)
+
+10. Pyramid operations.
+
+11. Sounds and other 1-D signals
+	We should be able to work with sounds in the same way that we
+	work with images.  It should be possible to assemble sounds
+	in an object-based way, so that the component sounds maintain
+	their identities, and are mixed for purposes of display (playing).
+	Display methods for sounds:
+	0. Play it as a sound.
+	1. Show waveform.  Dots or connect dots.
+	2. Zoom in an out; select sub-piece.
+	3. Spectrogram: it is an image, which can be shown as
+	grey-scale, surface plot, etc. 
+Note: sounds may be thought of as extending infinitely in both directions
+of time.  Same for image sequences.  Same for spectrograms.  Does this
+demand any thought?
+	Spectrogram can be short-time, long-time, or self-similar.
+	4. It should be possible to line up many parallel tracks, and
+	look at them all.  It should be possible to group them, and
+	name them.  It should be possible to display sound phrases as
+	rectangles (length = duration), with names, so you can assemble
+	a complex sound by moving around these labeled blocks.
+	5. You should be able to describe a sound in terms of a
+	score and an instrument.  MIDI descriptions?
+	6. Describe speech in terms of vocal tract? LPC parameters?
+
+12. Editing image sequences as movies:
+	You can assemble, insert, dissolve, etc, with image
+	sequences the same as you can with sound.  AND you can
+	keep the sound synced to the images.
+	Movies can be dislayed backward and forwards, at different
+	speeds, frame by frame, in short pieces, etc.  They can
+	be shown small (micromovies) as movies or arrayed across
+	the screen, in order to allow convenient browsing.
+
+13. Databases.
+	You can organize all of your images into databases that are
+	convenient to browse through.  Images can be tagged with
+	descriptors that are used for search: name, date, size, type,
+	creator, topic, etc.  The history can also be used for search.
+	(so, for instance, you can find all images that involve Lenna
+	and 9-tap pyramids.) Perhaps (not likely) we can develop a
+	simple similarity metric that allows you to say ``find all the
+	images that look kind of like this:''.
+
+14. Data compression.
+	Images are stored in a compressed format: a 3-tap pyramid, 4 levels,
+	with Huffman coding.  This allows for rapid reconstruction for
+	browsing at any size.  Images that must be stored lossless
+	can include a residual error image that fills in everything
+	that is missing from the compressed image -- even this should
+	still take up less space than the original image (?).
+
+15. Object oriented image description.
+	To be really object oriented we should distinguish between various
+	image descriptions.  A continuous image may be defined by an
+	equation, a polynomial, a set of samples if it is bandlimited,
+	etc.  It can be rendered into pixel format, but the description
+	can exist separately.  Thus, for instance, I can define an image
+	as a sum of a ramp and a sinusoid with noise added and a disc
+	cut out, without actually computing pixel values.  Later I can
+	compute pixels, if I decide to convert it into a pixel-based object.
+
+	This is the approach taken by MacDraw, Postscript, etc.
+	It means that some images can have infinite resolution.
+  	We can define images as collages of objects, 
+	which can later be moved,
+	scaled, brought-to-front, etc.,	in MacDraw style.  In this
+	approach, ``add'' would be like luminous transparent objects, ``mul''
+	like filters, ``replace'' like an opaque object, ``max'' like a
+	strange object.  At any moment one can freeze the current rendering as
+	a pixel array.
+
+	This approach also includes 3-D models, where the objects are
+	solids, polygons, light sources, cameras, etc.
+
+**. Region of Interest (ROI) operations.
+	It should be possible to do any operation on a ROI.
+	The ROI can be defined by a rectangle, e.g.
+	(convolve filt-name im-name :x1 100 :x2 200 :y1 0 :y2 50)
+	or, with a mask:
+	(convolve filt-name im-name :mask mask-name)
+	where mask-name is the name of a binary image mask.
+
+	The result of a ROI operation will be an image of the same
+	size as the starting image, but is filled with don't-knows
+	(presumably nils) outside the ROI.  Note that this has
+	lots of problems (edge handling, etc) and wastes space.
+	If we just use rectangular masks, then we won't waste
+	space, but will lose the nice spatial correspondence.
+	Ask Peter's advice.
+
+**.  Unknown and uncertain values.
+	It may often be useful to have pixels take on the value
+	``don't know'', or nil.  Examples: you don't bother
+	to do an operation outside a ROI; or, you only measure
+	velocity along zero crossings; or, you only have disparity
+	at a sparse collection of points.
+
+	How to represent uncertainty more generally?  E.G. we
+	would like to do Anandan's ellipses of uncertainty, of
+	any size and any orientation.
+
+
+Notes for the Lisp novice:
+
+OBVIUS is written in Lisp, and when you run OBVIUS from the keyboard,
+you do so by issuing Lisp commands -- or rather, in the parlance of Lisp,
+evaluating Lisp functions.  You don't have to know much
+Lisp in order to use OBVIUS for basic image operations, and you can
+write your own image processing functions with only a
+bare working knowledge of Lisp.
+
+By the way, if you are one of those people who once took a course in
+Lisp and was frightened away by CARs, CDRs, and recursion,
+please relax.  We're not going to make you use them.
+OBVIUS and Common Lisp allow you to do things using
+more traditional programming style if you wish.
+
+The following section introduces the basic concepts you will need.
+
+Lisp is interactive: you type an expression, hit <CR>, and Lisp evaluates
+the expression.  For instance, to add the integers 1 and 2, type:
+
+LISP> (+ 1 2)
+3
+
+Lisp tries to evaluate any expression you give it, and returns the
+result -- in this case, 3.
+
+Numbers evaluate to themselves:
+
+LISP> 4
+4
+
+A ``list'' is a sequence of things, separated by spaces, 
+enclosed within parentheses.
+For instance: (a b c), or (1), or (john mary bill) are all lists.
+() is also a list, known as the empty list null list.
+((1 5) (1 2)) is a list of lists.
+A list like (+ (hello?) (33 ``q''))
+probably doesn't make any sense, but it is still a list.  
+
+When you hand a list to Lisp for evaluation,
+it normally assumes that the first element is a
+function name, and that all of the other elements are arguments to the
+function.
+
+So,
+
+LISP> (max 1 2 100 4)
+100
+
+returns the maximum of the list.
+
+A list that can be evaluated by Lisp is called an ``s-expression'' or
+a ``form.'' A form can also be an element in a list.  Thus,
+to compute 3 * (4 + 5), you can say:
+
+LISP (* 3 (+ 4 5))
+27
+
+Lisp finds the first element of the form, *, and interprets it as a function
+call to the multiply function.  It then must evaluate the remaining
+elements in the list and so it can multiply them. The 3 evaluates to 3,
+but the next element, (+ 4 5), invokes another function call, this time
+to the addition function.  It returns 9, so the multiply function 
+finishes by evaluating (* 3 9), and returns 27.
+
+Since Lisp is always trying to interpret the first element of a list
+as a function name, here's what happens if you just hand it a list of
+numbers:
+
+LISP> (77 88 99)
+>>Error: Unknown operator 77 in (FUNCTION 77)
+EVAL:   Required arg 0 (X): (77 88 99)
+:A    Abort to Lisp Top Level
+-> 
+
+Lisp thinks you are trying to evaluate a function call ``77'', which
+does not exist, so it signals an error and throws you into the
+debugger.  Type :A (or whatever your system requires) to get back
+to top level.
+
+If you don't want Lisp to evaluate a list, you have to use the single
+quote sign to indicate that the list is really just a list.
+
+LISP> '(77 88 99)
+(77 88 99)
+
+In this case, Lisp just leaves the list alone and returns it as is.
+
+You can create variables and assign values to them with the function
+setq.  To create a variable called ``k'' and assign it the value
+9, say:
+
+LISP> (setq  k 9)
+9
+
+Now, whenever Lisp evaluates k, it will return 9:
+
+LISP> k
+9
+
+(Note that setq doesn't quite behave the way that ordinary Lisp functions are
+supposed to, since it doesn't try to evaluate the first argument
+following the setq, but accepts it literally instead.  In fact, setq
+is short for ``set quote'', and the above expression could be written
+as (set 'k 9).  Since it behaves in a non-standard way, setq
+is known as a ``special form.'')
+
+Now you can put k in an expression:
+
+LISP> (+ k 5)
+14
+
+The value of k is unchanged -- the sum was simply returned.
+
+LISP> k
+9
+
+If you want to add 5 to k, and put the result back into k,
+then say:
+
+LISP> (setq k (+ k 5))
+14
+LISP> k
+14
+
+[***More to be added: defun, keywords, numeric types...***]
