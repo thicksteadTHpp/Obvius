@@ -11,8 +11,8 @@
   For now it is my goal to resurrect as much of legacy functionalty as possible. The purpose of Version 3.X will be
   to be a reference point to the modernized version 4.0. See below for a wish list of features in Version 4.0 
 
-  In the meantime struggling with CommonLisp code from the 90ies. But there a good reasons to do so.
-  There are very good tutorials under the tutorial folder. But not all of them work, especially mouse bindings are not  implemented yet. If most of their content work one can update them to newer versions still having a reference.
+  In the meantime this means struggling with CommonLisp code from the 90ies, which works nearly out of the box. But there are good reasons to do so.
+  There are very good tutorials under the tutorial folder, not all of them work, especially mouse bindings are not  implemented yet. If most of their content work, one can update them to newer versions still having a reference.
 
   Obvius was intended to be used as a companion to Emacs. In the original version there was en extra emacs mode 
   which used a specialized REPL. As of 2020 I prefer to use SLIME or SLY for this purpuse. There are no plans to revive the 
