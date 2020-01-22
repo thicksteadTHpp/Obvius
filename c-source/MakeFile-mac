@@ -1,0 +1,24 @@
+# Instructions:
+# Build "obvius" to compile and copy obj files to bin directory
+# Build "clean" to delete object obj files from source directory
+# Note: To enter a command into MPW, select whole line and hit enter.
+BinPath =	"{Boot}Obvius:bin:"
+COptions = 	-opt off -d float=double
+ObjList = 	hex-convolve.c.o p-convolve.c.o ¶
+			convolve.c.o wrap.c.o	¶
+			edges.c.o svd.c.o tiff-access.c.o	¶
+			matrix.c.o byteswap.c.o color.c.o ¶
+			dither.c.o  fft.c.o	¶
+			imops.c.o 3d-ops.c.o surface-plot.c.o	¶
+	     	zoom.c.o warper.c.o mpw-hacks.c.o chartohex.c.o
+
+obvius	Ä	{ObjList}
+	Duplicate -y {ObjList} {BinPath}
+
+clean	Ä
+	Delete {ObjList} 
+	
+# Example of explicit specification of compilation for one file
+#{BinPath}hex-convolve.c.o 	Ä	{SrcPath}hex-convolve.c
+#	C {COptions} {SrcPath}hex-convolve.c ¶
+#		-o {BinPath}hex-convolve.c.o
