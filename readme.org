@@ -23,6 +23,11 @@
   pay special attention to the original license which makes this software usable for educational and researching purposes only.
   I try to contact the original authors to put a more modern license into it which will serve the same goals.
 
+** Screenshot
+
+[[shot01.jpg]]
+
+
 ** Original Readme
 
    OBVIUS (Object-Based Vision and Image Understanding System) is an
