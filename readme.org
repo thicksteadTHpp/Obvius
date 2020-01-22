@@ -1,23 +1,22 @@
 * Intro
 
   Obvius was an image processing software which was created by Eero Simoncelli, David Heeger and E.J. Chichilinsky 
-  at the MIT. Several Cntributors added functionality to it. Patrick C. Teo added a GL implementation. The software  
-  got out of use in the mid 90ies presumly by abondon CommonLisp code at all. 
+  at the MIT. Several Contributors added functionality to it. Patrick C. Teo added a GL implementation. The software  
+  got out of use in the mid 90'ies presumly by abondon CommonLisp code at all. 
 
   The main idea of Obvius is image processing for academic and research. There is no explicit focus on speed or
   high performanc computing. But nearly all low level functions are implemented in C. This may be a good idea or
-  not in 2020. There have to be test if this affects the performance to the better or not.
+  not in 2020. There have to be tests if this affects the performance to the better or not.
 
   For now it is my goal to resurrect as much of legacy functionalty as possible. The purpose of Version 3.X will be
-  to be a reference point to the modernized version 4.0. See below for a widh list of features in Version 4.0 
+  to be a reference point to the modernized version 4.0. See below for a wish list of features in Version 4.0 
 
   In the meantime struggling with CommonLisp code from the 90ies. But there a good reasons to do so.
-  There a re very good tutorials in doc section. But not all of them work. If most of their content work one
-  can update them to newer versions still having a reference.
+  There are very good tutorials under the tutorial folder. But not all of them work, especially mouse bindings are not  implemented yet. If most of their content work one can update them to newer versions still having a reference.
 
   Obvius was intended to be used as a companion to Emacs. In the original version there was en extra emacs mode 
-  which used a special REPL. As of 2020 i use SLIME or SLY for this purpuse. There are now no plans to revive the 
-  emacs modes bundled with the legacy code. 
+  which used a specialized REPL. As of 2020 I prefer to use SLIME or SLY for this purpuse. There are no plans to revive the 
+  emacs modes bundled with the legacy code now. 
 
   In this repository i bundle the original code which is downloadable from MIT under the legacy folder. Please
   pay special attention to the original license which makes this software usable for educational and researching purposes only.
@@ -71,21 +70,21 @@
 
 * State  
  
-  The last version as i know of was Obvius 3.0. So the current branch will be Version 3.1. It is intendended
-  to recover as much as possible of the functionality of the previus version. Even though I dont' have any 
+  The last version as far as I know of was Obvius 3.0. So the current branch will be Version 3.1. It is intendended
+  to recover as much as possible of the previous version's functionality. Even though I dont' have any 
   Screenshots or other material, I try to guess what Obvius looked like. 
 
-  When i resurected Obvius 
-  there were some minor problems with CLOS to be solved and the graphics backend had to witten completely new.
-  Luckily Obvius was designed in a way which made it possible to add new graphics backends without interfering
-  much with the core functions. I decided to use a immediate mode gui called nuklearon top of glfw. Both are 
-  available through Quicklisp by Bodge. An immediat mode gui allows to add a fully controllable render loop. 
-  This makes it possible to add windows (in Obvius called panes) at runtime and remove them. For displaying
-  Pictures a couple of GL commands need to be performed. For every picture to be displayed a GL- Texture is created
+  When i ressurrected Obvius 
+  there were some minor problems with CLOS to be solved and the graphics backend had to be written completely new.
+  Luckily Obvius was designed in a way that made it possible to add new graphics backends without interfering
+  too much with the core functions. I decided to use an immediate mode gui called nuklear on top of the glfw-library. Both are 
+  available through Quicklisp by Bodge. This should make porting to other OS's than UNIX possible. An immediate mode gui allows to add a fully controllable render loop. 
+  This makes it possible to add windows (in Obvius called panes) at runtime and remove them at any time without stopping the app. For displaying
+  Pictures a couple of GL commands need to be performed mostly concerning texture creation. For every picture to be displayed a GL- Texture is created
   and displayed in the nuklear windows (panes in obvius). This works quite well and the nuklear library
-  saves the trouble of redisplaying and moving of windows. On the contrary is the situation with the drawing objects.
-  Drawing objects ar Graphs and other diagrams which have been drawn line by line and point by point to a foreign 
-  array in the 90is. This foreign array had been blitted to the (X)-Screen and was so to be seen at the display.
+  saves the trouble of redisplaying and moving windows. On the contrary is the situation with the drawing objects.
+  Drawing objects are Graphs and other diagrams which have been drawn line by line and point by point to a foreign 
+  array back in the 90ies. This foreign array had been blitted to the (X)-Screen and was so to be seen at the display.
   For a workaround i use the drawing capabilities of nuklear to draw graphs etc. every frame to the nuklear window.
   This is quite a waste and will change in future.
 
