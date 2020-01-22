@@ -618,17 +618,15 @@
     ;;check if we need to render (compute) a new pixmap of bltable
     ;;or it is new
     ;;when texture-id is >0 then the bltable has a texture attached and a nk-image
+    ;; (and (claw:wrapper-null-p nk-image)
+    ;; 	 (or (null texture-id) (= 0 texture-id))
+    ;; 	 (in-gl-thread-of (screen-of window) 
+    ;; 	   (compute-bltable-GL-image window bltable zoom)
+    ;; 	   (setf (slot-value bltable 'nk-func) (make-nk-image-func window bltable))))
     (and (claw:wrapper-null-p nk-image)
 	 (or (null texture-id) (= 0 texture-id))
-	 (in-gl-thread-of (screen-of window) 
-	   (compute-bltable-GL-image window bltable zoom)
-	   (setf (slot-value bltable 'nk-func) (make-nk-image-func window bltable))))
-
-    ;; (send-to (screen-of window) (lambda (disp)
-    ;; 				  (compute-bltable-GL-image window bltable zoom)
-    ;; 				  (setf (slot-value bltable 'nk-func) (make-nk-image-func window bltable))))
+	 (compute-bltable-GL-image window bltable zoom))
     
-							    
     (let ((row (+ (floor (- (y-dim window) (y-dim bltable)) 2) y-offset))
 	  (row-adjusted (- (floor (- (y-dim window) (y-dim bltable)) 2) y-offset))
 	  (col (+ (floor (- (x-dim window) (x-dim bltable)) 2) x-offset)))

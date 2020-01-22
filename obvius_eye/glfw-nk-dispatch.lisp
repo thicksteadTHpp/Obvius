@@ -394,15 +394,6 @@
 		 (gl:clear-color (bg :r) (bg :g) (bg :b) 1f0)
 		 (gl:clear :color-buffer-bit)
 
-		 ;; (claw:c-with ((rect (:struct (%nk:rect))))
-		 ;; 	 (let ((val (%nk:begin nk-context "Hello Nuklear" (%nk:rect rect 50f0 50f0 230f0 250f0)
-		 ;; 			       (logior %nk:+window-border+ %nk:+window-movable+ %nk:+window-scalable+
-		 ;; 				       %nk:+window-minimizable+ %nk:+window-title+))))
-		 ;; 	   (unless (= val 0)
-		 ;; 	     (%nk:layout-row-static nk-context 30f0 80 1)
-		 ;; 	     (unless (= (%nk:button-label nk-context "button") 0)
-		 ;; 	       (format T "~&button pressed")))))
-		 ;; (%nk:end nk-context)
 
 		 ;;get somthing from the render queue
 
@@ -472,48 +463,6 @@
 
 (defun make-window-id (&optional (title "Hello Obvius"))
   (timestamped-temp-file (str+ title "_XXXX")))
-
-
-;; (defun push-to-nk-render-loop (dispatcher id form)
-;;   (setf (gethash id (nk-functions dispatcher)) form))
-
-;; (defun remove-from-nk-render-loop (dispatcher id)
-;;   (remhash id (nk-functions dispatcher)))
-
-
-;; (defun clear-nk-render-loop (dispatcher)
-;;   (clrhash (nk-functions dispatcher)))
-
-
-
-;; (defun do-nk-functions (disp nk-context)
-;;   (maphash (lambda (k v)
-;; 	     (declare (ignore k))
-;; 	     (funcall v nk-context))
-;; 	   (nk-functions disp)))
-
-
-;;get the context
-;; (defun nk-context (dispatcher)
-;;   (slot-value dispatcher 'nk-context))
-
-
-
-
-;; (defun push-test ()
-;;   (push-to-nk-render-loop (first *screen-list*)
-;; 			  "win01"
-;; 			  (lambda (ctx)
-;; 			    (claw:c-with ((rect (:struct (%nk:rect))))
-;; 			      (let ((val (%nk:begin-titled ctx "win01" "Hello Nuklear 2" (%nk:rect rect 150f0 50f0 230f0 250f0)
-;; 							   (logior %nk:+window-border+ %nk:+window-movable+ %nk:+window-scalable+
-;; 								   %nk:+window-minimizable+ %nk:+window-title+))))
-;; 				(unless (= val 0)
-;; 				  (%nk:layout-row-static ctx 30f0 80 1)
-;; 				  (unless (= (%nk:button-label ctx "button") 0)
-;; 				    (format T "~&button 2 pressed~&")))))
-;; 			    (%nk:end ctx))))
-
 
 
 ;; GLFW specific callbacks

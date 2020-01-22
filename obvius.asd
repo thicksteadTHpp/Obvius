@@ -1,8 +1,9 @@
 ;;;; obvius01.asd
 
-(asdf:defsystem #:obvius01
-  :description "Describe obvius01 here"
-  :author "Your Name <your.name@example.com>"
+(asdf:defsystem #:obvius
+  :description "OBVIUS (Object-Based Vision and Image Understanding System)"
+  :version "3.1.0 alpha"
+  :author "Current Maintainer: THO"
   :license "MIT"
   :serial t
   :depends-on (:zpng :ffa :cl-fad :cffi :static-vectors :trivial-garbage :closer-mop :vom
@@ -20,7 +21,9 @@
 	       :trivial-main-thread
 	       :cl-soil)
   :components ((:file "package")
-               (:file "obvius01")
+	       (:file "site_paths")
+	       (:file "defsys")		
+               (:file "obvius")
 	       (:module obvius_system
 		:components ((:file "lcl-compat")
 			     (:file "lucid-hacks")
@@ -36,8 +39,7 @@
 			     (:file "list-ops")
 			     ;;(:file "arrayio-lisp")
 			     ))
-	       (:file "site_paths")
-	       (:file "defsys")		
+	       
 	       (:module obvius_viewable
 	       		:components ((:file "viewable")
 	       			     (:file "viewable-classes")

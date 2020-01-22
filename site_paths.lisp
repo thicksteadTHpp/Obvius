@@ -17,7 +17,7 @@
 ;;; *** Not currently using logical pathnames, probably should.
 ;;;[tho} set up logical pathnames
 
-(defvar *real-obvius-directory* (namestring (asdf:system-relative-pathname "obvius01" "")))
+(defvar *real-obvius-directory* (namestring (asdf:system-relative-pathname "obvius" "")))
 
 
 

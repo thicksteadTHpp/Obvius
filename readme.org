@@ -23,6 +23,47 @@
   pay special attention to the original license which makes this software usable for educational and researching purposes only.
   I try to contact the original authors to put a more modern license into it which will serve the same goals.
 
+** Original Readme
+
+   OBVIUS (Object-Based Vision and Image Understanding System) is an
+   image-processing system based on Common Lisp and CLOS (Common Lisp
+   Object System).  The system provides a flexible interactive user
+   interface for working with images, image-sequences, and other
+   pictorially displayable objects.  By using Lisp as its primary
+   language, the system is able to take advantage of the interpretive
+   lisp environment (the ``listener''), object-oriented programming, and
+   the extensibility provided by incremental compilation.
+
+   The top-level of OBVIUS is implemented in Common Lisp, thus providing
+   an interpreted, object-oriented programming environment.  The
+   low-level floating point operations are implemented in C for
+   efficiency.  A graphical user interface, based on menus and dialog
+   boxes is also provided, in addition to the Lisp interpreter
+   (listener).  In the typical mode of interaction, the user types an
+   expression to the lisp listener (or enters a command in a dialog box)
+   and it returns a result.  A picture of that result will then be
+   automatically displayed in a window.  Each window contains a circular
+   stack of pictures.  The user can cycle through this stack using mouse
+   clicks with certain shift (``bucky'') key combinations.  Commonly used
+   operations such as histogram and zoom are also provided via mouse
+   clicks.
+
+   The system provides a library of low-level image processing routines.
+   Some examples of these are
+   - arithmetic operations (add, multiply, lookup-table point
+   operations, etc)
+   - image statistics (mean, variance, kurtosis, maximum, histograms etc)
+   - convolutions, Fourier transforms, Hilbert transforms
+   - geometric operations (crop, slice, rotate, flip-x, etc)
+   - comparisons (greater-than, etc)
+   - synthetic image generation
+   - matrix operations
+
+   OBVIUS also provides postscript output of pictures.  Writing new
+   operations in OBVIUS is relatively simple, and it is straightforward
+   to add new viewable and picture types.
+
+
 * State  
  
   The last version as i know of was Obvius 3.0. So the current branch will be Version 3.1. It is intendended
@@ -30,7 +71,7 @@
   Screenshots or other material, I try to guess what Obvius looked like. 
 
   When i resurected Obvius 
-  there were some minor problems  with CLOS to be solved and the graphics backend had to witten completely new.
+  there were some minor problems with CLOS to be solved and the graphics backend had to witten completely new.
   Luckily Obvius was designed in a way which made it possible to add new graphics backends without interfering
   much with the core functions. I decided to use a immediate mode gui called nuklearon top of glfw. Both are 
   available through Quicklisp by Bodge. An immediat mode gui allows to add a fully controllable render loop. 
@@ -54,6 +95,7 @@
 ** TODO
    - Code cleanup
    - Add support for color images
+   - Zooming
    - Dithering???
    - Test the Tutorials
    - Make the graphic backend more robust
@@ -73,14 +115,26 @@
   - make porting to other OSes possible (library compilation)
 
 
-* Install
- 
+* Installation and Set Up
+  
+
   Download a copy of this rep and put it in a folder under ~/quicklisp/local-projects/
 
-  Then load it with (ql:quickload "obvius31").
+  Then load it with:
+ #+begin_src lisp
+  (ql:quickload "obvius")
+ #+end_src
+ 
+ ** Library Compilations
+  
+  There is a precompiled library in the bin folder, but this may not work.
+  For obvius to work a foreign library has to be (re-)compiled.
 
-  For obvius to work a foreign library has to be compiled.
-  Go to c-source folder and type make. This should be enough - I hope. I am no expert when it comes
+  Go to c-source folder and type:
+#+begin_src
+  make lib 
+#+end_src
+  This should be enough - I hope. I am no expert when it comes
   to Makefiles and c-compiling stuff. Any help is appreciated.
 
 ** Depedencies 
@@ -92,9 +146,34 @@
 
 * Basic Usage
 
-  When obvius is loaded o into the obvius package by (in-package :obv) and then
-  load the test images with (make-test-images). You can now (display einstein)  or (display reagan) to 
-  display them 
+  When obvius is loaded go into the obvius package by 
+#+begin_src lisp
+ (in-package :obv)
+#+end_src
+   
+  and then load the test images with 
+
+#+begin_src lisp
+  (make-test-images)
+#+end_src
+ which should print a lot of stuuf on the RPL. These are logging snippets i added
+ to the code to get into the working. These are for learning purposes only and will 
+ be removed soon. 
+ You can now display the pictures with
+#+begin_src 
+(display einstein)
+#+end_src
+ or
+#+begin_src 
+(display reagan)
+#+end_src
+ Now look into the tutorials folder and follow the obvius tutorial for basic usage.
+
+* Known Bugs 
+  
+  - a lot
+  - if an error occurs inside the render loop glfw produces memory faults
+  - you have to kill the lisp process and start a new one
 
 
 * Acknowledgements
