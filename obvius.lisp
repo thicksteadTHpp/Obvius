@@ -12,8 +12,9 @@
 
 ;;; load the foreign library
 ;; don't ship code with that
-(cffi:load-foreign-library (merge-pathnames #P"emacs/clisp/obvius/bin/obv_gl.so" (user-homedir-pathname)))
+;; (cffi:load-foreign-library (merge-pathnames #P"emacs/clisp/obvius/bin/obv_gl.so" (user-homedir-pathname)))
 
+(cffi:load-foreign-library (merge-pathnames #p"bin/obv_gl.so" *obvius-directory-path*))
 
 ;;set up the logging level
 
@@ -27,6 +28,11 @@
   (cl:float val other))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;;  exporting to png
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun lerp (x x1 f1 x2 f2)
   (/ (+ (* f2 (- x x1))
@@ -216,29 +222,11 @@
 
 
 
-
-;; ;this is not needed
-;; (defun to-rgb-png (array &key ((:-> filename) (in-tempdir (timestamped-temp-file "_XXXX_XXXX.png"))) (scale-max 1) (scale-min 0))
-;;   (let* ((octetts  (make-array (array-dimensions array) :element-type '(unsigned-byte 8) :displaced-to (array-to-8bit-vector array scale-min scale-max)))
-;; 	 (png (make-instance 'zpng:png
-;; 			    :color-type :truecolor
-;; 			    :width (array-dimension array 1)
-;; 			    :height (array-dimension array 0)))
-;; 	 (png-data (zpng:data-array png)))
-;;     ;;red
-;;     (loop for y from 0 below (zpng:height png) do
-;; 	 (loop for x from 0 below (zpng:width png) do
-;; 	      (setf (aref png-data y x 0) (aref octetts y x))))
-;;     ;;green
-;;     (loop for y from 0 below (zpng:height png) do
-;; 	 (loop for x from 0 below (zpng:width png) do
-;; 	      (setf (aref png-data y x 1) (aref octetts y x))))
-;;     ;;blue
-;;     (loop for y from 0 below (zpng:height png) do
-;; 	 (loop for x from 0 below (zpng:width png) do
-;; 	      (setf (aref png-data y x 2) (aref octetts y x))))
-;;    (zpng:write-png png  filename)))
-      
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;; random file names
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defparameter *alphanums* "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -280,7 +268,7 @@
   ))
 
 ;;makes an array wiht the same element-type and size of dim
-;;optinal  offset
+;;optional  offset
 (defun displace-to (base-array dim &key displaced-index-offset )
   (if displaced-index-offset
       (make-array dim :displaced-to base-array
