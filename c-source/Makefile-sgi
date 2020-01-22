@@ -1,0 +1,38 @@
+############################################################################
+
+SGI_BIN		= ../sgi-bin
+BINARY 		= $(SGI_BIN)/obv.a
+
+all: $(BINARY)
+
+CC = cc
+CFLAGS =   -O2           
+
+CONVOLVE_SRC = 	hex-convolve.c p-convolve.c convolve.c wrap.c edges.c 
+FORTRAN_SRC = 	svd.c stepit.c
+GL_SRC =	gl-obv-blt.c gl-obv-draw.c gl-ffi-lucid-macros.c
+TIFF_SRC =	tiff-access.c
+ALL_SRC  =  	$(CONVOLVE_SRC) $(FORTRAN_SRC) $(TIFF_SRC) $(GL_SRC) \
+		matrix.c byteswap.c dither.c  fft.c \
+		imops.c 3d-ops.c surface-plot.c \
+	        zoom.c warper.c chartohex.c 
+
+$(BINARY): $(ALL_SRC)
+	$(CC) $(CFLAGS) -c $?
+	ar vrus $(BINARY) *.o
+	/bin/rm -fr *.o
+
+$(CONVOLVE_SRC): convolve.h
+	$(CC) $(CFLAGS) -c $(CONVOLVE_SRC)
+	touch $(CONVOLVE_SRC)
+
+$(FORTRAN_SRC): f2c.h
+	$(CC) $(CFLAGS) -c $(FORTRAN_SRC)
+	touch $(FORTRAN_SRC)
+
+.c:
+	$(CC) $(CFLAGS) -c $<
+	
+
+
+

@@ -1,0 +1,43 @@
+############################################################################
+
+INCLUDES = /usr/openwin/include
+BINARY = ../sun4-bin/obv.a
+
+all: $(BINARY)
+
+CC = cc
+CFLAGS = -O4 -fsingle  ## Optimize on Sun-4/SPARC
+# CFLAGS = -O4 -f68881   ## Sun-3 with standard Floating point co-processor
+# CFLAGS = -ffpa         ## Sun-3 with fpa (Weitek) board
+# CFLAGS = +x            ## HP Bobcats
+# CFLAGS = -O -f          ## DECstations
+# gcc -O -c $? -I$(INCLUDES)
+
+CONVOLVE_SRC = 	hex-convolve.c p-convolve.c convolve.c wrap.c edges.c 
+FORTRAN_SRC = 	svd.c stepit.c
+TIFF_SRC =	tiff-access.c
+ALL_SRC  =  	$(CONVOLVE_SRC) $(FORTRAN_SRC) $(TIFF_SRC) \
+		matrix.c byteswap.c color.c dither.c  fft.c \
+		imops.c 3d-ops.c surface-plot.c \
+	        zoom.c warper.c chartohex.c 
+
+###########################################################################
+##     cc -O4 -fsingle -c $? -I$(INCLUDES)
+
+$(BINARY): $(ALL_SRC)
+	$(CC) $(CFLAGS) -c $?
+	ar vru $(BINARY) *.o
+	ranlib $(BINARY)
+	/bin/rm -fr *.o
+
+$(CONVOLVE_SRC): convolve.h
+	$(CC) $(CFLAGS) -c $(CONVOLVE_SRC)
+	touch $(CONVOLVE_SRC)
+
+$(FORTRAN_SRC): f2c.h
+	$(CC) $(CFLAGS) -c $(FORTRAN_SRC)
+	touch $(FORTRAN_SRC)
+
+.c:
+	$(CC) $(CFLAGS) -c $<
+	
