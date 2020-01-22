@@ -1,0 +1,72 @@
+%% Figure depicting the calls used to manipulate pane stacks
+
+\begin{figure}
+\newlength{\oldunitlength}
+\setlength{\oldunitlength}{\unitlength}
+\setlength{\unitlength}{0.015in}
+
+\begin{center}
+\begin{picture}(400,270)(4,0)
+
+\put(70,260){\oval(80,20)}
+\put(70,260){\makebox(0,0){pop-picture}}
+\put(76,247){\vector(3,-4){18}}  	%to destroy
+
+\put(330,260){\oval(80,20)}
+\put(330,260){\makebox(0,0){display}}
+\put(330,243){\circle{14}}
+\put(330,243){\makebox(0,0){?}}
+\put(320,245){\vector(-3,-1){78}}  	%to move-picture
+\put(320,237){\vector(-1,-1){64}}  	%to push-picture
+\put(292,148){\line(2,5){34}}	  	%to draw-pane
+%\put(296,158){\line(2,5){30}}	  	%to draw-pane
+\put(292,148){\vector(-3,-1){75}}  	%to draw-pane
+
+\put(100,210){\makebox(0,0){\framebox(80,20){destroy (picture)}}}
+\put(108,197){\vector(1,-1){24}}  	%to remove-picture
+
+\put(200,210){\oval(80,20)}
+\put(200,210){\makebox(0,0){move-picture}}
+\put(189,197){\vector(-2,-1){48}}  	%to remove-picture
+\put(203,197){\vector(1,-1){24}}  	%to push-picture
+
+\put(40,160){\oval(80,20)}
+\put(40,160){\makebox(0,0){cycle-pane}}
+\put(52,147){\vector(3,-1){106}} 	%to draw-pane
+
+\put(135,160){\makebox(0,0){\framebox(80,20){remove-picture}}}
+\put(144,147){\vector(4,-3){32}} 	%to draw-pane
+
+\put(230,160){\makebox(0,0){\framebox(80,20){push-picture}}}
+\put(219,147){\vector(-3,-4){18}} 	%to draw-pane
+
+\put(360,160){\oval(80,20)}
+\put(360,160){\makebox(0,0){refresh}}
+\put(348,147){\vector(-3,-1){106}} 	%to draw-pane
+
+\put(200,110){\makebox(0,0){\framebox(80,20){draw-pane}}}
+\put(200,97){\vector(0,-1){24}}
+
+\put(360,60){\oval(80,20)}
+\put(360,60){\makebox(0,0){drag-picture}}
+\put(348,47){\vector(-3,-1){75}} 	%to render
+
+\put(200,60){\makebox(0,0){\framebox(80,20){present}}}
+\put(187,47){\vector(-1,-1){24}} %to compute-picture
+\put(213,47){\vector(1,-1){24}} %to render
+
+\put(150,10){\makebox(0,0){\framebox(80,20){compute-picture}}}
+\put(250,10){\makebox(0,0){\framebox(80,20){render}}}
+
+\end{picture}
+\end{center}
+
+\caption{Chart indicating the function call hierarchy of functions
+used to manipulate the picture stacks of OBVIUS panes.  Functions in
+oval boxes are top-level functions.  Those in rectangular boxes are
+internal.  The question mark enclosed in a circle indicates that the
+{\protect\tt display} function calls one of the three indicated functions.}
+\label{fig:display-calls}
+
+\setlength{\unitlength}{\oldunitlength}
+\end{figure}

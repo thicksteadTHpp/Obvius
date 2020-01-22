@@ -1,0 +1,235 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Data Analysis}
+\label{sec:data-analysis}
+
+OBVIUS has some basic tools for data analysis and simulation. 
+These include:
+
+\begin{description}
+\item[Matrix Tools] Singular value decomposition and related
+operations, and row and column operations 
+for dealing with multivariate data.
+
+\item[Statistical and Simulation Tools] 
+Simple methods for sample statistics, 
+probability distributions commonly used in modelling,
+and routines for generating noise drawn from particular distributions.
+
+\item[Model Fitting] Linear least squares regression and STEPIT.
+
+\end{description}
+
+
+
+\subsection{Matrix Tools}
+
+Many multivariate data analysis problems can be handled by
+treating data as rows or columns in matrices, 
+and applying simple linear algebra techniques to these matrices.
+The matrix module contains many tools for handling matrices.
+
+The matrix module may be loaded into OBVIUS by evaluating:
+\begin{verbatim}
+(obv-require :matrix)
+\end{verbatim}
+
+The following is an outline of the matrix tools available in OBVIUS.
+
+\begin{description}
+\item[Matrix Algebra]
+Most basic matrix algebra routines are available. For example:
+
+\begin{verbatim}
+;; Make a diagonal matrix, and take its inverse
+(setq d (diagonal-matrix '(1 2)))
+(setq d-1 (matrix-inverse d))
+
+;; Make another matrix, and take the sum and the product
+(setq m (make-matrix '((1 2) (3 4))))
+(setq sum (add m d))
+(setq product (matrix-mul m d))
+\end{verbatim}
+
+Please check Section \ref{sec:operations} for a detailed listing of
+matrix algebra routines.
+
+\item[SVD] The singular value decomposition is at the heart of many
+numerical linear algebra algorithms.  Please check Section
+\ref{sec:operations} for more detail on the OBVIUS svd implementation,
+and related tools such as matrix inversion, subspace algorithms, other
+matrix decompositions, and linear least-squares regression.
+
+An example calculation follows.
+
+\begin{verbatim}
+;; Example: Take the SVD of a matrix
+(setq matrix (make-matrix '((1 2) (3 4))))
+(svd matrix)
+\end{verbatim}
+
+SVD returns the singular values of the matrix in an vector,
+and the left- and right- singular matrices as multiple return values.
+
+\item[Row and Column Operations]
+OBVIUS has routines for doing simple row and column operations.
+Section \ref{sec:operations} section documents these functions in
+detail.  For example, you can access the rows of an example data
+matrix as follows:
+
+\begin{verbatim}
+;; Create a matrix and look at its row vectors
+(setq matrix (make-matrix '((1 2) (3 4) (5 6))))
+(setq first-row (row 0 matrix))
+(setq second-row (row 1 matrix))
+
+;; Swap the first and second rows of the matrix
+(swap-rows matrix 0 1)
+(setq first-row (row 0 matrix))
+
+;; Look at the covariance matrix of the variables in each row
+(setq covariance (covariance-rows matrix))
+\end{verbatim}
+
+\end{description}
+
+
+\subsection{Statistical and Simulation Tools}
+
+The statistics module may be loaded into OBVIUS by evaluating:
+\begin{verbatim}
+(obv-require :statistics)
+\end{verbatim}
+
+The following is a short outline of the statistical and simulation
+functions that are available.  These functions are defined in the
+files {\bf gaussian-noise.lisp} and {\bf statistics.lisp}:
+\begin {description}
+\item[Sample statistics] Some simple methods are available for
+standard statistics.  Example:
+\begin{verbatim}
+;; Make a couple of vectors with data
+(setq matrix-1 (make-matrix '((1 2 3 8 10 4))))
+(setq matrix-2 (make-matrix '((4 5 2 2 1 8))))
+
+;; Evaluate some statistics about the mean
+(setq mean (mean matrix-1))
+(setq standard-error (standard-error matrix-1))
+
+;; Variance etc.
+(setq variance (variance matrix-1))
+(setq covariance (covariance matrix-1 matrix-2))
+
+;; Examine an invented chi-square statistic
+(cumulative-chi-square (sum-of (square (sub matrix-1 matrix-2))) 3)
+\end{verbatim}
+
+\item[Standard Functions] Some commonly used probability distributions
+and other functions useful for modeling data are provided.  These
+include the Gaussian, Weibull, Poisson, Binomial, Chi-Square, F, T, and
+others.
+
+\item[Noise Generation] Several routines are useful 
+for generating noise data for simulation.  For example, you can
+generate an array filled with Poisson noise as follows:
+\begin{verbatim}
+;; Poisson noise example
+(setq noise (make-array 100 :element-type 'single-float))
+(setq lambda 7.0)
+(dotimes (i (length noise))
+  (setf (aref noise i) (float (poisson-noise lambda))))
+(mean noise)
+(variance noise)
+\end{verbatim}
+Other routines exist for Gaussian, Bernoulli, and uniform noise (look
+through the files {\bf gaussian-noise.lisp} and {\bf statistics.lisp}).
+\end{description}
+
+
+\subsection{Curve Fitting}
+
+Two types of curve fitting are available at present: linear least
+squares regression, and Chandler's STEPIT general-purpose minimization
+function.  These are best explained by example.  For more details,
+please refer to section \ref{sec:operations} section, or examine the
+source code directly.
+\begin{description}
+
+\item[Linear Least Squares Regression] Here is an example of how to
+solve a (cooked) regression problem.
+\begin{verbatim}
+;; Set up a matrix with the predictor variable
+(setq predictor (make-array '(10 3) :element-type 'single-float))
+
+;; Put random noise into the matrix
+(randomize predictor 1.0 :-> predictor)
+
+;; Set the observed matrix to be a linear transformation of the
+;; predictor
+(setq transform (make-matrix '( (1 2 3) (4 1 2) (4 9 2))))
+(setq observed (matrix-mul predictor transform))
+
+;; Solve the regression problem: the answer should be
+;; very close to the transformation matrix.
+(regress observed predictor)
+\end{verbatim}
+
+\item[Nonlinear Curve Fitting with Stepit]
+Chandler's STEPIT program is a fast, general purpose minimization
+function. Conceptually, you give STEPIT a set of parameters to adjust,
+and an error function that depends on the values of those parameters,
+and STEPIT attempts to adjust the parameters so as to minimize the
+error function. In detail, the required arguments to {\tt stepit-fit}
+are:
+\begin{description}
+\item[error-function] function to be called with parameters
+followed by other arguments (see below).
+It is the return value of this function that stepit attempts to minimize. 
+\item[initial-parameters]
+starting point of parameters (a single-float vector or array).
+\item[error-function-args]
+list of arguments that are passed (after the parameters)
+to the error function at each iteration. 
+These arguments are passed to error-function one after another, not as a list.
+\item[keywords] Detailed control of stepit's iterative process.
+See the source code for more information.
+\end{description}
+
+A simple example follows that illustrates the use of the OBVIUS
+interface to STEPIT.  You are seeking the entries of the vector that
+is closest to a pre-set vector (the answer is obvious, the result
+should be the same as the pre-set vector).  You set up the pre-set
+vector, and an initial guess for the closest vector. Then, give STEPIT
+the three required arguments:
+\begin{verbatim}
+;; Set up a dummy problem to be solved by stepit
+(setq vector (make-matrix 1 2))
+(setq initial-parameters (make-matrix 0 0))
+(stepit-fit #'vector-distance initial-parameters (list vector))
+\end{verbatim}
+STEPIT maintains its own set of parameters, call them {\tt
+stepit-parameters} that it adjusts after each call to the error
+function.  At each iteration, the error function is called as follows:
+\begin{verbatim}
+(vector-distance stepit-parameters vector)
+\end{verbatim}
+STEPIT adjusts the entries of {\tt stepit-parameters} until this
+function call is minimized. Obviously, STEPIT will figure out that the
+best choice of {\tt stepit-parameters} is identical to {\tt vector}.
+
+Althought this problem is not very interesting, most parameter-fitting
+problems can be coded with this structure. STEPIT therefore provides a
+general method for fitting models to data. Note that the length of
+time required for a stepit fit grows exponentially with the number of
+parameters, so if your models have more than about 5 parameters, be
+prepared to wait!
+\end{description}
+
+
+
+
+
+
+
+
+
+

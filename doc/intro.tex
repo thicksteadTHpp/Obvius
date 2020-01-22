@@ -1,0 +1,124 @@
+\section{Introduction}
+
+
+OBVIUS (Object-Based Vision and Image Understanding System) is an
+image-processing system based on Common Lisp and CLOS (Common Lisp
+Object System).  The system provides a flexible interactive user
+interface for working with images, image-sequences, and other
+pictorially displayable objects.  By using Lisp as its primary
+language, the system is able to take advantage of the interpretive
+lisp environment (the ``listener''), object-oriented programming, and
+the extensibility provided by incremental compilation.
+
+The basic functionality of OBVIUS is to present certain lisp objects
+to the user pictorially.  These objects are refered to as
+``viewables''. \index{{\ptt viewable}} Some examples of viewables are
+monochrome images, color images, binary images, complex images, image
+sequences, image pyramids, filters and discrete functions.  A
+``picture'' \index{{\ptt picture}} is the displayable representation of a
+viewable.  Note that a given viewable may be compatible with several
+different picture types.  For example, a floating point image may be
+displayed as an eight bit grayscale picture, as a one bit dithered
+picture, or as a 3D surface plot.  OBVIUS also provides postscript
+hardcopy output of pictures.
+
+In the typical mode of interaction, the user types an expression to
+the lisp listener and it returns a viewable, which is automatically
+displayed as a picture in a window.  Each window contains a circular
+stack of pictures.  Standard stack manipulation operations are
+provided via mouse clicks (e.g., cycle, pop, and push).  Commonly used
+operations such as histogram and zoom are also provided via mouse
+clicks.
+
+OBVIUS provides a library of image processing routines (e.g., point
+operations, image statistics, convolutions, fourier transforms).  All
+of the operations are defined on all of the viewable types.  The
+low-level floating point operations are implemented in C for speed.
+OBVIUS also provides a library of functions for synthesizing images.
+In addition, it is straightforward to add new operations and new
+viewable and picture types.
+
+OBVIUS currently runs on Sun workstations in Lucid v4.0 Common Lisp.
+We hope to have it running on other machines in the future (e.g.,
+DecStations, SGI workstations, Apple Macintoshes, etc).  
+
+This manual describes the overall organizational strategy of the
+system, and provides a description of the user interface.  Throughout,
+we assume the reader is familiar with Emacs, Common Lisp, and some
+form of object-oriented programming environment.  The manual is
+written primarily for Sun users -- users of other machines should see
+the Appendices for machine dependencies.  Section \ref{sec:start} and
+the OBVIUS tutorial \index{tutorial} (in the file {\tt
+<obv>/tutorials/obvius/obvius-tutorial.lisp}) are provided for new
+users to aquaint themselves with the system without getting bogged
+down in hairy implementational details.  The middle sections
+\ref{sec:organization} through \ref{sec:userface} are a more detailed
+description of the system for more experienced users.  Section
+\ref{sec:hacking} is provided for programmers (``hackers'').
+
+\newpage
+
+\section{Getting Started}
+\label{sec:start}
+
+We assume in this section that you have installed OBVIUS on your
+system (if you have not yet created an OBVIUS image, instructions for
+doing so are given in appendix~\ref{sec:install}).  We also assume
+that you are running the X window system (version 11, release 4 or
+higher), or Sun's OpenWindows (version 2.0 or higher).  You may use a
+window manager of your choice.  We have used OBVIUS with ``twm'',
+``uwm'', ``mwm'', and ``olwm''.
+
+We recommend that you run OBVIUS from within the Gnu emacs editor,
+version 18.49 or later (Gnu emacs is avaiable for anonymous ftp from
+prep.ai.mit.edu).  The tutorial (in the file {\tt
+<obv>/tutorials/obvius/obvius-tutorial.lisp}) assumes that you are
+doing this.  OBVIUS can, however, be run from a Unix shell.
+
+If you are running from Emacs, you should add the following
+lines to your ``{\tt .emacs}'' startup file:
+\begin{verbatim}
+(setq load-path (cons <obv>/emacs-source load-path))
+(setq *cl-program* <lisp-image>)
+(autoload 'run-cl "cl-shell" nil t)
+(setq *obvius-program* <obvius-image>)
+(autoload 'run-obvius "cl-obvius" nil t)
+\end{verbatim}
+The symbol {\tt <obv>} is used throughout this document to indicate the
+pathname of the primary OBVIUS directory (on our system, this is ``{\tt
+/usr/local/obvius}'').  The symbol {\tt <lisp-image>} refers to the
+pathname for a Lucid 4.0 image that includes CLOS and LispView.  On
+our system, this is in ``{\tt /usr/local/bin/lispview}''.
+
+To start lisp, you type {\tt M-x run-cl} from within Emacs.  To start
+OBVIUS, you type {\tt M-x run-obvius}. After several seconds, a new
+Emacs buffer will appear named {\tt *lisp*} and various system loading
+messages will be printed into the buffer.  Eventually, you will get
+OBVIUS's prompt: {\tt OBVIUS>}.  This buffer provides an interface to
+Lisp that is running as a sub-process of Emacs.  As described in the
+next section, hitting the {\tt cr} key in this buffer will send text
+to the Lisp process for evaluation, and Lisp output will be printed
+into this buffer.  
+
+At this point, new users go through the OBVIUS tutorial in the file
+{\tt <obv>/tutorials/obvius/obvius-tutorial.lisp}.  The purpose is to
+familiarize new users with the basic functionality of OBVIUS, and with
+the user interface.
+
+The remaining part of this section describes customization of your
+OBVIUS environment, and is unnecessary for novices.  At run-time,
+OBVIUS looks for two startup files in your home directory.  These can
+be used for personal customization of your environment.  The first is
+named either ``{\tt .obvius-windows}'' or ``{\tt
+obvius-window-init.lisp}''.  This file loads the appropriate window
+system code.  The default version is in ``{\tt
+<obv>/lucid-window-init.lisp}''.
+
+The second startup file is called either {\bf .obvius} or {\bf
+obvius-init.lisp}.  You can use this file to create a fixed number of
+OBVIUS windows in predefined locations, to initialize default values
+for global parameters and to have code loaded automatically.  The
+default file is in ``{\tt <obv>/lucid-obvius-init.lisp}''.  This file
+contains many (commented out) function calls that you may wish to add
+to your personal initialization file.
+

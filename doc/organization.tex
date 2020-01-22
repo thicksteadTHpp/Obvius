@@ -1,0 +1,635 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Organization of OBVIUS}
+\label{sec:organization}
+
+As described in the introduction, OBVIUS is based on three types of
+object: viewables, pictures, and panes.  This section covers these
+objects in more detail and also explains the memory management system.
+We assume that you have gone through the exercizes of the OBVIUS
+tutorial.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Viewables}
+
+\ldef{viewable}s are the objects that one works with in OBVIUS.
+In this section, we describe the general
+attributes of viewables.  For a discussion of the particulars of each
+viewable subclass, see section
+\ref{sec:viewables}.  Every viewable (simple or compound) contains the
+following slots:\index{{\ptt viewable},slots of}
+
+\begin{itemize}
+
+\item \lsym{name} -- the name of the viewable can be either a string,
+a symbol, or nil.  If the name is bound to a symbol, there is a symbol
+with that print-name bound to the viewable, i.e., the symbol may be
+used to refer to the viewable.  The name of a viewable is usually set
+using the standard lisp {\tt setq} function or using the {\tt :->}
+(result) keyword argument.  
+NOTE: Using (setf slot-value) to set the
+name slot will cripple the ability of OBVIUS to keep track of the
+existing viewables.  For this reason, the name slot accessor is not
+exported, and should not be used.
+
+\item \lsym{superiors-of} -- Some viewables contain other viewables.
+These are known as ``compound'' viewables.  For example, a complex
+image contains two images (real and imaginary parts).  Viewables
+containing other viewables are called {\em compound} viewables.  Each
+compound viewable knows how to access its ``inferior'' viewables, and
+each of the inferior viewables has a pointer to the ``superior''
+(compound) viewable.  This slot contains a list of all viewables
+containing the viewable as a sub-viewable.  For instance, if the
+viewable is the real-part of a complex-image, the list will contain
+that complex-image.
+
+\item \lsym{display-type} -- this slot contains the name of the 
+sub-class of picture \index{{\ptt picture}} that will be used when the viewable is
+automatically displayed.  A nil value indicates that the viewable
+should {\em not} be displayed automatically.  The slot may be set using the
+standard setf syntax: {\tt (setf (display-type \abox{viewable})
+'\abox{picture-type})}
+
+\item  \lsym{pictures-of} -- this slot contains a list of all of the
+pictures of the viewable.  There may be several different types of
+picture of the same viewable, and there may be more than one of a
+given picture type.  For example, there may be a grayscale picture
+{\em and} a surface plot of an image, or there may be two different
+grayscale pictures.
+
+\item \lsym{history} -- this slot contains a history object for the
+viewable.  See the section below for more information.
+
+\item \lsym{current} -- this slot contains a number that is incremented
+each time a viewable is modified.  It is used to keep track of whether
+the pictures of that viewable are up-to-date or not.  There is a
+similar slot in the picture class.
+
+\item \lsym{info-list} -- this slot contains a lisp ``plist'' (property
+list) of attributes.  For example, if the mean of an image is
+computed, it is stored in this p-list so it does not need to be
+recomputed.  The same is true for histograms, minimum, maximum, and
+other image statistics.  The info-list is set to nil when the viewable
+is destructively modified (this is done by the {\tt set-not-current} method).
+\end{itemize}
+
+The following functions may be used to access the info-list of a viewable:
+\begin{itemize}
+\item\lfun{info-list}{ viewable}
+Returns the info-list of an image.
+
+\item\lfun{info-get}{ viewable slot}
+Returns the value of the slot named {\em slot} in im's info-list.  May be
+used with setf to set the value instead of using info-set.
+
+\item\lfun{info-set}{ viewable slot value}
+Sets the value of the slot named {\em slot} in im's info-list to have
+the value {\em value}.  You can also use {\tt (setf (info-get vbl
+slot) val)}.
+
+\end{itemize}
+
+\mysubsubsec{Displaying Viewables}
+
+\index{{\ptt viewable},auto display}
+When a viewable is returned to the top-level lisp listener, it will be
+displayed automatically if the global parameter
+\lsym{*auto-display-viewables*} is non-nil.  If a picture 
+\index{{\ptt picture}} of the viewable
+already exists, it will be brought to the top of the stack of the
+current pane \index{{\ptt pane}} if the variable
+\lsym{*preserve-picture-pane*} is nil.  If this variable is non-nil,
+then the picture will stay on the same pane, but still be brought to
+the top of the stack.  Otherwise, a picture is created of the type
+defined by the display-type slot of the viewable and pushed onto the
+picture stack of the current pane.  If you wish to explicitly create a
+picture of a viewable with a particular set of display parameters, use
+the
+\lsym{display} function (described in Section \ref{sec:pictures}).
+Section \ref{sec:pictures} also describes methods for altering the
+parameters of pictures.
+
+\mysubsubsec{Modifying Viewables}
+
+\index{{\ptt viewable},destructive modification}
+When a viewable is destuctively modified (e.g. by passing it as the
+\lsym{:->} argument to a function) the method \lsym{set-not-current} is
+called.  This method tells OBVIUS that the pictures that depend on
+that viewable need to be recomputed.  In general, the method does
+nothing to the viewable, but calls itself on each of the superiors of
+the viewable, and on each of the pictures of the viewable.  The
+pictures then either update themselves immediately, or indicate to the
+user that they are ``not current'' by placing a double asterisk in the
+title bar (this is consistent with the double asterisk Emacs uses to
+indicate a buffer has been modified).  The display may be updated by
+refreshing the pane via a mouse click (see Section
+\ref{sec:mouse}).  Note that modifying a viewable does {\em not} cause
+related viewables to be re-computed.  For example, if a histogram is
+computed from an image and the image is subsequently modified, the
+histogram will not be recomputed.
+
+\mysubsubsec{Destroying Viewables}
+
+A viewable may be destroyed by evaluating the expression {\tt (\lsym{destroy}
+\abox{viewable})} or via a mouse click (see Section
+\ref{sec:mouse}).  The function \lsym{purge!} destroys all viewables.
+When a viewable is destroyed, the following things occur:
+\begin{enumerate}
+\item Superiors of the viewable are notified.  Note that some
+superiors will not allow their inferiors to be destroyed (e.g. a
+complex image will trigger a continuable error when the user tries to
+destroy its real part).
+ 
+\item Inferiors of the viewable are notified.  Typically, the
+inferiors just take the superior off of their {\tt superiors-of}
+lists.  If the global parameter
+\lsym{*auto-destroy-orphans*} is non-nil, the inferior is destroyed
+(see section on orphaned viewables below).  
+
+\item All pictures of the viewable are destroyed (i.e., the {\tt
+destroy} method is called on each picture).  The static space used by
+the pictures is freed (see section \ref{sec:memory}).
+
+\item The static space of the viewable is freed (see Section
+\ref{sec:memory}).
+
+\item If the viewable name slot contains a symbol, it is unbound in
+the current package of the global Lisp environment.
+
+\item The name of the viewable is set to the keyword
+\lsym{:destroyed}, as an indicator to the user in case they try to
+re-use the viewable.
+\end{enumerate}
+
+\mysubsubsec{Orphans}
+\index{orphans}
+A viewable is called an ``orphan'' if it is no longer accessible.  As
+far as OBVIUS is concerned, a viewable is considered inaccessible if
+it has no superiors, there are no pictures of it, and there is no
+global symbol bound to it.  When you run the OBVIUS garbage collector,
+\lsym{ogc}, it will recycle all orphaned viewables.  Furthermore, if
+the global variable \lsym{*auto-destroy-orphans*} has a non-nil value,
+OBVIUS will attempt to destroy orphans when they are created.  Thus,
+users of OBVIUS should understand when they are creating orphans!
+
+There are three situations when OBVIUS can prevent the ``orphan'ing'' of
+an existing viewable::
+\begin{enumerate}
+\item The (symbol) name of the viewable is (re-)bound (using {\tt setq} or
+{\tt set}) to another value.
+\item The only picture of the viewable is popped from a pane (destroyed).
+\item The viewable is an inferior of a compound viewable, and that
+compound viewble is destroyed.
+\end{enumerate}
+In each of these cases, if the global parameter
+\lsym{*auto-destroy-orphans*} is non-nil, the orphan will be
+automatically destroyed.  
+
+{\em Note that this can be dangerous.} For example, if a user writes
+code that returns an inferior viewable from within a function, but the
+function destroys the superior, the inferior may be destroyed {\em
+before} it is returned to top level.  Note also that automatic
+destruction of orphans {\em will not} prevent the user from creating
+new viewables that are orphans.  For example, one can create a list of
+images with no name and avoid dislaying them.  These images will be
+orphans and will not be preserved by the OBVIUS garbage-collector
+({\tt ogc}), although the user will have access to them.  If you want
+to return several images from a function, you should return them as an
+image-sequence, or using the Common Lisp multiple-values facility.
+See section~\ref{sec:hacking} for a more thorough discussion of this
+problem.
+
+\mysubsubsec{History and Constructor}
+The \lsym{constructor} function produces a lisp S-expression that
+would evaluate to a copy of the viewable.  When you save a viewable to
+a datfile (see section~\ref{sec:datfile}, this expression is written
+to the descriptor file.  It is also useful as a reminder of where the
+viewable came from.  The function {\tt (\lsym{history-sexp} <viewable>
+\&key (level 1))} allows the user to print a condensed listing of the
+history, substituting symbols for the viewables with symbol name
+slots.  The {\tt :level} parameter determines how many nested levels
+of history (function calls) will be displayed before the system
+attempts to replace them with symbols.  These functions are defined in
+the file {\bf viewable.lisp}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Pictures and Panes}
+\label{sec:pictures}
+
+A \ldef{pane} is a window that contains a stack of pictures.  The
+picture on top of the stack is the one that is displayed on the
+screen.  Each picture is allowed to reside on the stack of only one
+pane.  To create a new pane, the user should call the function 
+\lsym{new-pane}. The keyword arguments :left, :bottom, :right, and :top
+specify the position in pixels of the lower left and upper right
+corners of the pane.
+
+The system maintains a notion of the {\em selected} or {\em current}
+pane.  In general, clicking the mouse in a pane will select that pane
+(see section \ref{sec:mouse}).  Whenever a viewable is automatically
+displayed by the system, it is displayed in the current pane.
+
+A \ldef{picture} is a particular visual representation of a viewable.
+
+\mysubsubsec{Picture Slots and Default Values}
+The following slots are found in every picture type:
+\begin{itemize}
+\item {\bf pane-of} -- the pane in which this picture lives.  Pictures
+cannot exist in isolation; they must be on a picture stack.
+
+\item {\bf viewable} -- the viewable of which this is a picture.
+
+\item {\bf system-dependent-frob} -- a window-system dependent
+intermediate representation.  The window system knows how to rapidly
+``render'' the ``frob'' into a pane.  For gray pictures on X-screens,
+the frob is an offscreen pixmap.  For graphs with retain-bitmap
+non-nil, it is an offscreen bitmap.  But for graphs with retain-bitmap
+nil, it is an object containing lists of graphical objects (such as
+lines) to draw.
+
+\item {\bf index} -- a unique registration number identifying the picture.
+
+\item {\bf current} -- a number that is is used to
+keep track of whether the picture is up-to-date with its viewable
+(given that the viewable may have been modified since the picture was
+originally made).  The current slot is reset each time the picture is
+updated.  There is a similar slot for the viewable class.
+
+\item {\bf zoom} -- magnification of the picture, relative to its
+``natural'' size (this is described in detail below).
+
+\item {\bf overlays} -- this slot contains a list of the viewables that
+are overlayed on this picture (see section \ref{sec:overlays}).
+
+\item {\bf y-offset} and {\bf x-offset} -- these slots specify the
+position of the picture within the pane (relative to centered position).
+
+\end{itemize}
+
+In addition to those listed above, each picture class has parameters
+that control its computation from the underlying viewable.  For
+example gray pictures have \lsym{scale} and \lsym{pedestal} parameters
+that specify the transformation of the floating-point image array into
+a grayscale colormap.  The values of these parameters may be changed
+using the {\tt Current Picture} dialog from the {\tt Parameters} menu
+on the contral panel, or using the {\tt M-left} mouse click.  The
+parameter values may also be reset using the
+\lsym{setp} macro, which acts on the picture on top of the current
+pane.  The {\tt setp} macro is described in detail below.
+
+When a new picture is created, default values are chosen for the
+picture parameters.  The default slot values for each picture class
+may be set from the {\tt Picture Defaults} sub-menu of the {\tt
+Parameters} menu.  Typically, the default value may be a number or it
+may be the keyword{\tt :auto}.  If it is a number, that number will be
+used as an initial slot value for all pictures of this type.  If the
+default value is not a number, then OBVIUS will choose parameter
+values automatically.
+
+For details about the parameters for each picture class, see the
+descriptions in Section \ref{sec:viewables}.
+
+\mysubsubsec{Manipulating Pictures and Panes}
+
+In general, the user should not need to directly manipulate pictures
+or panes.  OBVIUS is designed with the intention that the user perform
+computations on {\em viewables}.  There are, however, several methods
+provided that allow the user to alter pictures:
+\begin{description}
+\item\lsym{*current-pane*} \\
+This global symbol is bound to the current pane.  This symbol can be
+used when calling functions that take a pane as an argument.
+
+\item\lfun{display}{ \&optional display-type \&key pane make-new \&allow-other-keys}
+This function is used to create a picture of a viewable.  The optional
+{\tt display-type} argument should be a symbol corresponding to the
+name of a picture subclass (eg. {\tt 'gray}, or {\tt 'vector-field}).
+The default value is t, meaning to use the \lsym{display-type} slot of
+the viewable.  The {\tt :pane} keyword argument specifies the pane in
+which to display the picture and defaults to the value of
+\lsym{*current-pane*}.  If this is nil, a new pane is created.  The
+{\tt display} function first tries to find an existing picture of the
+desired type.  If no picture of the right type exists, or if a non-nil
+value is passed with the keyword \ldef{:make-new}, a new picture is
+created with all default parameter values.  Otherwise, one of the
+existing pictures is displayed, and updated if it is out-of-date and
+\lsym{*auto-update-pictures*} is non-nil.  
+All additional keyword args ({\tt picture-initargs}) are used as
+initialization arguments in creating the picture (i.e., they are
+passed along to {\tt make-instance}).  They typically correspond to
+initargs for the slots of the picture being created.  For example, you
+can create a gray picture of an image, with the scale factor set to
+1.0, and the zoom factor set to fill the pane, as follows:
+\begin{verbatim}
+(display <image> 'gray :scale 1.0 :zoom :auto)
+\end{verbatim}
+
+\item\lfun{refresh}{ \&optional pane}
+This function re-displays the picture on top of the specified pane.
+The optional {\tt pane} argument defaults to the value of
+\lsym{*current-pane*}.  This function is typically called via a mouse
+click (see Section \ref{sec:mouse}).
+
+\item\lfun{next-pane}{}
+This function sets the current pane to be the next pane in the list of panes.
+
+\item\lfun{cycle-pane}{ \&optional pane number}
+This function cycles the circular picture stack of a pane and
+refreshes the display.  The default pane is the value of
+\lsym{*current-pane*}.  The optional {\tt number} argument defaults to
+a value of 1, and specifies how many pictures to cycle past.  Negative
+values cycle in reverse. This function is typically called via a mouse
+click (see Section \ref{sec:mouse}).
+
+\item\lfun{current-viewable}{}
+Returns the viewable currently visible in the current pane.
+
+\item\lfun{get-viewable}{ \&optional pane}
+Returns an S-expression that will evaluate to the viewable currently
+visible on top of the pane.  Optional argument {\tt pane} defaults to the value of
+\lsym{*current-pane*}.   This function is typically called via a mouse
+click (see Section \ref{sec:mouse}).
+
+\item\lfun{pop-picture}{ \&optional pane}
+This function removes the picture on the top of a picture stack and
+destroys it.  The underlying viewable, however, is left intact.  The
+default pane is the current pane.  It is usually called via a mouse
+click (see Section \ref{sec:mouse}).
+
+\item\lfun{setp}{ \&rest args}
+It is often desirable to modify the parameters that are associated
+with the various picture types.  The macro setp has been provided for
+this purpose.  The syntax for setp is just like setq except that all
+of the symbols to be set should correspond to slot names in the
+picture on top of the current pane.  After setting the new slot
+values, the picture will be recomputed using the new values and the
+display will be refreshed.  Note that some picture slots are not
+settable; calling setp on these will have no effect.  Picture
+parameters can also be reset using the {\tt Current Picture} option
+from the {\tt Parameters} menu.
+
+\item\lfun{getp}{ \&optional slot-name}
+This macro is complementary to setp.  It takes a single argument that
+must be the name of a slot in the current picture and returns the
+value of that slot.  When called with no arguments, it prints a list
+of the names and values of {\em all} of the slots of the current
+picture.  
+\end{description}
+
+\mysubsubsec{Zoom}
+
+Every picture class has a {\tt zoom}\index{{\ptt zoom},slot} parameter that
+controls the size of the picture in the pane.  The zoom amount is
+relative to the ``natural'' size of the picture (this depends on the
+type of picture).  The {\tt zoom} parameter may be set to {\tt
+:auto}\index{{\ptt :auto},zoom}, a number, or a list of two numbers.  If it
+is {\tt :auto}, then OBVIUS sizes the picture to fill the pane.  If it
+is a list, then OBVIUS sizes the picture to have dimensions equal to
+that list.  If {\tt zoom} is a number, then the size of the picture
+will be this multiple of its natural size.  For example, if a 64x64
+image is displayed as a gray picture with zoom = 2, then the picture
+will by 128x128 pixels.  If zoom = 1/2, then the picture will be 32x32
+pixels.  For some pictures (e.g., gray), zoom will be rounded to the
+nearest integer, or reciprocal of an integer.  For others (e.g.
+graph), it can take a floating point value.
+
+The value of the zoom parameter may be changed from the {\tt Current
+Picture Parameters} menu, using the {\tt setp} macro, or by using the mouse
+(see section~\ref{sec:mouse}).
+
+% The default value for {\tt zoom} may be set separately for each
+% picture class from the {\tt Picture Defaults} submenu of the {\tt
+% Parameters} menu.  If the default is {\tt nil}, then OBVIUS chooses a
+% value automatically each time a new picture is made.  Typically, the
+% automatic choice is {\tt zoom} = 1.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{File System Interface}
+\label{sec:datfile}
+
+OBVIUS uses a subset of the {\em datfile}\index{datfile} image file format used by
+several groups at the Media Lab and in other labs at MIT.  A datfile
+is a directory containing one or more files.  One of these files,
+named ``data'', contains the data organized in a rectangular matrix
+with any number of dimensions.  A separate file in the datfile
+directory, named ``descriptor'', contains a pseudo-LISP description of
+the data file.  Keyword/value pairs of ASCII strings, enclosed in
+matching parentheses, describe the organization, data type, history
+and other aspects of the datfile.  The advantage of this scheme is
+that information about the image is kept separate from the image data
+itself, and is human-readable and easily modified.  No special-format
+headers are required.
+
+A typical descriptor file looks like the following (the corresponding
+data file is 16K bytes):
+\begin{verbatim}
+(_data_type unsigned_1) 
+(_data_sets 1) 
+(_channels 1) 
+(_dimensions 256 256) 
+\end{verbatim}
+The most important keywords are {\tt \_data\_type} and {\tt
+\_dimensions}.  The {\tt \_dimensions} keyword specifies the size of the
+image (y-dimension is first).  The {\tt \_data\_type} keyword
+in the descriptor file specifies the type of the data file elements,
+and may take any of the following values (on the left is the
+{\tt \_data\_type} specification in the descriptor file, and on the right is
+the Common Lisp type specifier):
+\begin{itemize}
+\item unsigned\_1 = '(unsigned-byte 8)
+\item unsigned\_4 = '(unsigned-byte 32)
+\item float = 'single-float
+\item ascii = 'character
+\end{itemize}
+The {\tt \_data\_sets} and {\tt \_channels} keywords are currently not
+used by OBVIUS, but they must both be specified in the descriptor file
+and equal to $1$.  In the future, {\tt \_channels} may be used for color
+images (3 channels in an rgb image stored consecutively in the same
+data file) and {\tt \_data\_sets} will be used for image sequences (multiple
+images from an image sequence stored in the same data file).  
+
+Currently, OBVIUS stores {\tt image-sequences} as a datfile directory
+with one descriptor file and several data files named ``data0'',
+``data1'', etc.  The keyword {\tt \_data\_files} in the descriptor
+file specifies how many data files are present.
+
+The function \lsym{load-image} (see Section \ref{sec:operations}) loads
+images from datfiles and the function \lsym{save-image} saves images to
+datfiles.  The {\tt load-image} function will also load images from a
+file that is a stream of bytes in row-major order with one byte per
+pixel.
+
+OBVIUS is designed to load images in various machine formats.  Some
+machines (e.g., Suns and Symbolics) store 32-bit numbers in reversed
+byte order from each other.  OBVIUS uses the {\tt :byte-order}
+keyword in the descriptor of a datfile to determine the byte-order of
+the file.  If necessary, {\tt load-image} will reverse the order of
+the bytes as it reads in a 32bit image file.  OBVIUS is not currently
+set up to load different floating point formats.  Rather, you should
+use ascii or 32-bit file format if you have different machines at your
+site.
+
+The following describes the functions for load and saving images and
+image-sequences:
+\begin{description}
+\item\lfun{load-image}{ path \&key ysize xsize reverse-bytes \res}
+If path is a directory, load-image assumes that path is a datfile, and
+{\tt :ysize} and {\tt :xsize} are ignored.  Otherwise it assumes that
+path is an image file stored in row-major order with one byte per
+pixel.  In such a case the keywords {\tt :ysize} and {\tt :xsize} may
+be used to specify the size of the image.  If they are not specified
+then load-image assumes that the image is square.  For a datfile,
+OBVIUS uses the information in the descriptor file to determine the
+element-type, the byte-order, and the dimensions of the data.
+
+First, {\tt load-image} converts the incoming data into floats.  Then
+it uses a scale and pedestal, if specified in the descriptor file, to
+rescale the image data.
+
+The {\tt :reverse-bytes} argument is only relevant for 32-bit
+datfiles.  If {\tt :reverse-bytes} is nil then OBVIUS uses the
+byte-order keyword in the descriptor file to determine whether or not
+to reverse the bytes.  If the {\tt :reverse-bytes} is non-nil, then
+load-image ignores always reverses the bytes (ignoring the byte-order
+keyword in the descriptor file).
+
+If :\res is not specified and the global {\tt
+*auto-bind-loaded-images*} is non-nil, then the image will be named
+(see Section \ref{sec:viewables}) with the file-name or directory-name
+of path (not the whole path-name).  See the tutorial for a simple
+example.
+
+The {\tt load-image} function calls the {\tt load-image-sequence}
+function if the {\tt \_data\_files} keyword is present in the
+descriptor file.
+
+\item\lmeth{save-image}{image}{ image path \&key element-type auto-scale reverse-bytes df-keys}
+Saves image as a datfile in path.  The {\tt :element-type} keyword specifies
+what type of file to save it as.  {\tt :Element-type} may be '(unsigned-byte
+8), '(unsigned-byte 32), `single-float, or 'character.  The default is
+'(unsigned-byte 8).  WARNING: Floating point word formats are
+different for different manufacturers, so it may not be possible to
+load an image that was saved from a different machine (use 'character
+or '(unsigned=byte 32) instead of 'float). 
+
+If {\tt :element-type} is '(unsigned-byte 32) then the image is
+rescaled to fill the 32bit range.  The appropriate scale and pedestal
+are written to the descriptor file so that the 32-bit numbers will be
+rescaled correctly when the image is reloaded.  If the reverse-bytes
+keyword is T (default is nil) and the {\tt :element-type} is
+'(unsigned-byte 32), then the byte-order is swapped during write.
+
+If {\tt :element-type} is '(unsigned-byte 8) and {\tt :auto-scale} is
+NIL then no rescaling is done.  If {\tt :auto-scale} is T (the
+default) then the image is rescaled to fill the range from 0 to 255,
+and the appropriate scale and pedestal are written to the descriptor
+file so that the 8-bit numbers will be rescaled correctly when the
+image is reloaded.
+
+\item\lfun{load-image-sequence}{ path \&key start-index end-index \res}
+Loads an image sequence from a datfile directory with multiple data
+files name ``data0'', ``data1'', etc.  The keywords :start-index and
+:end-index may be used to load a subsequence.  The load-image function
+calls the load-image-sequence function if the \_data\_files keyword is
+present in the descriptor file.
+
+\item\lmeth{save-image}{image-sequence}{ sequence path \&key element-type auto-scale reverse-bytes df-keys start-index end-index}
+Saves a sequence as a datfile directory with multiple data files.  The
+keywords are the same as for saving images.  The :start-index and
+:end-index keywords may be used to save a subsequence.
+\end{description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Memory Management}
+\label{sec:memory}
+
+Lisp memory space is divided into several different areas.  The most
+important distinction is between the dynamic and static areas.  All
+user-defined storage space normally resides in the ``dynamic'' areas.
+Lucid Lisp provides several functions for examining and manipulating
+the dynamic Lisp memory space from top level.  A complete explanation
+is available in the Lucid Common Lisp User's Guide.  A few very useful
+functions are:
+\begin{description}
+\item\lfun{change-memory-management}{ \&key growth-limit expand ...}
+If a number is supplied for the {\tt :growth-limit} keyword, it specifies
+the maximum Lisp process size in 64k segments.  If a number is
+supplied for the {\tt :expand} keyword, the Lisp dynamic space is expanded
+by that many 64k segments.
+
+\item\lfun{room}{ \&optional info}
+This function prints out information about the current state of the
+lisp memory map.  If the optional argument {\tt info} is t, more
+information is given.
+\end{description}
+
+In order to avoid garbage collecting large arrays such as image
+arrays, OBVIUS allocates storage for viewables and pictures from the
+static heap.  {\em Since these arrays are never garbage collected,
+they must be returned explicitly to the system}.  OBVIUS maintains
+separate ``heaps'' of static storage space for different array types
+(e.g., 'single-float, 'bit, etc).  The memory allocator is designed to
+create heaps for any element-type that is a valid argument to the
+Common Lisp {\tt make-array} function.  Arrays are allocated from and
+returned to the static heaps with the functions {\tt allocate-array}
+and {\tt free-array} as described in Section~\ref{sec:hacking}.
+
+Sometimes in the midst of a computation, OBVIUS will need to allocate
+an array from one of the static heaps that has no more free space.
+The global parameter \lsym{*auto-expand-heap*} controls the behavior in
+this situation.  If {\tt *auto-expand-heap*} is non-nil, then OBVIUS
+will automatically call the {\tt expand-heap} function (described
+below) to increase the size of the appropriate heap.  The amount of expansion is
+controlled by the variable \lsym{*heap-growth-rate*}, which should
+contain an integer specifying the number of {\em elements} to add to
+the heap.  If {\tt *auto-expand-heap*} is nil, then OBVIUS will signal
+a continuable error: you can either abort the computation or enter
+{\tt :c} to expand the heap by {\tt *heap-growth-rate*} elements.
+
+Several functions are provided for top-level management of the static
+heaps:
+\begin{description}
+
+\item\lfun{expand-heap}{ type \&optional size}
+This function expands the size of OBVIUS's static array area, for the
+given type of element.  The type argument can be any array type.
+Examples are: 'single-float, '(unsigned-byte 8), and 'bit.  The
+optional parameter {\tt size} specifies the number of elements by
+which to expand the respective space.  It defaults to the value of the
+global parameter {\tt *heap-growth-rate*}.
+
+\item\lfun{heap-status}{}
+Prints a description of the current static memory usage.
+
+\item\lfun{ogc}{ \&key verbose}
+A primitive garbage collector that offers a means of reclaiming lost
+storage space (i.e., allocated arrays that belong to orphaned \index{orphans}
+viewables -- see the previous section on orphans for an explanation).
+Note that unlike the Common Lisp garbage collector, {\tt ogc} must be
+called manually by the user.  {\tt Ogc} reclaims static arrays that do
+not belong to: (1) pictures, (2) viewables of pictures, (3) viewables
+that are bound to symbols in the current package or the {\tt USER}
+package, or (4) inferior or superior viewables of the aformentioned
+viewables.  All arrays that are not preserved are returned to the heap
+for reallocation.  {\tt Ogc} also prints a list of symbols in the
+current package that are currently bound to viewables, so that the
+user may explicitly destroy these.  The former name for this
+function was \lsym{scrounge!}, which has been retained for
+back-compatibility.
+
+{\bf Warnings:} this function should {\em only} be called from top
+level, since it will not preserve viewables bound to local variables.
+Furthermore, it only preserves symbols that are in the current package
+(the name of the current package is the value of the variable {\tt
+*package*}) or the {\tt USER} package.  Furthermore, if you have
+created viewables that are not accessible through pictures, symbols,
+or inferiors or superiors, {\em these viewables will be recycled by
+the garbage collector}. 
+
+\end{description}
+
+

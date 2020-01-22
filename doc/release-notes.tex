@@ -1,0 +1,470 @@
+\section{Release Notes}
+\label{sec:release-notes}
+
+\subsection{Version 2.1 Release Notes}
+
+There have been several major changes since releases 1.0 and 1.2 of
+OBVIUS.  We have tried to keep most of the changes internal (i.e.
+non-exported), but some of them will affect the top-level user.  The
+following are the major changes since release 1.2:
+
+\subsubsection{General Changes}
+
+\begin{itemize}
+
+\item OBVIUS now runs under the X11 or OpenWindows window systems  exclusively.
+We no longer support SunView or the Symbolics window systems.
+
+\item OBVIUS now runs under Lucid 4.0.  This version of Lucid provides
+an implementation of CLOS (we no longer use PCL), and supports
+multi-processing.
+
+\item OBVIUS now uses a standard interface to the window system called
+``LispView''.  LispView was written at Sun, and is distributed with
+Sun (Lucid) Common Lisp.  We have deliberately kept our interface to
+LispView as simple as possible so that it should be easy to port
+OBVIUS to other GUI platforms.  Note that LispView has a few minor
+bugs when running under the twm window manager.
+
+\end{itemize}
+
+\subsubsection{Specific Notes for OBVIUS Users}
+
+\begin{itemize}
+
+\item The following global parameters have gone away: 
+{\tt *SEQ-DISPLAY-TYPE*}, {\tt *DEFAULT-DF-SIZE*}, {\tt
+*DEFAULT-NUMBER-OF-BINS*}, {\tt *AUTO-SCALE-IMAGES*}, {\tt
+*GAMMA-CORRECT*}, {\tt *GRAY-SCALE*}, {\tt *GRAY-PEDESTAL*}, {\tt
+*AUTO-SCALE-COMPOUND-IMAGES*}, {\tt *RETAIN-GRAPHS*}, {\tt
+*INDEPENDENT-PARAMETERS*}, {\tt *DEFAULT-PASTEUP-FORMAT*}, {\tt
+*AUTO-SCALE-VECTOR-FIELDS*}, {\tt *VECTOR-FIELD-DENSITY*}, {\tt
+*VECTOR-FIELD-MAGNIFY*}, {\tt *VECTOR-FIELD-LENGTHEN*}, {\tt
+*VECTOR-FIELD-SKIP*}, {\tt *VECTOR-FIELD-ARROW-HEADS*}.  In their
+place, we provide a mechanism for the user to adjust the default
+values of slots for CLOS classes. The function \lsym{set-default}
+allows the user to set the default values of the slots of any class.
+The arguments look like: {\tt (set-default <class-name>
+<slot-name-or-initarg> <default-form>). } The function
+\lsym{get-defaults} is provided to get a list of the current default
+values for a class.  For example, to auto-scale gray pictures by
+default, you would execute {\tt (set-default 'gray 'scale t)}.  To
+auto-scale an existing instance of a gray picture, you would execute 
+{\tt (setp scale t)}.
+
+\item The user initialization file may now be called either
+\lsym{obvius-init.lisp} or \lsym{.obvius}.  This allows you to use a ``.'' file if
+your prefer, and allows old users to keep around their former startup
+file (previous version of obvius did not use .obvius).  Also, the user
+can now have an \lsym{obvius-window-init.lisp} or
+\lsym{.obvius-windows} file.  This one will be loaded before the
+window system is initialized and thus allows modification of the
+behavior of window system resource allocation etc.  Default versions
+of both of these files are included in the lisp-source directory.
+
+\item All pictures now have a \lsym{:zoom} slot which you can setp.
+Zoom factors are no longer limited to powers of two.  A zoom value of
+one corresponds to the ``natural'' size of the picture.  If the zoom
+value is set to :auto, the picture is automagically zoomed to fill the
+pane.  If it is a list of length two, the picture is zoomed to these
+dimensions.
+
+\item The \lsym{:scale} in gray pictures now has a different meaning.  The
+values in the image are {\em divided} by the scale (after subtracting off
+the pedestal).  The resulting values should be in the range [0,1],
+where 1 will correspond to the brightest intensity of the display, and
+0 the darkest.  Values outside this range are clipped.
+
+\item New picture type \lsym{dither} allows display of dithered images
+on screens deeper than 1 bit.  It inherits from gray.
+
+\item \lsym{one-d-graph} picture type is now called \lsym{graph}.
+
+\item New picture type \lsym{drawing}.  This is now the parent class
+for {\tt graph}s, {\tt vector-field}s, {\tt surface-plot}s, and {\tt
+contour-plot}s.
+
+\item New slots have been added to screens.  The \lsym{:gray-gamma} parameter
+determines the gamma correction exponent for the gray colormap.  The
+\lsym{:gray-shades} parameter corresponds to the number of gray colors in the
+colormap.  The \lsym{:gray-dither} parameter determines whether OBVIUS dithers
+float array values into gray pictures.  If this holds a number, OBVIUS
+will dither if there are less gray shades than this number.  If t,
+OBVIUS always dithers.  The \lsym{:foreground} should hold either a
+keyword corresponding to one of the colors in {\tt
+/usr/lib/X11/rgb.txt}, or a list of three numbers in the interval
+[0,1] corresponding to red, green, blue components.  This color is
+used as a default for graphs, vector-fields, etc.  The
+\lsym{:background} slot is similar.  It determines the color used to
+clear the panes.
+
+\item Edge-handler arguments to \lsym{make-filter} have changed.  They are now
+keywords instead of strings.  The current list is: {\tt nil (wrap),
+:dont-compute, :zero, :repeat, :reflect1, :reflect2, :extend }.
+
+\item The "point-operation" \index{point operations} 
+macros ({\tt +. *. /.} etc) are now act like the corresponding Common
+Lisp functions (documented in Steele, edition I).  They take any
+number of arguments, along with a result arg.  New ones have been
+defined.  Eventually, ALL of the numerical functions in Steele should
+be created.  Partial list of new operations: {\tt fill!}, {\tt
+make-ramp}, {\tt make-1-over-r}, {\tt make-r-squared}, {\tt expt.},
+{\tt exp.}, {\tt log.}, {\tt mod.}, {\tt sin.}, {\tt cos.}, {\tt
+realpart.}, {\tt imagpart.}, {\tt phase.}, {\tt incf},. {\tt decf.},
+{\tt zero-crossings}, {\tt rect-to-polar} {\tt polar-to-rect}, {\tt
+transpose}, {\tt max-abs-error}, {\tt minimum-location}, {\tt
+point-minimum}, {\tt maximum-location}, {\tt point-maximum}, {\tt
+skew}, {\tt kurtosis}.
+
+\item The {\tt *auto-scrounge!} parameter has been eliminated.  A new
+parameter, \lsym{*auto-destroy-orphans*}, has been added to allow
+OBVIUS to destroy orphaned viewables.  This is described in
+section~\ref{sec:organization}.
+
+\item The macro \lsym{with-local-images} has been replaced by
+\lsym{with-local-viewables}.  The behavior has been slightly modified:
+1) the new macro is capable of returning multiple-values, 2) the macro
+signals an error if you try to return one of the local viewables from
+the body, 3) you may return inferiors of compound viewables -- these
+will not be destroyed (even if the global symbol
+\lsym{*auto-destroy-orphans*} is non-nil).
+
+\item Emacs interface has been rewritten as a much cleaner package (in use
+since 1/90).  Support for arglists, macroexpansion, describe, etc are
+provided.  See the file emacs-source/cl-shell.doc for more
+information.
+
+\item Arguments to display have changed.  The new function is much
+more powerful and flexible.  The syntax is as follows:
+\begin{verbatim}
+(display viewable &optional (display-type (display-type vbl))
+                  &rest keys
+                  &key 
+		  (pane (or *current-pane* (new-pane)))
+		  make-new
+                  &allow-other-keys)
+\end{verbatim}
+The differences are: 1) \lsym{:display-type} is now an optional
+parameter (it used to be a keyword).  2) The \lsym{:make-new}
+parameter allows you to force OBVIUS to create a new picture of the
+given type (otherwise, OBVIUS may just bring an existing picture of
+the given type up to the top of the current pane).  3) You can pass
+keywords corresponding to slot names in the picture (as in setp) to
+set them up.  Example: {\tt (display <image> 'gray :scale 200
+:pedestal 37)}
+
+\item Arguments to \lsym{hardcopy} have changed.  They are now similar
+to those for display:
+\begin{verbatim}
+(hardcopy viewable &optional (display-type (display-type vbl))
+                   &rest keys
+                   &key
+		   path printer y-location x-location y-scale x-scale
+		   invert-flag suppress-text make-new
+                   &allow-other-keys)
+\end{verbatim}
+Also, hardcopy now does real postscript output (i.e. line drawing
+commands) for drawing pictures (e.g. graphs, vector-fields,
+surface-plots), so these will be drawn at the resolution of the
+printer!
+
+\item Adopted a convention for matrix multiply operations that vectors
+correspond to row-vectors.  We used to automagically interpret vectors
+as either row or column depending on the operation.  Now, you get a
+continuable error if the method is expecting a column and you give it
+a row (or vice versa).  To work with column vectors, make Nx1 arrays.
+Or, use the functions vectorize and columnize to convert (via
+displaced arrays) between row and columns.
+
+\item Arguments to \lsym{make-sin-grating} have changed (see
+description in Section \ref{sec:operations}).
+
+\item Arguments to \lsym{make-histogram} and \lsym{entropy} have been
+changed (see description in Section \ref{sec:operations}).
+
+\item Keyword arguments to {\tt make-<vbl>} functions can now be any initargs that
+you could pass to a call to make-instance.  They no longer take a
+:\res keyword -- you should use the \lsym{:name} keyword to specify a
+name.  The purpose of the functions is to 1) emphasize that some args
+are required, 2) provide result arg behavior (including history, etc).
+
+\item You can now create sequences of any type of viewable (not just images)
+and can display flipbooks of most types of pictures.
+
+\item Big speedup in most synthetic image generation code. (eg.
+{\tt make-uniform-random-image, make-sin-grating}, etc).
+
+\item Optional loadable modules: look at \lsym{*obvius-module-plist*}.
+Current modules are {\tt :gaussian-pyramid :qmf-pyramid :overlay
+:x-magnifier :matrix}.  Load these by executing {\tt
+(obv-require <module-name>)}.
+
+\item The \lsym{overlay} module allows you to display two graphs on one plot,
+or overlay a one-bit image on top of a gray image.  See
+section~\ref{sec:overlays}.
+
+\item Mouse clicks are now received by a secondary process.  Some of
+them are handled immediately (i.e., even when the top-level listener
+is computing something).  Examples are the simple manipulations of
+panes: cycle-pane, move-to-here, etc.  Other operations are put onto a
+queue for evaluation by the top-level (listener) process.  See
+section~\ref{sec:multi-processing} for more details.
+
+\item Mouse bindings have changed slightly.  The right mouse button
+now displays position messages dynamically as you drag the mouse.
+Bindings with the M-Sh and M-C buckys down are now picture-specfic and
+will change depending on the type of picture in the pane.  See
+section~\ref{sec:mouse} for a listing of the bindings.
+
+\item We now provide a more interactive user interface: a control
+panel with menus.  To use it, execute {\tt (obv-require
+:x-control-panel)} and then {\tt (make-control-panel)}.  Status
+messages will appear in the control-panel if it exists, in the Emacs
+mini-buffer (if running in cl-shell-mode) or not at all.  Dialog boxes
+provide pop-up help: click M-left on an item for pop-up help
+information (NOTE: due to a bug in LispView, this feature doesn't work
+sometimes.  To ``reset'' it, click in a blank region of the dialog,
+and then click M-left on the desired item immediately afterward).
+
+\item New viewable, \lsym{polar-image} stores the magnitude and
+complex-phase of a complex-image.  The functions magnitude and
+complex-phase do the right thing on polar images.  The arithmetic
+functions (e.g., {\tt add}, {\tt sub}, {\tt mul}, and {\tt div}) are
+not yet defined correctly for {\tt polar-images}.  Convert them to
+complex images first (using {\tt polar-to-complex}), and then do the
+arithmetic.  \lsym{polar-to-rect} renamed \lsym{polar-to-complex}, and converts a
+polar-image to complex-image.  Likewise, \lsym{rect-to-polar} renamed
+\lsym{complex-to-polar}.
+
+\item Defined nearly all image operations on arrays.  Redefined image
+methods to call these array methods.
+
+\item Defined nearly all image operations on discrete-functions.
+Got rid of peak.  Now it is same as image operations, maximum and
+maximum-location.
+
+\item Changed args to \lsym{circular-shift}, \lsym{paste}, and
+\lsym{crop} to be keywords.
+Defined circular-shift, paste, and crop for vectors and arrays.  For
+vectors, ignores the ``y'' keywords.
+
+\item Added ``x'' ``y'' ``x-dim'' and ``y-dim'' keyword arguments to 
+\lsym{correlate} for correlating over a restricted range of offsets.
+
+\item Defined complex-discrete-functions.  All the operations for
+complex-images are implemented for complex-discrete-functions,
+including fft, magnitude, etc.
+
+\item One-d-images can now be made by specifying only the 1 relevant
+size, e.g., {\tt (make-sin-grating 64) } 
+One-d-images are now stored as vectors (not as 2D arrays).
+
+\end{itemize}
+
+\subsubsection{Notes for OBVIUS Hackers (i.e. non-exported changes)}
+
+\begin{itemize}
+
+\item OBVIUS now uses LispView, an object-oriented Lisp-to-X interface
+written by Sun.  Most of the old X/SunView cruftiness has been thrown
+out.  The new interface is slower, but it is also more robust and
+requires much less maintenance!
+
+\item Lucid-4.0 contains a nearly-up-to-spec version of CLOS.  In
+particular, defclass and initialize-instance now adhere to the spec.
+We have defined a
+simple macro called {\tt def-simple-class} which automatically creates
+accessors, an initarg and an initform (nil) for each slot.
+We have also moved most of the functionality of the {\tt make-<vbl>} functions
+into initialize-instance methods, where it belongs!
+
+\item To avoid multi-processing collisions, any function which might
+be called directly from the mouse must be careful to modify the
+contents of the pane only within a call to the macro
+\lsym{with-locked-pane}.  Also, note that because of the
+multi-processing in Lucid4.0, you can no longer compile when in the
+debugger.  Alternatively, one can enqueue forms for execution by the
+top-level loop using the function {\tt push-onto-eval-queue}.
+
+\item The memory manager has been rewritten to be noticably faster,
+more general, and more robust.  A diagnostic tool is provided to check
+the integrity of the heap data structures:
+\lsym{obvius::run-heap-diagnostics}. Eventually, we would like to
+replace this with a Lucid-supported static memory allocator.  Two
+global parameters are provided to adjust the behavior of the memory
+manager. If \lsym{*auto-expand-heap*} is non-nil, the static heap is
+automatically expanded when OBVIUS needs more memory.  The number of
+elements by which to expand is determined by the variable \lsym{*heap-growth-rate*}.
+
+\item The \lsym{with-result} macro replaces all 
+\lsym{with-result-<vbl>} macros.  It returns the value of the last
+expression in the body (including multiple values).  It has been
+rewritten to use a model specification similar to what you would pass
+to make-instance.  If you pass a model-plist, the first keyword must
+be {\tt :class} followed by a CLOS class or the symbolic name of one.
+Also, if you don't pass a history list, it will not modify the history
+of the result.  This allows the programmer to let the history be that
+resulting from the sub-calls made within a function.  See
+sections~\ref{sec:writing-ops} and~\ref{sec:new-viewable}.
+
+\item Auto-display is no longer done from the print-object method.  It
+is now done directly by the top level loop (\lsym{repl}).  In a
+multi-processing environment, it was too messy to determine whether
+the printing was being done at ``top-level''.
+
+\item The order of arguments in the methods \lsym{present} and
+\lsym{set-result} has changed.
+
+\item The keyword arguments used for the \lsym{set-result} method on
+\lsym{viewable-sequence} are a bit different.  You can now pass a
+\lsym{:sub-viewable-spec} which will be used to create the sub-viewables.
+You must provide a {\tt :length} parameter with this.  
+
+\item The \lsym{gray-lut} (gray lookup-table) in a colormap is now a vector of
+length no more than 256 which indexes into the successive gray entries
+in the colormap.  These gray values may be gamma-corrected.
+
+\item Some variable names have changed:
+
+\begin{tabular}{ccc}
+status-line-message & {\tt -->} & status-message \\
+draw-gray           & {\tt -->} & draw-float-array \\
+draw-bitmap	    & {\tt -->} & draw-bit-array \\
+new-array           & {\tt -->} & allocate-array \\
+memory-usage        & {\tt -->} & heap-status \\
+*growth-rate* 	    & {\tt -->} & *heap-growth-rate* \\
+scrounge!           & {\tt -->} & ogc \\
+\end{tabular}
+
+In addition, the function \lsym{default-display-type} is no longer used.
+
+\item Patches are loaded from the patches sub-directory.  Files in
+this directory are expected to have filenames like patch-123.lisp.
+They are loaded at startup time in numerical order, starting with the
+filenumber specified by the parameter \lsym{*starting-patch-file*}.
+See the file {\tt lisp-source/patches.lisp} for the code that does the
+loading.  We will periodically put new patch files up for anonymous
+ftp.  Users will typically have the choice of ftp'ing a whole new
+source tree, with the patches installed, or just the patch  files.
+The new source tree will have an appropriate {\tt
+*starting-patch-file*}, so as not to load unnecessary patches.
+
+\end{itemize}
+
+\subsection{Version 2.2beta Release Notes}
+
+Below is a listing of major changes/additions.  See the Changelog for
+detailed changes.
+\begin{itemize}
+\item Color-images and color-pictures added.
+
+\item Overlays totally rewritten.
+
+\item Viewable-matrices added.  Sequences now inherit from
+viewable-matrices. 
+
+\item A huge number of matrix utilites added, and new versions of svd,
+matrix-inverse, regrees, etc.
+
+\item Stepit added.
+
+\item List-ops added.
+
+\item Statistics and numerical-recipes added.
+
+\item Plot symbols added to graphs.
+
+\item Polar-plots added.
+
+\item Scatter-plots added.
+
+\item For flipbooks and overlays, picture parameters dialog now allows
+you to change parameters of the sub-pictures.
+
+\item Generic-ops added.  When adding new ops, write the methods for
+arrays and for generic viewables first.
+
+\item eliminated gamma-correct from gray (and pasteup) pictures.
+Wrote new gamma-correct method.
+
+\item args to compile-load changed: Now  takes an :output-file keyword
+like the Common Lisp compile-file command.
+
+\end{itemize}
+
+
+\subsection{Version 2.2 Release Notes}
+
+Below is a listing of major changes/additions.  See the Changelog for
+detailed changes.
+
+\begin{itemize}
+\item Additional keyword args :optimizations and
+:brief-optimize-message have been added to compile-load.
+:optimizations is a list that you would pass to (proclaim (optimize
+...)).  :brief-optimize-message overrides the Lucid :optimize-message
+arg and prints a one line synopsis of the current compiler
+optimizations.
+
+\item Arglists have been made more consistent for \lsym{crop},
+\lsym{paste}, \lsym{make-slice}, and \lsym{circular-shift}.  
+Old keywords were left in for back-compatibility.
+
+\item Overlays totally rewritted again (see obvius-tutorial.lisp for
+examples).  Overlays is no longer an optional module.
+
+\item New version of surface plots, that can be printed using
+hardcopy.
+
+\item Contour plots added (an optional module).
+
+\item Fast display-sequence code added.
+
+\item Synthetic functions:  Eliminated \lsym{make-normal-random-image}.
+Changed names of some functions:
+\begin{tabular}{ccc}
+\lsym{make-uniform-random-image} & {\tt -->} & make-uniform-noise \\
+\lsym{make-gaussian-noise-image} & {\tt -->} & make-gaussian-noise \\
+\lsym{make-random-dot-image} & {\tt -->} & make-random-dots \\
+\end{tabular}
+
+\item \lsym{load-image} on image sequences now checks for a {\tt
+class} key.  Useful for image-pairs or color-images.
+
+\item \lsym{fft} now takes a {\tt :dimensions} keyword.
+
+\item Added display for filters.
+
+\item Default args to \lsym{point-operation} have changed.  The
+default binsize is now nil (=> call the function, rather than making a
+lookup-table).  This is slower, but gives no sampling surprises in the
+result!
+
+\item Added :center, :post-center, and :pre-center keyword for fft
+and power-spectrum. 
+
+\item Added \lsym{rotate} and \lsym{resample}.
+
+\item Added \lsym{round.} \lsym{truncate.} \lsym{floor.} methods
+
+\item The \lsym{warp} code is no longer an optional module
+(it is included in the source).
+
+\item Pane manipulation functions now exported (useful from within
+programs, or if mouse dies): {\tt pop-picture}, {\tt cycle-pane}, {\tt
+get-viewable}.
+
+\item Added function \lsym{next-pane}. 
+
+\item Got rid of {\tt destroy-top-picture} (same as {\tt pop-picture}), and
+{\tt destroy-pane} which is just {\tt (destroy *current-pane*)}.  Got
+rid of {\tt destroy-top-viewable}.  Provided {\tt current-viewable}
+instead, which returns viewable on top of current pane.
+
+\item Added \lsym{purge!} function.
+
+\item Fixed {\tt setf iref} and lots of other annoying little bugs.
+
+\item Added \lsym{periodic-discrete-function}s and \lsym{log-discrete-function}s.
+
+\end{itemize}
