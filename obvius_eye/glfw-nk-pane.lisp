@@ -33,7 +33,7 @@
    ;;maybe the next two slots ar enot needed anymore
    (interests :initform nil);; *default-pane-interests*)
    (devices   :initform nil);;*default-window-devices*)
-   (status :reader status :type (member :offline :cleared :realized :destroyed) :initform :offline)))
+   (status :accessor status :type (member :offline :cleared :realized :destroyed) :initform :offline)))
 
 (defmethod set-pane-title-bar ((pane nk-pane) title)
   (setf (title pane) (string-right-trim "." title)))
@@ -163,8 +163,8 @@
   (when (not (eq pane *current-pane*))
     (call-next-method)))
 
-(defmethod remove-from-render-loop ((pane nk-pane))
-  (remove-from-nk-render-loop (screen-of pane) (wid pane)))
+;; (defmethod remove-from-render-loop ((pane nk-pane))
+;;   (remove-from-nk-render-loop (screen-of pane) (wid pane)))
 
 
 

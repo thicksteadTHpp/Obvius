@@ -49,11 +49,12 @@
   (assert (symbolp background-var))
   (assert (symbolp rect-var))
   (assert (symbolp painter-var))
-  `(claw:c-val ((,rgb-foreground-var (:struct (%nk:color)) (canvas-drawing-color ,canvas))
-		(,background-var (:struct (%nk:style-item)) (canvas-window-background ,canvas))
-		(,rect-var (:struct (%nk:rect)) (canvas-rect ,canvas))
-		(,painter-var (:struct (%nk:command-buffer)) (canvas-painter ,canvas)))
-     ,@body))
+  `(when ,canvas
+     (claw:c-val ((,rgb-foreground-var (:struct (%nk:color)) (canvas-drawing-color ,canvas))
+		  (,background-var (:struct (%nk:style-item)) (canvas-window-background ,canvas))
+		  (,rect-var (:struct (%nk:rect)) (canvas-rect ,canvas))
+		  (,painter-var (:struct (%nk:command-buffer)) (canvas-painter ,canvas)))
+       ,@body)))
 
 (defmacro f> (num)
   `(float ,num 1f0))
