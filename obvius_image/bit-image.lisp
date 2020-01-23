@@ -9,7 +9,7 @@
 ;;;              Massachusetts Institute of Technology.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package obvius)
+(in-package :obv)
 
 (export '(bit-image-p x-dim y-dim iref
 	  make-bit-image

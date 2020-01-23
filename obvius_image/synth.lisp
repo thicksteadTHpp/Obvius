@@ -9,7 +9,7 @@
 ;;;              Massachusetts Institute of Technology.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package obvius)
+(in-package :obv)
 (export '(make-synthetic-image
 	  make-impulse make-ramp
 	  make-1-over-r make-r-squared make-atan

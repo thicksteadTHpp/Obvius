@@ -415,7 +415,7 @@
     (ydim :fixnum) (xdim :fixnum))
 (LCL:def-foreign-function internal-paste 
     (im (:array :single-float)) (c1 :fixnum) (sy1 :fixnum) (sx1 :fixnum) 
-    (sy2 :fixnum) (sx2 :fixnum) res (c2 :fixnum) 
+    (sy2 :fixnum) (sx2 :fixnum) (res (:array :single-float)) (c2 :fixnum) 
     (dy :fixnum) (dx :fixnum))
 (LCL:def-foreign-function internal-sq-err 
     (im1 (:array :single-float)) (im2 (:array :single-float))
