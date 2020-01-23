@@ -632,7 +632,8 @@
     ;; 	   (setf (slot-value bltable 'nk-func) (make-nk-image-func window bltable))))
     (and (claw:wrapper-null-p nk-image)
 	 (or (null texture-id) (= 0 texture-id))
-	 (compute-bltable-GL-image window bltable zoom))
+	 (in-gl-thread-of (screen-of window)
+	   (compute-bltable-GL-image window bltable zoom)))
     
     (let ((row (+ (floor (- (y-dim window) (y-dim bltable)) 2) y-offset))
 	  (row-adjusted (- (floor (- (y-dim window) (y-dim bltable)) 2) y-offset))
@@ -662,6 +663,11 @@
     ;; 							      (unless (= val 0)
     ;; 								(%nk:layout-row-static ctx 256f0 256 1)
     ;; 								(%nk:image ctx (slot-value bltable 'nk-image))))))))
+
+
+
+(defmethod render :after ((window 24bit-nk-pane) (bltable GL-bltable) y-offset x-offset zoom)
+  (setf (status window) :realized))
 
 
 
