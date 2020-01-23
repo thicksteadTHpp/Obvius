@@ -27,6 +27,9 @@
 (defun float* (val &optional (other 1.0d0))
   (cl:float val other))
 
+(defun dfloat (val)
+  (the double-float (cl:float val 1d0)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
