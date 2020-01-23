@@ -18,9 +18,9 @@
 (defun %display-panes (disp nk-context)
   (loop for pane in (pane-list disp)
 	for picture = (first (picture-stack pane))
-        if picture do (with-slots (system-dependent-frob y-offset x-offset zoom) picture
-		       (render pane  system-dependent-frob y-offset x-offset zoom))
-	  else       do (render pane nil T T 1)))
+        if picture do (with-slots (system-dependent-frob) picture
+		       (nk-render pane  system-dependent-frob))
+	  else       do (nk-render pane nil)))
 	
 
 ;;draws an empty window (pane) used when pane is cleared
@@ -41,12 +41,13 @@
 ;;[TODo] check if pane  is nk-pane
 ;; (defmethod compute-picture :after (pic vbl)
 ;;   (setf (status (pane-of pic)) :realized))
-				
+
+(defgeneric nk-render (pane frob))
 
 ;;around method to render
 ;; call render only from inside the render loop
 ;; otherwise no gl-context is available
-(defmethod render :around ((pane nk-pane) frob y-offset x-offset zoom)
+(defmethod nk-render :around ((pane nk-pane) frob)
   (when *in-render-loop*
     (if  (eq (status pane) :cleared)
 	 (if (null frob)
@@ -57,13 +58,11 @@
 	   (setf (status pane) :realized)))))
 
 
-(defmethod render ((pane nk-pane) (frob (eql nil)) y-offset x-offset zoom)
+(defmethod nk-render ((pane nk-pane) (frob (eql nil)))
   (draw-empty-nk-win pane))
  
 ;;renders bltables (arrays of pixels)
-(defmethod render :after ((pane nk-pane) (bltable gl-bltable) y-offset x-offset zoom)
-    ;; draw empty win if pane is cleared
-  ;; but dont' loose picture stack
+(defmethod nk-render ((pane nk-pane) (bltable gl-bltable))
   (claw:c-val ((ctx (:struct (%nk:context)) (get-context pane)))
     (let ((+rect+  (slot-value pane 'nk-rect))
 	  (+title+ (slot-value pane 'title))
@@ -87,7 +86,7 @@
 ;; renders drawables
 ;; [THO] TODO check if we can use this for all drawables
 ;; we need to get a painter to the nk-window
-(defmethod render :around ((pane nk-pane) (gf graph-frob) y-offset x-offset zoom)
+(defmethod nk-render ((pane nk-pane) (gf graph-frob))
   (claw:c-val ((ctx (:struct (%nk:context)) (get-context pane)))
     (let ((+rect+  (slot-value pane 'nk-rect))
 	  (+title+ (slot-value pane 'title))
@@ -115,10 +114,7 @@
 								  :total-space total-space
 								  :rect r))
 		  ;; call render with frob and offset from total space
-		  ;; this does not affect (call-next-method)
-		  ;; (setf y-offset (total-space :y)
-		  ;; 	x-offset (total-space :x))
-		  (call-next-method pane gf (total-space :y) (+ 20 (total-space :x)) 1)))
+		  (render pane gf (total-space :y) (+ 20 (total-space :x)) 1)))
 	      (%nk:end ctx)
 	      (setf (slot-value pane 'canvas) nil))))))
 
