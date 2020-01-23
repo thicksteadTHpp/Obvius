@@ -39,8 +39,8 @@
   
 
 ;;[TODo] check if pane  is nk-pane
-(defmethod compute-picture :after (pic vbl)
-  (setf (status (pane-of pic)) :realized))
+;; (defmethod compute-picture :after (pic vbl)
+;;   (setf (status (pane-of pic)) :realized))
 				
 
 ;;around method to render

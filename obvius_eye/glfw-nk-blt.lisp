@@ -519,21 +519,26 @@
     (with-slots (nk-image texture-id data screen-of depth image dimensions base-dimensions) bltable
     (setf dimensions (list (ceiling (* (car base-dimensions) zoom))
 			   (ceiling (* (cadr base-dimensions) zoom))))
-    (destructuring-bind (x &optional (y 1)) base-dimensions
-      (let ((tex (gl:gen-texture)))
-	(vom:info "[compute-bltable-GL-image] gen texture: ~d" tex)
-	(when (/= tex 0)
-	  (setf texture-id tex)   
-	  (gl:bind-texture :texture-2d tex)
-	  (%gl:tex-storage-2d :texture-2d 1 :RGB8 x y)
-	  (ffa:with-pointers-to-arrays ((data data-pointer :uint8 (array-total-size data) :copy-out)
-					(*swizzle-mask-gray* swizzle-mask :int32 4 :copy-out))
-	    (gl:tex-sub-image-2d :texture-2d 0 0 0 x y :red :unsigned-byte data-pointer)
-	    ;;(let ((swizzle-mask (cffi:foreign-alloc :int :initial-contents *swizzle-mask-gray*)))  ;;distribute the red channel over g and b channel
-	      ;;so we get a gray picture
-	      (%gl:tex-parameter-iv :texture-2d :texture-swizzle-rgba swizzle-mask)
-					;(cffi:foreign-free swizzle-mask)))
-	    )
+      (destructuring-bind (x &optional (y 1)) base-dimensions
+	(ffa:with-pointer-to-array (data data-pointer :uint8 (array-total-size data) :copy-out)
+	  (let ((tex (create-rgb-texture-from-gray x y data-pointer)))
+	    (vom:info "[compute-bltable-GL-image] gen texture: ~d" tex)
+
+      ;; (let ((tex (gl:gen-texture)))
+      ;; 	(vom:info "[compute-bltable-GL-image] gen texture: ~d" tex)
+      ;; 	(when (/= tex 0)
+      ;; 	  (setf texture-id tex)   
+      ;; 	  (gl:bind-texture :texture-2d tex)
+      ;; 	  (%gl:tex-storage-2d :texture-2d 1 :RGB8 x y)
+      ;; 	  (ffa:with-pointers-to-arrays ((data data-pointer :uint8 (array-total-size data) :copy-out)
+      ;; 					(*swizzle-mask-gray* swizzle-mask :int32 4 :copy-out))
+      ;; 	    (gl:tex-sub-image-2d :texture-2d 0 0 0 x y :red :unsigned-byte data-pointer)
+      ;; 	    ;;(let ((swizzle-mask (cffi:foreign-alloc :int :initial-contents *swizzle-mask-gray*)))  ;;distribute the red channel over g and b channel
+      ;; 	      ;;so we get a gray picture
+      ;; 	      (%gl:tex-parameter-iv :texture-2d :texture-swizzle-rgba swizzle-mask)
+      ;; 					;(cffi:foreign-free swizzle-mask)))
+      ;; 	    )
+      ;; 	  (gl:bind-texture :texture-2d 0)
 	  ;;; nk stuff
 	  (claw:c-let ((nid (:struct (%nk:image)) :free nil))
 	    (%nk:image-id nid tex)
@@ -608,8 +613,10 @@
 ;;;
 ;;; Generic render routine for 24bit GL screens
 ;;; will be called in eah fram of the render loop 
+
 (defmethod render ((window 24bit-nk-pane) (bltable GL-bltable) y-offset x-offset zoom)
   (with-slots (nk-image texture-id image pane->frob-y pane->frob-x dimensions base-dimensions) bltable
+
     (when (and image (/= (cadr dimensions) (ceiling (* (cadr base-dimensions) zoom))))
       ;; we need to to recompute the picture due to zooming
       (and (allocated-array-p image) (free-array image))
@@ -658,4 +665,19 @@
 
 
 
+(defun create-rgb-texture-from-gray (x y data)
+  (ffa:with-pointer-to-array (*swizzle-mask-gray* swizzle-mask :int32 4 :copy-out)
+    (let ((tex (gl:gen-texture)))
+      (unless (= 0 tex)
+	(gl:bind-texture :texture-2d tex)
+	(gl:tex-parameter :texture-2d :texture-min-filter :linear)
+	(gl:tex-parameter :texture-2d :texture-mag-filter :linear)
+;;	(gl:tex-parameter :texture-2d :texture-wrap-s :repeat)
+;;	(gl:tex-parameter :texture-2d :texture-wrap-t :repeat)
+	(%gl:tex-parameter-iv :texture-2d :texture-swizzle-rgba swizzle-mask)
+	(gl:tex-image-2d :texture-2d 0 :rgb x y 0 :red :unsigned-byte data)
+	(gl:generate-mipmap :texture-2d)
+	(gl:finish))
+      (gl:bind-texture :texture-2d 0)
+      tex)))
 
