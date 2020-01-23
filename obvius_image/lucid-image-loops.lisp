@@ -9,7 +9,7 @@
 ;;;              Massachusetts Institute of Technology.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package obvius)
+(in-package :obv)
 
 (export '(with-image-pixels loop-over-image-pixels loop-over-image-positions))
 

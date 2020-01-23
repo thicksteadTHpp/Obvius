@@ -9,8 +9,8 @@
 ;;;              Massachusetts Institute of Technology.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package obvius)
-(export '(*auto-bind-loaded-images*
+(in-package :obv)
+(export '(*auto-bind-loaded-images* iref
 	  make-image make-slice dimensions rank
 	  image-p  one-d-image-p x-dim y-dim total-size 
 	  print-values iref image-from-array))
@@ -59,7 +59,6 @@ their filenames.")
   (set-not-current image)
   val)
 
-#+MCL
 (defmethod (setf iref) ((val number) (image image) &rest args)
   (setf (apply #'aref (data image) args) (float val))
   (set-not-current image)
