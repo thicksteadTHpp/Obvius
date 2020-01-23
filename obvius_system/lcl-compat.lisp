@@ -1,5 +1,6 @@
 (defpackage #:lcl
   (:use #:cl #:cffi)
+;;  (:import-from :obv obv-double-float obv-single-float)
   (:export
    :def-foreign-function
    :def-foreign-callable))
@@ -7,7 +8,7 @@
 
 (format t "~&----->Setting up lcl-compat<---------~&")
 
-(in-package :obv)
+(in-package :lcl)
 
 ;;(defctype :array :pointer)
 (cffi:defctype :single-float :float)
@@ -16,6 +17,32 @@
 (cffi:defctype :unsigned-32bit :unsigned-long)
 (cffi:defctype :signed-32bit :int32)
 ;;(defctype :string (:pointer :char))
+
+
+(cffi:define-foreign-type obv-double-float ()
+  ()
+  (:actual-type :double))
+
+(cffi:define-foreign-type obv-single-float ()
+  ()
+  (:actual-type :float))
+
+(cffi:define-foreign-type lcl-compat-array (cffi::foreign-array-type)
+    ;;  ((obv-foreign-array-type :reader obv-foreign-array-type :initarg :type))
+    ((foreign-type :accessor foreign-type :initarg :foreign-type :initform nil)
+     (copy-strategy :accessor copy-strategy :initarg :copy-strategy :initform :copy-in-out ));;:type (member :copy-in-out :copy-in :copy-out :no-copy)))
+    (:actual-type :pointer))
+
+(cffi:define-foreign-type lcl-compat-string ()
+  ()
+  (:actual-type :pointer))
+
+
+(cffi:define-parse-method obv-double-float ()
+  (make-instance 'obv-double-float))
+
+(cffi:define-parse-method obv-single-float ()
+  (make-instance 'obv-single-float))
 
 
 ;;returns cffi compatible types
@@ -49,32 +76,26 @@
 	   (otherwise :POINTER)))))
 
 
+(defmethod cffi:translate-to-foreign (val (type obv-double-float))
+  (cl:float val 1d0))
 
-
-(cffi:define-foreign-type lcl-compat-array (cffi::foreign-array-type)
-  ;;  ((obv-foreign-array-type :reader obv-foreign-array-type :initarg :type))
-  ((foreign-type :accessor foreign-type :initarg :foreign-type :initform nil)
-   (copy-strategy :accessor copy-strategy :initarg :copy-strategy :initform :copy-in-out ));;:type (member :copy-in-out :copy-in :copy-out :no-copy)))
-  (:actual-type :pointer))
-
+(defmethod cffi:translate-to-foreign (val (type obv-single-float))
+  (cl:float val 1f0))
 
 
 
-  (cffi:define-foreign-type lcl-compat-string ()
-    ()
-    (:actual-type :pointer))
 
 ;; startegy is one of :copy-in :copy-out :copy-in-ou or :no-copy
-  (cffi:define-parse-method lcl-array (&optional type (strategy :copy-in-out))
-    (make-instance 'lcl-compat-array
-		   :element-type (or type 'integer) 
-		   :dimensions nil
-		   :foreign-type (if type (corresponding-foreign-type type))
-		   :copy-strategy (if strategy strategy :copy-in-out)))
+(cffi:define-parse-method lcl-array (&optional type (strategy :copy-in-out))
+  (make-instance 'lcl-compat-array
+		 :element-type (or type 'integer) 
+		 :dimensions nil
+		 :foreign-type (if type (corresponding-foreign-type type))
+		 :copy-strategy (if strategy strategy :copy-in-out)))
 
-  (cffi:define-parse-method lcl-string (&optional encoding)
-    (declare (ignore encoding))
-    (make-instance 'lcl-compat-string))
+(cffi:define-parse-method lcl-string (&optional encoding)
+  (declare (ignore encoding))
+  (make-instance 'lcl-compat-string))
 
   ;; (cffi:define-parse-method :array (&optional type)
   ;;   (make-instance 'lcl-compat-array :element-type type :dimensions nil))
@@ -267,13 +288,21 @@
 
 
 
-(in-package :lcl)
+;;(in-package :lcl)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun lcl-type-translation (type)
+  (defun lcl-type-translation-base-types (type)
     (case type
-      (:string 'obv::lcl-string)
-      (:array  'obv::lcl-array)
+      ;;(:string 'lcl-string)
+      (:array  'lcl-array)
+      (:double-float 'obv-double-float)
+      (:single-float 'obv-single-float)
+      (:float        'obv-single-float)
+      (otherwise type)))
+  (defun lcl-type-translation-array-types (type)
+    (case type
+      ;;(:string 'lcl-string)
+      (:array  'lcl-array)
       (otherwise type))))
 
 ;;name def may be a single name or a list with (name return-type)
@@ -293,8 +322,8 @@
 	 (typed-args (mapcar (lambda (arg)
 			       (if (listp arg)
 				   (list (first arg) (if (listp (second arg))
-							 (mapcar #'lcl-type-translation (second arg))
-							 (lcl-type-translation (second arg))))
+							 (mapcar #'lcl-type-translation-array-types (second arg))
+							 (lcl-type-translation-base-types (second arg))))
 				   (list arg :int))) args)))
     `(defcfun (,c-name ,lisp-name) ,return-type ,@typed-args)))
 
