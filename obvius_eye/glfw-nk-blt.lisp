@@ -86,9 +86,9 @@
 (defmethod destroy :after ((bltable GL-bltable) &key &allow-other-keys)
   (vom:info "[destroy} :after bltable")
   (with-slots (data image nk-image nk-rect texture-id) bltable
-    (and data
-	 (allocated-array-p data)
-	 (free-array data))
+     (and data
+	  (allocated-array-p data)
+	  (free-array data))
     (and image
 	 (allocated-array-p image)
 	 (free-array image))
@@ -96,8 +96,8 @@
 	 (claw:free nk-image))
     (and nk-rect
 	 (claw:free nk-rect))
-    (when (> texture-id 0)
-      (destroy-texture (screen-of bltable) texture-id))))
+    (and (> texture-id 0)
+	 (destroy-texture (screen-of bltable) texture-id))))
       ;; (in-gl-thread-of (screen-of bltable)
       ;; 	(vom:info "[destroy] bltable and texture: ~d" texture-id)
       ;; 	(gl:delete-texture texture-id)))))
@@ -544,7 +544,8 @@
 	    (%nk:image-id nid tex)
 	    (setf width (second dimensions)
 		  height (first dimensions)
-		  nk-image nid))
+		  nk-image nid
+		  (slot-value bltable 'texture-id) tex))
 	  (update-nk-rect window)
 	  (vom:info "[compute-bltable-GL-image] gen texture: ~d   ... done" tex))))))) 
 
