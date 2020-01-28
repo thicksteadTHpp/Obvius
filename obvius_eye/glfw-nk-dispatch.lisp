@@ -309,6 +309,7 @@
 
 
 (defmethod destroy-texture ((disp glfw-nk-dispatcher) (id fixnum))
+  (vom:info "[enqueue] destroy texture: ~d" id)
   (in-gl-thread-of disp
     (vom:info "[destroy] texture: ~d" id)
     (gl:delete-texture id)))
