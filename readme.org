@@ -87,6 +87,10 @@
   array back in the 90ies. This foreign array had been blitted to the (X)-Screen and was so to be seen at the display.
   For a workaround i use the drawing capabilities of nuklear to draw graphs etc. every frame to the nuklear window.
   This is quite a waste and will change in future.
+  
+** Tested
+   - arch Linux and SBCL 2.0.0
+   - Ubuntu 18.04.3 and SBCL 1.4.5
 
 ** What works
 
