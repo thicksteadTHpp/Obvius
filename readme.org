@@ -139,6 +139,9 @@
   (ql:quickload "obvius")
  #+end_src
  
+ There is a step-by-step insdtallation guide:
+ [[https://github.com/thicksteadTHpp/Obvius/wiki/Install]]
+ 
  ** Library Compilations
   
   There is a precompiled library in the bin folder, but this may not work.
