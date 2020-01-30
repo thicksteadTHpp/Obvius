@@ -1,3 +1,7 @@
+2020-01-30  tobias  <tobias@adrenochrom>
+
+	* c-source/CMakeLists.txt: added CMakeLists.txt to build with cmake
+
 2020-01-22  THO  <tobias@adrenochrom>
 
 	* Reorganized into github
