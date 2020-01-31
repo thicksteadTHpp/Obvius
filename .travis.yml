@@ -51,11 +51,9 @@ before_install:
 script:
   - export TARGET_FILE=$TRAVIS_BUILD_DIR/lib$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
   - >
-    cd $TRAVIS_BUILD_DIR/c-source/ && \
-        mkdir build && \
-	cd build && \
-        cmake -G "Unix Makefiles" ..  && \
-        cmake --build . 
+    cd $TRAVIS_BUILD_DIR/c-source && \
+    cmake -G "Unix Makefiles" -B build  -S .  && \
+    cmake --build build 
 
 before_deploy:
   - mv $TRAVIS_BUILD_DIR/c-source/lib/$OUTPUT_FILE $TARGET_FILE
