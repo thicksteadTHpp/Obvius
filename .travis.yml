@@ -51,7 +51,9 @@ before_install:
 script:
   - export TARGET_FILE=$TRAVIS_BUILD_DIR/lib$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
   - >
-    cd $TRAVIS_BUILD_DIR/c-source/ && cmake -G "Unix Makefiles" \
+    cd $TRAVIS_BUILD_DIR/c-source/ && \
+        mkdir build &&\ 
+        cmake -G "Unix Makefiles" \
         -DCMAKE_C_FLAGS=$(CFLAGS) \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
