@@ -29,7 +29,7 @@ if(TIFF_LIBRARY)
     target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
 endif()
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -U__STRICT_ANSI__")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c89 -U__STRICT_ANSI__")
 
 
 
