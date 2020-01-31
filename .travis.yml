@@ -52,13 +52,15 @@ script:
   - export TARGET_FILE=$TRAVIS_BUILD_DIR/lib$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
   - >
     cd $TRAVIS_BUILD_DIR/c-source/ && \
+        mkdir build && \
+	cd build && \
         cmake -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         -DBUILD_SHARED_LIBS=ON \
         -DLIBRARY_OUTPUT_PATH=$TRAVIS_BUILD_DIR/c-source/lib \
-        -S . -B build && \
-        cmake --build build
+        ..  && \
+        cmake --build .
 
 before_deploy:
   - mv $TRAVIS_BUILD_DIR/c-source/lib/$OUTPUT_FILE $TARGET_FILE
