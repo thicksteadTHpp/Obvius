@@ -36,7 +36,8 @@ matrix:
 
 branches:
   only:
-  - "/^v\\d+(\\.\\d+)+$/"
+  - crosscompile 
+#  - "/^v\\d+(\\.\\d+)+$/"
 
 
 before_install:
@@ -45,3 +46,33 @@ before_install:
       sudo apt-get update -q
       sudo -E apt-get -yq --no-install-suggests --no-install-recommends install patchelf gcc-multilib xorg-dev
     fi
+
+
+script:
+  - export TARGET_FILE=$TRAVIS_BUILD_DIR/lib$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
+  - >
+    cd $TRAVIS_BUILD_DIR/c-source/build/ && cmake -G "Unix Makefiles" \
+        -DCMAKE_C_FLAGS=$(CFLAGS) \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+        -DBUILD_SHARED_LIBS=ON \
+        -DLIBRARY_OUTPUT_PATH=$TRAVIS_BUILD_DIR/c-source/lib \
+        .. && \
+        make
+
+before_deploy:
+  - mv $TRAVIS_BUILD_DIR/c-source/lib/$OUTPUT_FILE $TARGET_FILE
+  - >
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      patchelf --set-rpath '@ORIGIN/' "$TARGET_FILE";
+      patchelf --set-soname "lib$NAME.$EXTENSION" "$TARGET_FILE";
+    fi
+    
+deploy:
+  provider: releases
+  api-key: $acceess_token
+  file: [$TARGET_FILE]
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
