@@ -40,6 +40,9 @@ branches:
   - crosscompile 
 #  - "/^v\\d+(\\.\\d+)+$/"
 
+addons:
+ homebrew: libtiff
+
 
 before_install:
   - >
