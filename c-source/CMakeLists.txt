@@ -24,13 +24,30 @@ if(MATH_LIBRARY)
 endif()
 
 
-find_library(TIFF_LIBRARY tiff)
-if(TIFF_LIBRARY)
-    target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
-endif()
+#find_library(TIFF_LIBRARY tiff)
+#if(TIFF_LIBRARY)
+#    target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
+#endif()
+
+include(ExternalProject)
+
+ExternalProject_Add(tifflib
+  PREFIX ${CMAKE_BINARY_DIR}/tiff-lib
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
+  URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
+  URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/lib_ready)
+#  INSTALL_COMMAND "")
+
+#ExternalProject_Add_Step(tifflib copy
+# DEPENDEES install
+# COMMAND "cp ${CMAKE_BINARY_DIR}/tiff-lib/src/tifflib-build/libtiff/*.* ${CMAKE_BINARY_DIR}/lib_ready/")
+
+
+add_dependencies(lib tifflib)
+
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c89 -U__STRICT_ANSI__")
-
 
 
 set_target_properties(lib PROPERTIES
