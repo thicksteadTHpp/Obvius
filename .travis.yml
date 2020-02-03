@@ -22,6 +22,7 @@ matrix:
       - EXTENSION=so
       - OUTPUT_FILE=lib$NAME.$EXTENSION.
   - os: osx
+    osx_image: xcode 10.1
     env:
       - TARGET_ARCH=i686
       - CFLAGS=-m32
