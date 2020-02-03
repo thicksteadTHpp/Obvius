@@ -19,6 +19,13 @@ add_library(lib SHARED ${ALL_SRC} ${OBV_H})
 
 include(ExternalProject)
 
+if ( $ENV{CFLAGS})
+   if ( $ENV{CFLAGS} STREQUAL "-m32" )
+      set (CMAKE_CXX_FLAGS "-m32")	     
+   endif()
+endif()
+
+
 ExternalProject_Add(tiffsource
   PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
@@ -68,6 +75,7 @@ if ( $ENV{CFLAGS})
       OUTPUT_NAME obv32)
    endif()
 endif()
+
 
 set_target_properties(lib PROPERTIES  
   VERSION 0.1
