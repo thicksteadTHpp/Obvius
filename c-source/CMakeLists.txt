@@ -73,7 +73,7 @@ if (DEFINED ENV{CFLAGS})
 	           -Dwebp:BOOL=OFF
 		   -Djpeg:BOOL=OFF
    )
-   set(SELF_COMPILED_TIFF:BOOL ON)
+   set(SELF_COMPILED_TIFF ON)
    else()
         ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
@@ -85,14 +85,14 @@ if (DEFINED ENV{CFLAGS})
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
 	     	    -Dwebp:BOOL=OFF
        )
-       set(SELF_COMPILED_TIFF:BOOL ON)
+       set(SELF_COMPILED_TIFF ON)
    endif()
 else()
     message("Try to find system libtiff")
     find_library(TIFF_LIBRARY tiff)
     if(TIFF_LIBRARY)
        target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
-       set(SELF_COMPILED_TIFF:BOOL OFF)
+       set(SELF_COMPILED_TIFF OFF)
     endif()
 endif()
 
