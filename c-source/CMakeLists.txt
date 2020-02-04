@@ -75,7 +75,7 @@ if (DEFINED ENV{CFLAGS})
         	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
 	           -Dwebp:BOOL=OFF
-		   -Djpeg=OFF"
+		   -Djpeg:BOOL=OFF
    )
    else()
    ExternalProject_Add(tiffsource
