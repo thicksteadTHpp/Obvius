@@ -12,24 +12,74 @@ SET(GL_SRC gl-obv-blt.c )
 SET(TIFF_SRC tiff-access.c)
 SET(ALL_SRC ${CONVOLVE_SRC} ${TIFF_SRC} ${GL_SRC}  matrix.c byteswap.c color.c dither.c  fft.c 	imops.c 3d-ops.c surface-plot.c zoom.c warper.c chartohex.c)
 
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 
 add_library(lib SHARED ${ALL_SRC} ${OBV_H})
+
+set_target_properties(lib PROPERTIES
+   OUTPUT_NAME obv
+   LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
+   )
+
+if ( $ENV{CFLAGS})
+   if ( $ENV{CFLAGS} STREQUAL "-m32" )
+      set_target_properties(lib PROPERTIES
+      OUTPUT_NAME obv32)
+   endif()
+endif()
+
+
+set_target_properties(lib PROPERTIES  
+  VERSION 0.1
+  POSITION_INDEPENDENT_CODE ON)
+
+if (WIN32)
+   set_target_properties(lib PROPERTIES
+     PREFIX lib
+     SUFFIX .dll)
+endif()
+
 
 
 
 include(ExternalProject)
 
 
-ExternalProject_Add(tiffsource
-  PREFIX ${CMAKE_BINARY_DIR}/tiff-source
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
-  URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
-  URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
-             -DCMAKE_C_FLAGS=$ENV{CFLAGS}
-	     -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
-	     -Dwebp:BOOL=OFF
+if ( $ENV{CFLAGS})
+   if ( $ENV{CFLAGS} STREQUAL "-m32" )
+      set_target_properties(lib PROPERTIES
+      OUTPUT_NAME obv32)
+   endif()
+endif()
+
+
+if ($ENV{CFLAGS})
+  if ($ENV{CFLAGS} STREQUAL "-m32" AND APPLE)
+        ExternalProject_Add(tiffsource
+	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
+  	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
+  	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
+  	URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
+  	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
+        	        -DCMAKE_C_FLAGS=$ENV{CFLAGS}
+	     		-DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
+	     		-Dwebp:BOOL=OFF
+			-Djpeg=OFF
   )
+  else
+       ExternalProject_Add(tiffsource
+	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
+  	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
+  	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
+  	URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
+  	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
+        	        -DCMAKE_C_FLAGS=$ENV{CFLAGS}
+	     		-DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
+	     		-Dwebp:BOOL=OFF
+  )
+  endif()
+endif()	
+
 
 
 find_library(MATH_LIBRARY m)
@@ -59,28 +109,8 @@ add_dependencies(lib tifflib)
 
 
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 
 
-set_target_properties(lib PROPERTIES
-   OUTPUT_NAME obv
-   LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
-   )
-
-if ( $ENV{CFLAGS})
-   if ( $ENV{CFLAGS} STREQUAL "-m32" )
-      set_target_properties(lib PROPERTIES
-      OUTPUT_NAME obv32)
-   endif()
-endif()
 
 
-set_target_properties(lib PROPERTIES  
-  VERSION 0.1
-  POSITION_INDEPENDENT_CODE ON)
 
-if (WIN32)
-   set_target_properties(lib PROPERTIES
-     PREFIX lib
-     SUFFIX .dll)
-endif()
