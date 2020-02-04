@@ -64,7 +64,7 @@ ExternalProject_Add(tiffsource
   )
 
 
-message("Building OSX?: ${APPLE} ")
+message("Building OSX?: ${APPLE} $ENV{CFLAGS}")
 
 if ( $ENV{CFLAGS})
    if ( $ENV{CFLAGS} MATCHES "-m32")
