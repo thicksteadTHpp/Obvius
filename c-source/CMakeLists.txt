@@ -75,7 +75,7 @@ if (DEFINED ENV{CFLAGS})
    )
    set(SELF_COMPILED_TIFF:BOOL ON)
    else()
-   ExternalProject_Add(tiffsource
+        ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
   	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
@@ -84,10 +84,11 @@ if (DEFINED ENV{CFLAGS})
         	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
 	     	    -Dwebp:BOOL=OFF
-   )
-   set(SELF_COMPILED_TIFF:BOOL ON)
+       )
+       set(SELF_COMPILED_TIFF:BOOL ON)
    endif()
-   else()
+else()
+    message("Try to find system libtiff")
     find_library(TIFF_LIBRARY tiff)
     if(TIFF_LIBRARY)
        target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
@@ -104,8 +105,8 @@ endif()
 
 
 if (${SELF_COMPILED_TIFF})
+  message("we have a self compiled libtiff")
   add_dependencies(lib tiffsource)
-
   add_library(tifflib SHARED IMPORTED)
   set_target_properties(tifflib PROPERTIES
       IMPORTED_LOCATION ${obvlib_SOURCE_DIR}/libs/lib/${CMAKE_SHARED_LIBRARY_PREFIX}tiff${CMAKE_SHARED_LIBRARY_SUFFIX})
