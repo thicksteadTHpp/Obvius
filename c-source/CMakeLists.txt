@@ -52,6 +52,8 @@ include(ExternalProject)
 
 
 
+
+
 ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
@@ -64,9 +66,9 @@ ExternalProject_Add(tiffsource
   )
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
-message("Building OSX?: ${APPLE} $ENV{CFLAGS} ENV_FLAGS")
+message("Building OSX?: ${APPLE} $ENV{CFLAGS} ${ENV_FLAGS}")
 
-if ( $ENV{CFLAGS})
+if (DEFINED ENV{CFLAGS})
    if (APPLE)
    message("32bit compile")
    message("32bit compile on APPLE ")
