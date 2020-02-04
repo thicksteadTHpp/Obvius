@@ -58,14 +58,14 @@ include(ExternalProject)
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
 message("Building OSX?: ${APPLE} $ENV{CFLAGS}  ")
-if ( ENV{CFLAGS} STREQUAL "-m32")
+if ( $ENV{CFLAGS} STREQUAL "-m32")
   message("STREQUAL works")
 endif()
 
 
 if (DEFINED ENV{CFLAGS})
-   if (APPLE AND ENV{CFLAGS} STREQUAL "-m32")
-         message("32bit compile on APPLE ") 
+   if (APPLE AND $ENV{CFLAGS} STREQUAL "-m32")
+        message("32bit compile on APPLE ") 
 	ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
