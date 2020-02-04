@@ -52,10 +52,6 @@ include(ExternalProject)
 
 
 
-
-
-
-
 set(ENV_FLAGS "$ENV{CFLAGS}")
 message("Building OSX?: ${APPLE} $ENV{CFLAGS}  ")
 if ( $ENV{CFLAGS} STREQUAL "-m32")
@@ -65,7 +61,7 @@ endif()
 
 if (DEFINED ENV{CFLAGS})
    if (APPLE AND $ENV{CFLAGS} STREQUAL "-m32")
-        message("32bit compile on APPLE ") 
+        message("32bit compile on APPLE is DEPRECATED") 
 	ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
@@ -77,6 +73,7 @@ if (DEFINED ENV{CFLAGS})
 	           -Dwebp:BOOL=OFF
 		   -Djpeg:BOOL=OFF
    )
+   set(SELF_COMPILED_TIFF:BOOL ON)
    else()
    ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
@@ -88,7 +85,14 @@ if (DEFINED ENV{CFLAGS})
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
 	     	    -Dwebp:BOOL=OFF
    )
+   set(SELF_COMPILED_TIFF:BOOL ON)
    endif()
+   else()
+    find_library(TIFF_LIBRARY tiff)
+    if(TIFF_LIBRARY)
+       target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
+       set(SELF_COMPILED_TIFF:BOOL OFF)
+    endif()
 endif()
 
 
@@ -99,22 +103,19 @@ if(MATH_LIBRARY)
 endif()
 
 
+if (${SELF_COMPILED_TIFF})
+  add_dependencies(lib tiffsource)
 
-add_dependencies(lib tiffsource)
+  add_library(tifflib SHARED IMPORTED)
+  set_target_properties(tifflib PROPERTIES
+      IMPORTED_LOCATION ${obvlib_SOURCE_DIR}/libs/lib/${CMAKE_SHARED_LIBRARY_PREFIX}tiff${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+   target_link_libraries(lib PUBLIC tifflib)
+
+   add_dependencies(lib tifflib)
+endif()
 
 
-add_library(tifflib SHARED IMPORTED)
-set_target_properties(tifflib PROPERTIES
-   IMPORTED_LOCATION ${obvlib_SOURCE_DIR}/libs/lib/${CMAKE_SHARED_LIBRARY_PREFIX}tiff${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-target_link_libraries(lib PUBLIC tifflib)
-
-add_dependencies(lib tifflib)
-
-
-#if(TIFF_LIBRARY)
-#    target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
-#endif()
 
 
 
