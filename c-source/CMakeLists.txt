@@ -66,7 +66,11 @@ ExternalProject_Add(tiffsource
   )
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
-message("Building OSX?: ${APPLE} $ENV{CFLAGS} ${ENV_FLAGS}")
+message("Building OSX?: ${APPLE} $ENV{CFLAGS}  ")
+if ( ENV_FLAGS STREQUAL "-m32")
+  message("STREQUAL works")
+endif()
+
 
 if (DEFINED ENV{CFLAGS})
    if (APPLE)
@@ -74,7 +78,7 @@ if (DEFINED ENV{CFLAGS})
    message("32bit compile on APPLE ")
          get_target_property(tiffsource_args tiffsource CMAKE_ARGS) 
          set_target_properties(tiffsource PROPERTIES
-            ${tiffsource_args} -Djpeg=OFF)
+         CMAKE_ARGS ${tiffsource_args} -Djpeg=OFF)
    endif()
 endif()
 
