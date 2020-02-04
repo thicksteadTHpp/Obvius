@@ -26,8 +26,8 @@ ExternalProject_Add(tiffsource
   URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
   URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
-             -DCMAKE_C_FLAGS="-m32"
-	     -DCMAKE_CXX_FLAGS="-m32"
+             -DCMAKE_C_FLAGS=$ENV{CFLAGS}
+	     -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
 	     -Dwebp:BOOL=OFF
   )
 
@@ -59,7 +59,7 @@ add_dependencies(lib tifflib)
 
 
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 -std=c89 -U__STRICT_ANSI__")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 
 
 set_target_properties(lib PROPERTIES
