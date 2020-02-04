@@ -68,6 +68,7 @@ message("Building OSX?: ${APPLE} ")
 
 if ( $ENV{CFLAGS})
    if ( $ENV{CFLAGS} STREQUAL "-m32")
+   message("32bit compile")
       if (${APPLE})
          message("32bit compile on APPLE ")
          get_target_property(tiffsource_args tiffsource CMAKE_ARGS) 
