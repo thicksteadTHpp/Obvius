@@ -54,31 +54,40 @@ include(ExternalProject)
 
 
 
-ExternalProject_Add(tiffsource
-	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
-  	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
-  	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
-  	URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
-  	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
-        	        -DCMAKE_C_FLAGS=$ENV{CFLAGS}
-	     		-DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
-	     		-Dwebp:BOOL=OFF
-  )
+
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
 message("Building OSX?: ${APPLE} $ENV{CFLAGS}  ")
-if ( ENV_FLAGS STREQUAL "-m32")
+if ( ENV{CFLAGS} STREQUAL "-m32")
   message("STREQUAL works")
 endif()
 
 
 if (DEFINED ENV{CFLAGS})
-   if (APPLE)
-   message("32bit compile")
-   message("32bit compile on APPLE ")
-         get_target_property(tiffsource_args tiffsource CMAKE_ARGS) 
-         set_target_properties(tiffsource PROPERTIES
-         CMAKE_ARGS "${tiffsource_args} -Djpeg=OFF")
+   if (APPLE AND ENV{CFLAGS} STREQUAL "-m32")
+         message("32bit compile on APPLE ") 
+	ExternalProject_Add(tiffsource
+	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
+  	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
+  	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
+  	URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
+  	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
+        	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
+	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
+	           -Dwebp:BOOL=OFF
+		   -Djpeg=OFF"
+   )
+   else()
+   ExternalProject_Add(tiffsource
+	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
+  	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
+  	URL http://download.osgeo.org/libtiff/tiff-4.1.0.zip
+  	URL_MD5 5d0347a6ac49ca20be01d6494c4df9cb
+  	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
+        	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
+	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
+	     	    -Dwebp:BOOL=OFF
+   )
    endif()
 endif()
 
