@@ -78,7 +78,7 @@ if (DEFINED ENV{CFLAGS})
    message("32bit compile on APPLE ")
          get_target_property(tiffsource_args tiffsource CMAKE_ARGS) 
          set_target_properties(tiffsource PROPERTIES
-         CMAKE_ARGS ${tiffsource_args} -Djpeg=OFF)
+         CMAKE_ARGS "${tiffsource_args} -Djpeg=OFF")
    endif()
 endif()
 
