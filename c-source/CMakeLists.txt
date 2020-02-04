@@ -63,11 +63,11 @@ ExternalProject_Add(tiffsource
 	     		-Dwebp:BOOL=OFF
   )
 
-
+set(ENV_FLAGS "$ENV{CFLAGS}")
 message("Building OSX?: ${APPLE} $ENV{CFLAGS}")
 
 if ( $ENV{CFLAGS})
-   if ( ENV{CFLAGS} STREQUAL "-m32")
+   if ( ENV_FLAGS STREQUAL "-m32")
    message("32bit compile")
       if (${APPLE})
          message("32bit compile on APPLE ")
