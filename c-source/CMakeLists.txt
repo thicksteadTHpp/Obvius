@@ -66,7 +66,7 @@ if ($ENV{CFLAGS})
 	     		-Dwebp:BOOL=OFF
 			-Djpeg=OFF
   )
-  else
+  else()
        ExternalProject_Add(tiffsource
 	PREFIX ${CMAKE_BINARY_DIR}/tiff-source
   	INSTALL_DIR ${CMAKE_BINARY_DIR}/lib_ready
