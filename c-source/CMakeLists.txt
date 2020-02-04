@@ -64,12 +64,16 @@ ExternalProject_Add(tiffsource
   )
 
 
+message("Building OSX?: ${APPLE} ")
+
 if ( $ENV{CFLAGS})
-   if ( $ENV{CFLAGS} STREQUAL "-m32" AND ${APPLE})
+   if ( $ENV{CFLAGS} STREQUAL "-m32")
+      if (${APPLE})
          message("32bit compile on APPLE ")
          get_target_property(tiffsource_args tiffsource CMAKE_ARGS) 
          set_target_properties(tiffsoure PROPERTIES
             ${tiffsource_args} -Djpeg=OFF)
+      endif()
    endif()
 endif()
 
