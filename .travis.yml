@@ -60,8 +60,6 @@ script:
       mkdir build && cd build && \
       cmake -G "Unix Makefiles" \
       -DCMAKE_C_FLAGS=$CFLAGS \
-      -DCMAKE_SHARED_LIBRARY_PREFIX=$PREFIX \
-      -DCMAKE_SHARED_LIBRARY_SUFFIX=$EXTENSION \	
       -DCMAKE_CXX_FLAGS=$CFLAGS \
       -S .. && \
       cmake --build . 
