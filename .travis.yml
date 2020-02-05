@@ -38,7 +38,7 @@ matrix:
 branches:
   only:
   - crosscompile 
-#  - "/^v\\d+(\\.\\d+)+$/"
+  - "/^v\\d+(\\.\\d+)+$/"
 
 addons:
  homebrew: libtiff
@@ -54,7 +54,7 @@ before_install:
 
 
 script:
-  - export TARGET_FILE=$TRAVIS_BUILD_DIR/lib$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
+  - export TARGET_FILE=$TRAVIS_BUILD_DIR/c-source/libs/lib/$NAME.$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
   - >
     cd $TRAVIS_BUILD_DIR/c-source && \
       mkdir build && cd build && \

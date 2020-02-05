@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-project(obvlib VERSION 0.1
+project(obvlib VERSION 3.1
 	       DESCRIPTION "The Obvius low-level c-code library"
 	       LANGUAGES C)
 
+
+# The obvius source files
 SET(OBV_H obv.h convolve.h)
 SET(CONVOLVE_SRC hex-convolve.c p-convolve.c convolve.c wrap.c edges.c )
 SET(FORTRAN_H f2c.h)
@@ -12,25 +14,21 @@ SET(GL_SRC gl-obv-blt.c )
 SET(TIFF_SRC tiff-access.c)
 SET(ALL_SRC ${CONVOLVE_SRC} ${TIFF_SRC} ${GL_SRC}  matrix.c byteswap.c color.c dither.c  fft.c 	imops.c 3d-ops.c surface-plot.c zoom.c warper.c chartohex.c)
 
+
+# C standard to use for compiling the obvius lib
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 
 add_library(lib SHARED ${ALL_SRC} ${OBV_H})
 
+# the name of the library and the output dir
 set_target_properties(lib PROPERTIES
    OUTPUT_NAME obv
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
    )
 
-if ( $ENV{CFLAGS})
-   if ( $ENV{CFLAGS} STREQUAL "-m32" )
-      set_target_properties(lib PROPERTIES
-      OUTPUT_NAME obv32)
-   endif()
-endif()
-
-
+# additional props
 set_target_properties(lib PROPERTIES  
-  VERSION 0.1
+  VERSION 3.1
   POSITION_INDEPENDENT_CODE ON)
 
 if (WIN32)
@@ -39,7 +37,8 @@ if (WIN32)
      SUFFIX .dll)
 endif()
 
-if ( $ENV{CFLAGS})
+# for 32 bit compile add 32 to the name 
+if (DEFINED ENV{CFLAGS})
    if ( $ENV{CFLAGS} STREQUAL "-m32" )
       set_target_properties(lib PROPERTIES
       OUTPUT_NAME obv32)
@@ -47,9 +46,7 @@ if ( $ENV{CFLAGS})
 endif()
 
 
-
 include(ExternalProject)
-
 
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
@@ -58,6 +55,8 @@ if ( $ENV{CFLAGS} STREQUAL "-m32")
   message("STREQUAL works")
 endif()
 
+# if on APPLE and 32 bit disable jpeg support (won't link to jpeg dylid)
+# because jpeg.dylib is 64bit in any case
 
 if (DEFINED ENV{CFLAGS})
    if (APPLE AND $ENV{CFLAGS} STREQUAL "-m32")
