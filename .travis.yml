@@ -79,4 +79,5 @@ deploy:
   skip_cleanup: true
   overwrite: true
   on:
+    branch: crosscompile
     draft: true 
