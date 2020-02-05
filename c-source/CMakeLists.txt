@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 
 
-project(obvlib VERSION 3.1
+project(obvlib VERSION 3.2
 	       DESCRIPTION "The Obvius low-level c-code library"
 	       LANGUAGES C)
 
@@ -25,9 +25,9 @@ add_library(lib SHARED ${ALL_SRC} ${OBV_H})
 # the name of the library and the output dir
 
 set_target_properties(lib PROPERTIES
-   OUTPUT_NAME obv
+   OUTPUT_NAME $ENV{NAME}
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
-   VERSION 3.1
+   VERSION 3.2
    POSITION_INDEPENDENT_CODE ON	
    )
 
@@ -80,6 +80,8 @@ if (DEFINED ENV{CFLAGS})
   	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
         	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
+		   -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+		   -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
 	           -Dwebp:BOOL=OFF
 		   -Djpeg:BOOL=OFF
    )
@@ -93,7 +95,9 @@ if (DEFINED ENV{CFLAGS})
   	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${obvlib_SOURCE_DIR}/libs
         	   -DCMAKE_C_FLAGS=$ENV{CFLAGS}
 	           -DCMAKE_CXX_FLAGS=$ENV{CFLAGS}
-	     	    -Dwebp:BOOL=OFF
+		   -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
+		   -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX}
+	     	   -Dwebp:BOOL=OFF	
        )
        set(SELF_COMPILED_TIFF ON)
    endif()
