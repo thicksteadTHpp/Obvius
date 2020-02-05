@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.1.0)
 
+
 project(obvlib VERSION 3.1
 	       DESCRIPTION "The Obvius low-level c-code library"
 	       LANGUAGES C)
 
 
 # The obvius source files
+
 SET(OBV_H obv.h convolve.h)
 SET(CONVOLVE_SRC hex-convolve.c p-convolve.c convolve.c wrap.c edges.c )
 SET(FORTRAN_H f2c.h)
@@ -21,21 +23,31 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 add_library(lib SHARED ${ALL_SRC} ${OBV_H})
 
 # the name of the library and the output dir
+
 set_target_properties(lib PROPERTIES
    OUTPUT_NAME obv
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
+   VERSION 3.1
+   POSITION_INDEPENDENT_CODE ON	
    )
 
-# additional props
-set_target_properties(lib PROPERTIES  
-  VERSION 3.1
-  POSITION_INDEPENDENT_CODE ON)
+
+if ( $ENV{CFLAGS})
+   if ( $ENV{CFLAGS} STREQUAL "-m32" )
+      set_target_properties(lib PROPERTIES
+      OUTPUT_NAME obv32)
+   endif()
+endif()
+
+
+  
 
 if (WIN32)
    set_target_properties(lib PROPERTIES
      PREFIX lib
      SUFFIX .dll)
 endif()
+
 
 # for 32 bit compile add 32 to the name 
 if (DEFINED ENV{CFLAGS})
@@ -47,7 +59,6 @@ endif()
 
 
 include(ExternalProject)
-
 
 set(ENV_FLAGS "$ENV{CFLAGS}")
 message("Building OSX?: ${APPLE} $ENV{CFLAGS}  ")
