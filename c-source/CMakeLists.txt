@@ -22,6 +22,24 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
 
 add_library(lib SHARED ${ALL_SRC} ${OBV_H})
 
+#env vars if not under travis
+if (NOT DEFINED ENV{NAME})
+   set(ENV{NAME} "obvius")
+endif()
+
+if (NOT DEFINED ENV{PREFIX})
+   set(ENV{PREFIX} ${CMAKE_SHARED_LIBRARY_PREFIX})
+endif()
+
+if (NOT DEFINED ENV{EXTENSION})
+   set(ENV{EXTENSION} ${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
+
+if (NOT DEFINED ENV{CFLAGS})
+   set(ENV{CFLAGS} -m64)
+endif()
+
+
 # the name of the library and the output dir
 
 set_target_properties(lib PROPERTIES
@@ -34,15 +52,6 @@ set_target_properties(lib PROPERTIES
    )
 
 
-if ( $ENV{CFLAGS})
-   if ( $ENV{CFLAGS} STREQUAL "-m32" )
-      set_target_properties(lib PROPERTIES
-      OUTPUT_NAME obv32)
-   endif()
-endif()
-
-
-  
 
 if (WIN32)
    set_target_properties(lib PROPERTIES
@@ -52,12 +61,12 @@ endif()
 
 
 # for 32 bit compile add 32 to the name 
-if (DEFINED ENV{CFLAGS})
-   if ( $ENV{CFLAGS} STREQUAL "-m32" )
-      set_target_properties(lib PROPERTIES
-      OUTPUT_NAME obv32)
-   endif()
-endif()
+#if (DEFINED ENV{CFLAGS})
+#   if ( $ENV{CFLAGS} STREQUAL "-m32" )
+#      set_target_properties(lib PROPERTIES
+#      OUTPUT_NAME obv32)
+#   endif()
+#endif()
 
 
 include(ExternalProject)
