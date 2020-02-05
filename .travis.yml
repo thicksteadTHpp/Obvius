@@ -68,8 +68,8 @@ before_deploy:
   - mv $TRAVIS_BUILD_DIR/c-source/libs/lib/$OUTPUT_FILE $TARGET_FILE
   - >
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      patchelf --set-rpath '@ORIGIN/' "$TARGET_FILE";
-      patchelf --set-soname "$PREFIX$NAME$EXTENSION" "$TARGET_FILE";
+      patchelf --set-rpath '@ORIGIN/' $TARGET_FILE;
+      patchelf --set-soname "$PREFIX$NAME$EXTENSION" $TARGET_FILE;
     fi
     
 deploy:
