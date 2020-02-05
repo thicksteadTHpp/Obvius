@@ -15,13 +15,13 @@ matrix:
       - TARGET_ARCH=i686
       - CFLAGS=-m32
       - EXTENSION=.so
-      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION.
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
   - os: linux
     env:
       - TARGET_ARCH=x86_64
       - CFLAGS=-m64
       - EXTENSION=.so
-      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION.
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
   - os: osx
     osx_image: xcode 9.2
     env:
