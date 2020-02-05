@@ -6,8 +6,8 @@ project(obvlib VERSION 3.2
 	       LANGUAGES C)
 
 
-# The obvius source files
 
+# The obvius source files
 SET(OBV_H obv.h convolve.h)
 SET(CONVOLVE_SRC hex-convolve.c p-convolve.c convolve.c wrap.c edges.c )
 SET(FORTRAN_H f2c.h)
@@ -52,11 +52,10 @@ set_target_properties(lib PROPERTIES
    )
 
 
-
 if (WIN32)
    set_target_properties(lib PROPERTIES
-     PREFIX lib
-     SUFFIX .dll)
+     PREFIX $ENV{PREFIX}
+     SUFFIX $ENV{EXTENSION})
 endif()
 
 
