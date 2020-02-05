@@ -65,7 +65,7 @@ script:
       cmake --build . 
 
 before_deploy:
-  - mv $TRAVIS_BUILD_DIR/c-source/lib/$OUTPUT_FILE $TARGET_FILE
+  - mv $TRAVIS_BUILD_DIR/c-source/libs/lib/$OUTPUT_FILE $TARGET_FILE
   - >
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       patchelf --set-rpath '@ORIGIN/' "$TARGET_FILE";
