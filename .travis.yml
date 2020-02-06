@@ -4,10 +4,9 @@ dist: xenial
 
 env:
   global:
-    - NAME= obvius
-    - ASDF_SYSTEM= obvius
-    - PREFIX= lib
-    - TRAVIS_BUILD=true
+    - NAME="obvius"
+    - ASDF_SYSTEM=obvius
+    - PREFIX="lib"
 
 matrix:
   include:

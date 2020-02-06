@@ -49,7 +49,7 @@ endif()
 #env vars if not under travis
 #must be after defining the library
 
-if (DEFINED ENV{TRAVIS_BUILD})
+if (DEFINED ENV{TRAVIS})
    set(OBV_LIB_NAME $ENV{NAME})
    set(OBV_LIB_PREFIX $ENV{PREFIX})
    set(OBV_LIB_SUFFIX $ENV{EXTENSION})
