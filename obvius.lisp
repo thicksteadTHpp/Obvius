@@ -16,6 +16,16 @@
 
 (cffi:load-foreign-library (merge-pathnames #p"bin/obv_gl.so" *obvius-directory-path*))
 
+;; [TODO] load the appropriate foreign lib 
+;; (defmacro in-obv-dir-path (path)
+;;   `(merge-pathnames ,path *obvius-directory-path*))
+
+;; (cffi:define-foreign-library obv-lib
+;;   (:darwin (:or #+64-bit (in-obv-dir-path 
+;;   (t (:default (:or "libobvius" (in-obv-dir-path #p"bin/obv_gl.so"))))
+
+
+
 ;;set up the logging level
 
 (vom:config t :info)

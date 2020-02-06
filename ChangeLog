@@ -1,3 +1,7 @@
+2020-02-06  tobias  <tobias@adrenochrom>
+
+	* readme.org (Intro): complete new build system for obvlib based on cmake
+
 2020-01-30  tobias  <tobias@adrenochrom>
 
 	* c-source/CMakeLists.txt: added CMakeLists.txt to build with cmake
