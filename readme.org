@@ -139,18 +139,26 @@
   (ql:quickload "obvius")
  #+end_src
  
+
  There is a step-by-step insdtallation guide:
  [[https://github.com/thicksteadTHpp/Obvius/wiki/Install]]
- 
- ** Library Compilations
+
+** Library Compilations
+
   
   There is a precompiled library in the bin folder, but this may not work.
   For obvius to work a foreign library has to be (re-)compiled.
+  Be sure to have CMake and libtiff installed.
 
   Go to c-source folder and type:
 #+begin_src
-  make lib 
+  mkdir build
+  cd build 
+  cmake ..
+  cmake --build .
+  cmake --install .
 #+end_src
+
   This should be enough - I hope. I am no expert when it comes
   to Makefiles and c-compiling stuff. Any help is appreciated.
 

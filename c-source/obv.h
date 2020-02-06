@@ -13,6 +13,6 @@ Not all C source files will need to include this header file.
 
 #endif
 
-#ifdef sun
+
 #include <unistd.h> /* For lseek() */
-#endif
+#include <stdio.h>

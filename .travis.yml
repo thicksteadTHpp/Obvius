@@ -1,0 +1,78 @@
+language: c
+sudo: true
+dist: xenial
+
+env:
+  global:
+    - NAME="obvius"
+    - ASDF_SYSTEM=obvius
+    - PREFIX="lib"
+
+matrix:
+  include:
+  - os: linux
+    env:
+      - TARGET_ARCH=i686
+      - CFLAGS=-m32
+      - EXTENSION=.so
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
+  - os: linux
+    env:
+      - TARGET_ARCH=x86_64
+      - CFLAGS=-m64
+      - EXTENSION=.so
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
+  - os: osx
+    osx_image: xcode 9.2
+    env:
+      - TARGET_ARCH=i686
+      - CFLAGS=-m32
+      - EXTENSION=.dylib
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
+  - os: osx
+    env:
+      - TARGET_ARCH=x86_64
+      - CFLAGS=-m64
+      - EXTENSION=.dylib
+      - OUTPUT_FILE=$PREFIX$NAME$EXTENSION
+
+branches:
+  only:
+   - "/^v\\d+(\\.\\d+)+$/"
+   - crosscompile
+
+
+before_install:
+  - >
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get update -q
+      sudo dpkg --add-architecture i386
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install patchelf gcc-multilib xorg-dev cmake libtiff5-dev libtiff5-dev:i386 
+    fi
+
+
+script:
+  - export TARGET_FILE=$TRAVIS_BUILD_DIR/$PREFIX$NAME$EXTENSION.-$TARGET_ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
+
+  - >
+    cd $TRAVIS_BUILD_DIR/c-source && \
+      mkdir build && cd build && \
+      cmake -G "Unix Makefiles" \
+      -DCMAKE_C_FLAGS=$CFLAGS \
+      -DCMAKE_CXX_FLAGS=$CFLAGS \
+      -S .. && \
+      cmake --build . 
+
+before_deploy:
+  - cp $TRAVIS_BUILD_DIR/c-source/libs/lib/$OUTPUT_FILE $TARGET_FILE
+
+    
+deploy:
+  provider: releases
+  api-key: $acceess_token
+  file: [$TARGET_FILE]
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true 
+    
