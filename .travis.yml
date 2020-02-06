@@ -38,8 +38,8 @@ matrix:
 
 branches:
   only:
-  - "/^v\\d+(\\.\\d+)+$/"
-
+   - "/^v\\d+(\\.\\d+)+$/"
+   - crosscompile
 
 
 before_install:
