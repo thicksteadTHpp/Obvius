@@ -1,28 +1,10 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-#env vars if not under travis
-if (NOT DEFINED ENV{NAME})
-   set(ENV{NAME} "obvius")
-endif()
+set(OBV_VERSION 3.2)
 
-if (NOT DEFINED ENV{PREFIX})
-   set(ENV{PREFIX} ${CMAKE_SHARED_LIBRARY_PREFIX})
-endif()
-
-if (NOT DEFINED ENV{EXTENSION})
-   set(ENV{EXTENSION} ${CMAKE_SHARED_LIBRARY_SUFFIX})
-endif()
-
-if (NOT DEFINED ENV{CFLAGS})
-   set(ENV{CFLAGS} -m64)
-endif()
-
-
-project(obvlib VERSION 3.2
+project(obvlib VERSION ${OBV_VERSION}
 	       DESCRIPTION "The Obvius low-level c-code library"
 	       LANGUAGES C)
-
-
 
 # The obvius source files
 SET(OBV_H obv.h convolve.h)
@@ -33,9 +15,12 @@ SET(GL_SRC gl-obv-blt.c )
 SET(TIFF_SRC tiff-access.c)
 SET(ALL_SRC ${CONVOLVE_SRC} ${GL_SRC}  matrix.c byteswap.c color.c dither.c  fft.c imops.c 3d-ops.c surface-plot.c zoom.c warper.c chartohex.c)
 
+if (DEFINED ENV{CFLAGS})
+   set(OBV_C_FLAGS $ENV{CFLAGS})
+endif()
 
 # C standard to use for compiling the obvius lib
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS} -std=c89 -U__STRICT_ANSI__")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OBV_C_FLAGS} -std=c89 -U__STRICT_ANSI__")
 
 # link to tiff library is ON for APPLE 64 bit LINUX 32Bit and 64Bit 
 set(LINK_TO_TIFF ON)
@@ -61,23 +46,38 @@ if(TIFF_LIBRARY AND LINK_TO_TIFF)
 endif()
 
 
+#env vars if not under travis
+#must be after defining the library
+
+if (DEFINED ENV{TRAVIS_BUILD})
+   set(OBV_LIB_NAME $ENV{NAME})
+   set(OBV_LIB_PREFIX $ENV{PREFIX})
+   set(OBV_LIB_SUFFIX $ENV{EXTENSION})
+else()
+   set(OBV_LIB_NAME "obvius")
+   set(OBV_LIB_PREFIX "lib")   #${CMAKE_SHARED_LIBRARY_PREFIX})
+   set(OBV_LIB_SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
+
+message("obv-lib name: ${OBV_LIB_PREFIX}${OBV_LIB_NAME}${OBV_LIB_SUFFIX}")
 
 # the name of the library and the output dir
 
 set_target_properties(lib PROPERTIES
-   OUTPUT_NAME $ENV{NAME}
-   PREFIX $ENV{PREFIX}
-   SUFFIX $ENV{EXTENSION}
+   OUTPUT_NAME ${OBV_LIB_NAME}
+   PREFIX ${OBV_LIB_PREFIX}
+   SUFFIX ${OBV_LIB_SUFFIX}
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
-   VERSION 3.2
+   VERSION ${OBV_VERSION}
    POSITION_INDEPENDENT_CODE ON	
    )
 
 
 if (WIN32)
    set_target_properties(lib PROPERTIES
-     PREFIX $ENV{PREFIX}
-     SUFFIX $ENV{EXTENSION})
+     OUTPUT_NAME ${OBV_LIB_NAME}
+     PREFIX ${OBV_LIB_PREFIX}
+     SUFFIX ${OBV_LIBSUFFIX})
 endif()
 
 
@@ -88,7 +88,9 @@ if(MATH_LIBRARY)
 endif()
 
 
-
+install(TARGETS lib
+        LIBRARY DESTINATION ${obvlib_SOURCE_DIR}/../bin/
+	RENAME ${OBV_LIB_PREFIX}${OBV_LIB_NAME}${OBV_LIB_SUFFIX})
 
 
 
