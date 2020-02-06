@@ -38,7 +38,6 @@ matrix:
 
 branches:
   only:
-  - crosscompile 
   - "/^v\\d+(\\.\\d+)+$/"
 
 
@@ -75,6 +74,5 @@ deploy:
   skip_cleanup: true
   overwrite: true
   on:
-    branch: crosscompile
     tags: true 
     
