@@ -69,7 +69,8 @@ set_target_properties(lib PROPERTIES
    SUFFIX ${OBV_LIB_SUFFIX}
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
    VERSION ${OBV_VERSION}
-   POSITION_INDEPENDENT_CODE ON	
+   POSITION_INDEPENDENT_CODE ON
+   NO_SONAME ON    # no version string 
    )
 
 
@@ -90,6 +91,7 @@ endif()
 
 install(TARGETS lib
         LIBRARY DESTINATION ${obvlib_SOURCE_DIR}/../bin/
+	NAMELINK_SKIP
 	RENAME ${OBV_LIB_PREFIX}${OBV_LIB_NAME}${OBV_LIB_SUFFIX})
 
 

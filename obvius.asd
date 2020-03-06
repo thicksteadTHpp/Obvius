@@ -2,11 +2,14 @@
 
 (asdf:defsystem #:obvius
   :description "OBVIUS (Object-Based Vision and Image Understanding System)"
-  :version "3.1.0 alpha"
+  :version "3.2.0"
   :author "Current Maintainer: THO"
   :license "MIT"
   :serial t
   :depends-on (:zpng :ffa :cl-fad :cffi :static-vectors :trivial-garbage :closer-mop :vom
+	       :trivial-download
+	       :md5
+	       :uiop	     
 	       :chanl
 	       :cl-colors
 	       :cl-opengl
@@ -22,7 +25,8 @@
 	       :cl-soil)
   :components ((:file "package")
 	       (:file "site_paths")
-	       (:file "defsys")		
+	       (:file "defsys")
+	       (:file "generate_obv_lib")
                (:file "obvius")
 	       (:module obvius_system
 		:components ((:file "lcl-compat")
@@ -247,7 +251,7 @@
 ;; obvius modules as defined in lucid-defsys                                 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(asdf:defsystem #:obvius-modules
+(asdf:defsystem #:obvius/modules
   :description "Modules for obvius legacy 3.0"
   :author "Your Name <your.name@example.com>"
   :license "MIT"

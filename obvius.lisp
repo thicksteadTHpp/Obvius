@@ -1,4 +1,14 @@
 ;;;; obvius01.lisp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  File: obvius.lisp
+;;;  Author: THO
+;;;  Description: Top Level Funcs, logging, foreign lib and png export.
+;;;  Creation Date:   2019
+;;;  Modified:  March, 2020
+;;;  ----------------------------------------------------------------
+;;;    Object-Based Vision and Image Understanding System (OBVIUS),
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (in-package #:obvius)
 
@@ -11,18 +21,13 @@
 
 
 ;;; load the foreign library
-;; don't ship code with that
-;; (cffi:load-foreign-library (merge-pathnames #P"emacs/clisp/obvius/bin/obv_gl.so" (user-homedir-pathname)))
 
-(cffi:load-foreign-library (merge-pathnames #p"bin/obv_gl.so" *obvius-directory-path*))
 
-;; [TODO] load the appropriate foreign lib 
-;; (defmacro in-obv-dir-path (path)
-;;   `(merge-pathnames ,path *obvius-directory-path*))
+;;(cffi:load-foreign-library (merge-pathnames #p"bin/obv_gl.so" *obvius-directory-path*))
 
-;; (cffi:define-foreign-library obv-lib
-;;   (:darwin (:or #+64-bit (in-obv-dir-path 
-;;   (t (:default (:or "libobvius" (in-obv-dir-path #p"bin/obv_gl.so"))))
+;; [DONE] load the apropriate foreign lib 
+
+(defparameter *libobv* (cffi:load-foreign-library obv.lib:*obvius-lib-path*))
 
 
 
@@ -270,14 +275,14 @@
 		  (make-random-file-name pattern)
 		  )))
 
-
+;;[THO] 2020-03-06 do not output to png files anymore
 (defun make-test-images ()
   (let ((*auto-expand-heap* T))
     (declare (special *auto-expand-heap*))
     (load-image (translate-logical-pathname "obv:images;einstein"))
     (load-image (translate-logical-pathname "obv:images;reagan"))
-    (to-png (data einstein) :-> (in-tempdir "einstein-GRAY.png") )
-    (to-png (data reagan) :-> (in-tempdir "reagan-GRAY.png") )
+    ;;(to-png (data einstein) :-> (in-tempdir "einstein-GRAY.png") )
+    ;;(to-png (data reagan) :-> (in-tempdir "reagan-GRAY.png") )
   ))
 
 ;;makes an array wiht the same element-type and size of dim

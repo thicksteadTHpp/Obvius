@@ -17,7 +17,9 @@
 ;;; *** Not currently using logical pathnames, probably should.
 ;;;[tho} set up logical pathnames
 
-(defvar *real-obvius-directory* (namestring (asdf:system-relative-pathname "obvius" "")))
+
+(defparameter *system-name* "obvius")
+(defvar *real-obvius-directory* (uiop:unix-namestring (asdf:system-source-directory *system-name*)))
 
 
 
@@ -40,10 +42,12 @@
 	("images;*.*" ,(str+ *real-obvius-directory* "images/*.*"))
         ("**;*.*" ,(str+ *real-obvius-directory* "mpw/**/*.*"))))
 
-;; [TODO] use xdg or something to make it implementation independent
+;; [DONE] use xdg or something to make it implementation independent
 ;; this will only work on unix now
-(defparameter *temp-dir* #+UNIX "/tmp/obv/")
+(defparameter *temp-dir-path* (uiop:merge-pathnames* (make-pathname :directory '(:relative "obv")) uiop:*temporary-directory*))
 
+(defparameter *temp-dir* (uiop:unix-namestring *temp-dir-path*))
+						
 (setf (logical-pathname-translations "tmp")
       `(("*;*.*" ,(str+ *temp-dir* "*/*.*"))
 	(""      ,*temp-dir*)))
@@ -52,14 +56,15 @@
   (str+ (namestring (translate-logical-pathname "tmp:")) filename))   
 
 (eval-when (:load-toplevel :execute)
-  (uiop/common-lisp:ensure-directories-exist (translate-logical-pathname "tmp:")))
+  ;;  (uiop/common-lisp:ensure-directories-exist (translate-logical-pathname "tmp:")))
+  (uiop:ensure-all-directories-exist (list *temp-dir-path*)))
 
 
-(defvar *obvius-directory-path* (pathname *real-obvius-directory*))
-(defvar *lisp-source-path* "");;(str+ *obvius-directory-path* "lisp-source;"))
-(defvar *c-source-path* "");;(str+ *obvius-directory-path* "c-source;"))
-(defvar *binary-path* "");;(str+ *obvius-directory-path* "bin;"))
-(defvar *obvius-image-path* (merge-pathnames #P"images/" *obvius-directory-path*))
+(defvar *obvius-directory-path* (asdf:system-source-directory *system-name*))
+(defvar *lisp-source-path* (uiop:merge-pathnames* (make-pathname :directory '(:relative "lisp-source")) *obvius-directory-path*)) ;;(str+ *obvius-directory-path* "lisp-source;"))
+(defvar *c-source-path* (uiop:merge-pathnames* (make-pathname :directory '(:relative "c-source")) *obvius-directory-path*)) ;;(str+ *obvius-directory-path* "c-source;"))
+(defvar *binary-path* (uiop:merge-pathnames* (make-pathname :directory '(:relative "bin")) *obvius-directory-path*));;(str+ *obvius-directory-path* "bin;"))
+(defvar *obvius-image-path* (uiop:merge-pathnames* (make-pathname :directory '(:relative "images")) *obvius-directory-path*))
 
 
 
@@ -82,7 +87,7 @@
 
 ;;; Printing environment
 
-(defvar *temp-ps-directory* "tmp:"
+(defvar *temp-ps-directory* *temp-dir*
   "Temporary directory for PostScript files which are being sent to the printer.")
 
 (defvar *default-printer* ""
