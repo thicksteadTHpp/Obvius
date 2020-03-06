@@ -148,6 +148,9 @@
 
   [ATTENTION] This is under heavy development. I hope that in some weeks (End of Feb 2020) i can deliver
   precompiled libs for Linux MacOS and Win.
+  
+  [UPDATE 2020-03-06] Load obvius via quicklisp and the library should be autimatically
+  compiled. Assumed that you have cmake and dependencies installed. (tested on LINUX)
 
   There is a precompiled library in the bin folder, but this may not work.
   For obvius to work a foreign library has to be (re-)compiled.

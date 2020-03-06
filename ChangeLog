@@ -1,3 +1,8 @@
+2020-03-06  tobias  <tobias@adrenochrom>
+
+	* generate_obv_lib.lisp: libobvius will be either built on load or
+	                         downloaded
+
 2020-02-06  tobias  <tobias@adrenochrom>
 
 	* readme.org (Intro): complete new build system for obvlib based on cmake
