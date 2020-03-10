@@ -27,7 +27,7 @@ Not all C source files will need to include this header file.
 
 #include <unistd.h> /* For lseek() */
 #include <stdio.h>
-
+#include <math.h>
 
 #ifdef __APPLE__
 #include <unistd.h> /* For lseek() */
