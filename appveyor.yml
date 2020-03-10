@@ -38,8 +38,7 @@ build_script:
     CFLAGS=%CFLAGS% cd c-source/
     && mkdir build && cd build
     && cmake -G \"MSYS Makefiles\" -DCMAKE_C_FLAGS=$CFLAGS -S ..
-    && cmake --build .
-    && cmake --install ."
+    && cmake --build ."
   - mv %APPVEYOR_BUILD_FOLDER%\c-source\%TARGET_NAME%.dll %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%"
 
 artifacts:
