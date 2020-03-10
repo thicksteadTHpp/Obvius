@@ -24,6 +24,10 @@ Not all C source files will need to include this header file.
 
 #endif
 */
+#ifdef _WIN32
+#include <stdlib.h>
+#endif
+
 
 #include <unistd.h> /* For lseek() */
 #include <stdio.h>
