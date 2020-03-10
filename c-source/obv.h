@@ -20,6 +20,8 @@ Not all C source files will need to include this header file.
 #include <stdio.h>
 #include <share.h>
 
+#define M_PI 3.14159265
+
 #endif
 
 #ifdef __UNIX__
