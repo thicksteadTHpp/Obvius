@@ -74,7 +74,11 @@ set_target_properties(lib PROPERTIES
    OUTPUT_NAME ${OBV_LIB_NAME}
    PREFIX ${OBV_LIB_PREFIX}
    SUFFIX ${OBV_LIB_SUFFIX}
+   if (WIN32)
+   LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}
+   else()
    LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/libs/lib
+   endif()
    VERSION ${OBV_VERSION}
    POSITION_INDEPENDENT_CODE ON
    NO_SONAME ON    # no version string 
