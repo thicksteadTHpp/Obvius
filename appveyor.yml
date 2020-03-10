@@ -37,7 +37,7 @@ build_script:
     sh -c "
     CFLAGS=%CFLAGS% cd c-source/
     && mkdir build && cd build
-    && cmake -G "MinGW Makefiles" -DCMAKE_C_FLAGS=$CFLAGS -S ..
+    && cmake -G \"MinGW Makefiles\" -DCMAKE_C_FLAGS=$CFLAGS -S ..
     && cmake --build ."
   - mv %APPVEYOR_BUILD_FOLDER%\c-source\libs\lib\%TARGET_NAME%.dll %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%
 
