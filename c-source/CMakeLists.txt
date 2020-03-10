@@ -13,7 +13,14 @@ SET(FORTRAN_H f2c.h)
 SET(FORTRAN_SRC svd.c stepit.c)
 SET(GL_SRC gl-obv-blt.c )
 SET(TIFF_SRC tiff-access.c)
+
+# on windows ad  mpw hacks for srand48 and drand48
+if (WIN32)
+SET(ALL_SRC ${CONVOLVE_SRC} ${GL_SRC}  mpw-hacks.c matrix.c byteswap.c color.c dither.c  fft.c imops.c 3d-ops.c surface-plot.c zoom.c warper.c chartohex.c)
+else()
 SET(ALL_SRC ${CONVOLVE_SRC} ${GL_SRC}  matrix.c byteswap.c color.c dither.c  fft.c imops.c 3d-ops.c surface-plot.c zoom.c warper.c chartohex.c)
+endif()
+
 
 if (DEFINED ENV{CFLAGS})
    set(OBV_C_FLAGS $ENV{CFLAGS})
@@ -82,6 +89,7 @@ set_target_properties(lib PROPERTIES
 #endif()
 
 
+# msys and mingw automatically link math lib 
 if (NOT WIN32)
 find_library(MATH_LIBRARY m)
 
