@@ -1,0 +1,62 @@
+image:
+  - Visual Studio 2017
+
+environment:
+  global:
+    NAME: obvius
+
+  matrix:
+  - platform: x64
+    TARGET_ARCH: x86_64
+    CFLAGS: -m64
+    PATH: C:\msys64\mingw64\bin\;C:\msys64\usr\bin\;$(PATH)
+    PACKAGES: mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake
+  - platform: x86
+    TARGET_ARCH: i686
+    CFLAGS: -m32
+    PATH: C:\msys64\mingw32\bin\;C:\msys64\usr\bin\;$(PATH)
+    PACKAGES: mingw-w64-i686-toolchain mingw-w64-i686-cmake
+
+skip_non_tags: true
+
+branches:
+  only:
+    - master
+    - "/^v\\d+(\\.\\d+)+$/"
+
+install:
+  - git submodule update --init --recursive --depth=2
+  - pacman --needed --noconfirm -S zip unzip base-devel %PACKAGES%
+
+build_script:
+  - set TARGET_NAME=lib%NAME%
+  - set TARGET_VERSION=%TARGET_ARCH%-windows-%APPVEYOR_REPO_TAG_NAME%
+  - set TARGET_ARTIFACT=%TARGET_NAME%.dll-%TARGET_VERSION%
+  - set TARGET_SPEC=%TARGET_ARTIFACT%-spec.zip
+  - >
+    sh -c "
+    CFLAGS=%CFLAGS% cd c-source/
+    && mkdir build && cd build
+    && cmake -G "Unix Makefiles" -DCMAKE_C_FLAGS=$CFLAGS -S ..
+    && cmake --build ."
+  - mv %APPVEYOR_BUILD_FOLDER%\c-source\libs\lib\%TARGET_NAME%.dll %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%
+
+artifacts:
+  - path: $(TARGET_ARTIFACT)
+    name: target_artifact
+  - path: $(TARGET_SPEC)
+    name: target_spec
+
+deploy:
+  provider: GitHub
+  release: $(APPVEYOR_REPO_TAG_NAME)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  description: $(APPVEYOR_REPO_COMMIT_MESSAGE)
+  auth_token:
+    secure: H8DP+Sn2F4fitkqQ651/nNQYq2MXARMtzJoyThHRhUG/DECxCnKFvdo3B9+3UQ3e
+  artifact: target_artifact 
+  force_update: true
+  draft: false
+  prerelease: false
+  on:
+    appveyor_repo_tag: true
