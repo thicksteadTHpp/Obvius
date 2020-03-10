@@ -85,7 +85,7 @@ set_target_properties(lib PROPERTIES
    )
 
 get_target_property(OUT_DIR lib LIBRARY_OUTPUT_DIRECTORY)
-message("output dir: &{OUT_DIR}")
+message("output dir: ${OUT_DIR}")
 
 #if (WIN32)
 #   set_target_properties(lib PROPERTIES
