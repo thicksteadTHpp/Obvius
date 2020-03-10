@@ -82,12 +82,14 @@ set_target_properties(lib PROPERTIES
 #endif()
 
 
+if (NOT WIN32)
 find_library(MATH_LIBRARY m)
 
 if(MATH_LIBRARY)
     target_link_libraries(lib PUBLIC ${MATH_LIBRARY})
+    message("found math library")
 endif()
-
+endif()
 
 install(TARGETS lib
         LIBRARY DESTINATION ${obvlib_SOURCE_DIR}/../bin/
