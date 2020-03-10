@@ -13,6 +13,24 @@ Not all C source files will need to include this header file.
 
 #endif
 
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <share.h>
 
+#endif
+
+#ifdef __UNIX__
 #include <unistd.h> /* For lseek() */
 #include <stdio.h>
+
+#endif
+
+
+#ifdef __APPLE__
+#include <unistd.h> /* For lseek() */
+#include <stdio.h>
+
+#endif
