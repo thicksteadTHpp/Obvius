@@ -74,12 +74,12 @@ set_target_properties(lib PROPERTIES
    )
 
 
-if (WIN32)
-   set_target_properties(lib PROPERTIES
-     OUTPUT_NAME ${OBV_LIB_NAME}
-     PREFIX ${OBV_LIB_PREFIX}
-     SUFFIX ${OBV_LIBSUFFIX})
-endif()
+#if (WIN32)
+#   set_target_properties(lib PROPERTIES
+#     OUTPUT_NAME ${OBV_LIB_NAME}
+#     PREFIX ${OBV_LIB_PREFIX}
+#     SUFFIX ${OBV_LIBSUFFIX})
+#endif()
 
 
 find_library(MATH_LIBRARY m)
