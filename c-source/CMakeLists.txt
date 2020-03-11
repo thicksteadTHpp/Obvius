@@ -103,13 +103,14 @@ if(MATH_LIBRARY)
     target_link_libraries(lib PUBLIC ${MATH_LIBRARY})
     message("found math library")
 endif()
-endif()
+
+# don't install under Win32 because admin priviliges are needed
 
 install(TARGETS lib
         LIBRARY DESTINATION ${obvlib_SOURCE_DIR}/../bin/
 	NAMELINK_SKIP
 	RENAME ${OBV_LIB_PREFIX}${OBV_LIB_NAME}${OBV_LIB_SUFFIX})
-
+endif()
 
 
 
