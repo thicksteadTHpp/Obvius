@@ -40,7 +40,7 @@
 (defparameter *system-name* "obvius")
 (defparameter *c-files-dir* "c-source")
 (defparameter *build-dir*   "build")
-(defparameter *version*     "v3.2.0" "Version string for downloadable libs")
+(defparameter *version*     "v3.2.1" "Version string for downloadable libs")
 (defparameter *lib-format-string* "libobvius.~a.-~a-~a-~a")
 (defparameter *suffix* #+darwin "dylib"
                        #+unix "so"
@@ -48,7 +48,7 @@
 		       )
 (defparameter *ext* #+darwin "osx"
                     #+unix "linux"
-                    #+windows "win"
+                    #+windows "windows"
 		       "awkward naming convention")
 
 (defparameter *mtype* #+x86 "i686"
@@ -119,7 +119,7 @@
       (progn
 	(format t "~&[CMAKE] build successful")
 	;;under win copy the generated lib out of build dir
-	#+windows (uiop:copy-file (uiop:merge-pathnames* (make-pathname :name *obvius-lib-name* :type *suffix*)   *build-dir*) *locally-compiled-lib*) 
+	#+windows (uiop:copy-file (uiop:merge-pathnames* (make-pathname :directory '(:relative "lib") :name *obvius-lib-name* :type *suffix*) *build-dir*) *c-source-dir*) 
 	(uiop:file-exists-p *locally-compiled-lib*)) ;;check if target file is there
       (progn
 	(format t "~&[CMAKE] BUILD or INSTALL FAILED")
