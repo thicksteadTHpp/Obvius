@@ -63,7 +63,7 @@ script:
       cmake --build . 
 
 before_deploy:
-  - cp $TRAVIS_BUILD_DIR/c-source/libs/lib/$OUTPUT_FILE $TARGET_FILE
+  - cp $TRAVIS_BUILD_DIR/c-source/lib/$OUTPUT_FILE $TARGET_FILE
 
     
 deploy:
