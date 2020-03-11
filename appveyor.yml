@@ -39,7 +39,7 @@ build_script:
     && mkdir build && cd build
     && cmake -G \"MSYS Makefiles\" -DCMAKE_C_FLAGS=$CFLAGS -S ..
     && cmake --build ."
-  - mv %APPVEYOR_BUILD_FOLDER%\c-source\%TARGET_NAME%.dll %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%"
+  - mv %APPVEYOR_BUILD_FOLDER%"\c-source\"%TARGET_NAME%.dll %APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%"
 
 artifacts:
   - path: $(TARGET_ARTIFACT)
