@@ -39,7 +39,9 @@ matrix:
 branches:
   only:
    - "/^v\\d+(\\.\\d+)+$/"
+   - master
 
+if: tag IS present
 
 before_install:
   - >
