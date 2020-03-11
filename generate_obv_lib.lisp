@@ -37,17 +37,18 @@
        
 
 ;;the name of the system
+;;added (not darwin) as hinted by lispm
 (defparameter *system-name* "obvius")
 (defparameter *c-files-dir* "c-source")
 (defparameter *build-dir*   "build")
 (defparameter *version*     "v3.2.1" "Version string for downloadable libs")
 (defparameter *lib-format-string* "libobvius.~a.-~a-~a-~a")
 (defparameter *suffix* #+darwin "dylib"
-                       #+unix "so"
+                       #+(and unix (not darwin)) "so"
                        #+windows "dll"
 		       )
 (defparameter *ext* #+darwin "osx"
-                    #+unix "linux"
+                    #+(and unix (not darwin)) "linux"
                     #+windows "windows"
 		       "awkward naming convention")
 
@@ -132,8 +133,8 @@
 
 
 (defparameter *file-digest*
-  #+(and unix x86-64) #(222 84 146 209 55 55 82 239 152 190 236 60 230 132 24 172)
-  #+(and unix x86) #(222 254 41 230 54 19 192 194 45 226 63 91 151 176 102 244)
+  #+(and unix (not darwin) x86-64) #(222 84 146 209 55 55 82 239 152 190 236 60 230 132 24 172)
+  #+(and unix (not darwin) x86) #(222 254 41 230 54 19 192 194 45 226 63 91 151 176 102 244)
   #+(and darwin x86-64) #(192 178 18 221 63 147 5 127 25 154 174 207 91 92 203 110)
   #+(and darwin x86) #(171 193 239 89 169 56 145 175 95 99 27 12 89 59 40 242)
   #+(and windows x86) #(215 130 109 176 212 55 4 40 102 165 82 21 236 195 149 133)
