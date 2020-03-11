@@ -107,7 +107,10 @@
 (defun try-build-and-install ()
   (uiop:ensure-all-directories-exist (list *build-dir*))
   (if (and 
-       (uiop:call-with-current-directory *build-dir* (command-or-error "cmake .." "Error during cmake init ~a"))
+       (uiop:call-with-current-directory *build-dir*
+					 #-windows(command-or-error "cmake .." "Error during cmake init ~a")
+					 #+windows(command-or-error "cmake -G \"MSYS Makefiles\" .." "Error during cmake init ~a")
+					 )
 
        (uiop:call-with-current-directory *build-dir* (command-or-error "cmake --build ." "Error during cmake build ~a"))
 
