@@ -32,7 +32,6 @@ build_script:
   - set TARGET_NAME=lib%NAME%
   - set TARGET_VERSION=%TARGET_ARCH%-windows-%APPVEYOR_REPO_TAG_NAME%
   - set TARGET_ARTIFACT=%TARGET_NAME%.dll-%TARGET_VERSION%
-  - set TARGET_SPEC=%TARGET_ARTIFACT%-spec.zip
   - >
     sh -c "
     CFLAGS=%CFLAGS% cd c-source/
@@ -44,8 +43,6 @@ build_script:
 artifacts:
   - path: $(TARGET_ARTIFACT)
     name: target_artifact
-  - path: $(TARGET_SPEC)
-    name: target_spec
 
 deploy:
   provider: GitHub
