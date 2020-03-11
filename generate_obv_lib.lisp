@@ -118,6 +118,8 @@
        (uiop:call-with-current-directory *build-dir* (command-or-error "cmake --install ." "Error during cmake install ~a")))
       (progn
 	(format t "~&[CMAKE] build successful")
+	;;under win copy the generated lib out of build dir
+	#+windows (uiop:copy-file (uiop:merge-pathnames* (make-pathname :name *lib-name* :type *suffix*)   *build-dir*) *locally-compiled-lib*) 
 	(uiop:file-exists-p *locally-compiled-lib*)) ;;check if target file is there
       (progn
 	(format t "~&[CMAKE] BUILD or INSTALL FAILED")
