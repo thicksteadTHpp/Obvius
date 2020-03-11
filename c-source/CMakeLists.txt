@@ -40,6 +40,9 @@ if (DEFINED ENV{CFLAGS})
    endif()
 endif()
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/lib)
+
 
 message("Try to find system libtiff")
 find_library(TIFF_LIBRARY tiff)
@@ -74,7 +77,7 @@ set_target_properties(lib PROPERTIES
    OUTPUT_NAME ${OBV_LIB_NAME}
    PREFIX ${OBV_LIB_PREFIX}
    SUFFIX ${OBV_LIB_SUFFIX}
-   LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}
+#   LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}
    VERSION ${OBV_VERSION}
    POSITION_INDEPENDENT_CODE ON
    NO_SONAME ON    # no version string 
