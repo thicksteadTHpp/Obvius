@@ -91,6 +91,7 @@
 ** Tested
    - arch Linux and SBCL 2.0.0
    - Ubuntu 18.04.3 and SBCL 1.4.5
+   - windows 10 and SBCL 2.0.2, MSYS2
 
 ** What works
 
@@ -99,7 +100,7 @@
    - popping pictures
    - simple graphing
    - blurring
-   - There is a pre-release with precompiled Libs for MacOSX - i have unfortunatly no way to test it
+   - There is a release with precompiled Libs for Linux,MacOSX and Windows - i have unfortunatly no way to test for MacOS
 
    For Version 3.1 I have tried to be as little intrusive as possible to the core legacy code. There are no changes 
    or at least little changes to the core mechanics. The display of Graphs and other drawing ojects is now a real cycle
@@ -146,17 +147,19 @@
 
 ** Library Compilations
 
-  [ATTENTION] This is under heavy development. I hope that in some weeks (End of Feb 2020) i can deliver
-  precompiled libs for Linux MacOS and Win.
-  
   [UPDATE 2020-03-06] Load obvius via quicklisp and the library should be automatically
-  compiled. Assumed that you have cmake and dependencies installed. (tested on LINUX)
+  compiled. Assumed that you have cmake and dependencies installed. (tested on LINUX, Windows10 with MSYS2)
+
+  If you load obvius via quicklisp, the asdf-system (on which quicklisp is built upon) will try to compile the
+  c-library. If that does fail - it will try to download a precompiled library.   
+
+  On Windows you should have MSYS2 installed. (and some build tools)
 
   There is a precompiled library in the bin folder, but this may not work.
   For obvius to work a foreign library has to be (re-)compiled.
   Be sure to have CMake and libtiff installed.
 
-  Go to c-source folder and type:
+  [LINUX] and [MACOS ]Go to c-source folder and type:
 #+begin_src
   mkdir build
   cd build 
@@ -164,6 +167,15 @@
   cmake --build .
   cmake --install .
 #+end_src
+
+  [Windows] Go to c-source folder and type
+  #+begin_src
+  mkdir build
+  cd build 
+  cmake -G "MSYS Makefiles" ..
+  cmake --build .
+  cmake --install .
+  #+end_src
 
   This should be enough - I hope. I am no expert when it comes
   to Makefiles and c-compiling stuff. Any help is appreciated.
@@ -173,6 +185,9 @@
    There are a lot of dependencies. Luckily a big part comes with quicklisp.
   I tried to bundle as much dependencies as possible in the repo. For GLFW to work look at bodge-glfw and bodge-nuklear
   All the rest should be installable via Quicklisp.
+
+  If you want to compile the c-library you have to install a build environement. With recent Linux distros this should
+  come out of the box. For Windows i recommend to use MSYS2. 
 
 
 * Basic Usage
