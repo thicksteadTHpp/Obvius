@@ -92,6 +92,7 @@
    - arch Linux and SBCL 2.0.0
    - Ubuntu 18.04.3 and SBCL 1.4.5
    - windows 10 and SBCL 2.0.2, MSYS2
+   - There are rumors it ran successfully on MacOS/SBCL 
 
 ** What works
 
