@@ -1,3 +1,6 @@
+# snippets for CMakesLists.txt
+# with tiff support
+
 cmake_minimum_required(VERSION 3.1.0)
 
 project(obvlib VERSION 0.1
@@ -53,3 +56,17 @@ if (WIN32)
      PREFIX lib
      SUFFIX .dll)
 endif()
+
+# code for searching the install for a preinstalled libtiff
+# works for now on linux
+#
+#message("Try to find system libtiff")
+#find_library(TIFF_LIBRARY tiff)
+#if(TIFF_LIBRARY AND LINK_TO_TIFF)
+#       add_library(lib SHARED ${ALL_SRC} ${TIFF_SRC} ${OBV_H})
+#       target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
+#       message("There is a TIFF library in the system")
+# else()
+#       message("Compiling without TIFF support")
+#       add_library(lib SHARED ${ALL_SRC} ${OBV_H})	
+#endif()

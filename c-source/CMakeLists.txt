@@ -12,7 +12,6 @@ SET(CONVOLVE_SRC hex-convolve.c p-convolve.c convolve.c wrap.c edges.c )
 SET(FORTRAN_H f2c.h)
 SET(FORTRAN_SRC svd.c stepit.c)
 SET(GL_SRC gl-obv-blt.c )
-SET(TIFF_SRC tiff-access.c)
 
 # on windows ad  mpw hacks for srand48 and drand48
 if (WIN32)
@@ -30,31 +29,22 @@ endif()
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OBV_C_FLAGS} -std=c89 -U__STRICT_ANSI__")
 
 # link to tiff library is ON for APPLE 64 bit LINUX 32Bit and 64Bit 
-set(LINK_TO_TIFF ON)
+# set(LINK_TO_TIFF ON)
 
 # do not link to tiff on APPLE 32bit
-if (DEFINED ENV{CFLAGS})
-   if (APPLE AND $ENV{CFLAGS} STREQUAL "-m32")
-    set(LINK_TO_TIFF OFF)
-    message("MACOSX does not like 32bit linking anymore")
-   endif()
-endif()
+#if (DEFINED ENV{CFLAGS})
+#   if (APPLE AND $ENV{CFLAGS} STREQUAL "-m32")
+#    set(LINK_TO_TIFF OFF)
+#    message("MACOSX does not like 32bit linking anymore")
+#   endif()
+# endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${obvlib_SOURCE_DIR}/lib)
 
-message("Try to find system libtiff")
-find_library(TIFF_LIBRARY tiff)
-if(TIFF_LIBRARY AND LINK_TO_TIFF)
-       add_library(lib SHARED ${ALL_SRC} ${TIFF_SRC} ${OBV_H})
-       target_link_libraries(lib PUBLIC ${TIFF_LIBRARY})
-       message("There is a TIFF library in the system")
- else()
-       message("Compiling without TIFF support")
-       add_library(lib SHARED ${ALL_SRC} ${OBV_H})	
-endif()
 
+add_library(lib SHARED ${ALL_SRC} ${OBV_H})	
 
 #env vars if not under travis
 #must be after defining the library
