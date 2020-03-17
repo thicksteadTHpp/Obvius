@@ -143,10 +143,12 @@
  #+end_src
  
 
- There is a step-by-step insdtallation guide:
+ There is a step-by-step installation guide:
  [[https://github.com/thicksteadTHpp/Obvius/wiki/Install]]
 
 ** Library Compilations
+
+  [UPDATE 2020-03-06] Ther should be no dependency on libtiff anymore.
 
   [UPDATE 2020-03-06] Load obvius via quicklisp and the library should be automatically
   compiled. Assumed that you have cmake and dependencies installed. (tested on LINUX, Windows10 with MSYS2)
@@ -158,7 +160,7 @@
 
   There is a precompiled library in the bin folder, but this may not work.
   For obvius to work a foreign library has to be (re-)compiled.
-  Be sure to have CMake and libtiff installed.
+  Be sure to have CMake +and libtiff installed+.
 
   [LINUX] and [MACOS ]Go to c-source folder and type:
 #+begin_src

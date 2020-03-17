@@ -1,3 +1,7 @@
+2020-03-17  tobias  <tobias@adrenochrom>
+
+	* readme.org (Library Compilations): for compileing libobvius i removed libtiff dependencies from the compiling processes,
+
 2020-03-06  tobias  <tobias@adrenochrom>
 
 	* generate_obv_lib.lisp: libobvius will be either built on load or
