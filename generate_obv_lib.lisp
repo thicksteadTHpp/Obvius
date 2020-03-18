@@ -41,7 +41,7 @@
 (defparameter *system-name* "obvius")
 (defparameter *c-files-dir* "c-source")
 (defparameter *build-dir*   "build")
-(defparameter *version*     "v3.2.1" "Version string for downloadable libs")
+(defparameter *version*     "v3.2.2" "Version string for downloadable libs")
 (defparameter *lib-format-string* "libobvius.~a.-~a-~a-~a")
 (defparameter *suffix* #+darwin "dylib"
                        #+(and unix (not darwin)) "so"
@@ -131,15 +131,30 @@
 ;;just for testing the download
 ;;(defun try-build-and-install () nil)
 
+;;v3.2.1
+;; (defparameter *file-digest*
+;;   #+(and unix (not darwin) x86-64) #(222 84 146 209 55 55 82 239 152 190 236 60 230 132 24 172)
+;;   #+(and unix (not darwin) x86) #(222 254 41 230 54 19 192 194 45 226 63 91 151 176 102 244)
+;;   #+(and darwin x86-64) #(192 178 18 221 63 147 5 127 25 154 174 207 91 92 203 110)
+;;   #+(and darwin x86) #(171 193 239 89 169 56 145 175 95 99 27 12 89 59 40 242)
+;;   #+(and windows x86) #(215 130 109 176 212 55 4 40 102 165 82 21 236 195 149 133)
+;;   #+(and windows x86-64) #(203 241 197 110 81 220 3 71 166 61 23 198 69 65 140 118)
+;;   )
 
-(defparameter *file-digest*
-  #+(and unix (not darwin) x86-64) #(222 84 146 209 55 55 82 239 152 190 236 60 230 132 24 172)
-  #+(and unix (not darwin) x86) #(222 254 41 230 54 19 192 194 45 226 63 91 151 176 102 244)
-  #+(and darwin x86-64) #(192 178 18 221 63 147 5 127 25 154 174 207 91 92 203 110)
-  #+(and darwin x86) #(171 193 239 89 169 56 145 175 95 99 27 12 89 59 40 242)
-  #+(and windows x86) #(215 130 109 176 212 55 4 40 102 165 82 21 236 195 149 133)
-  #+(and windows x86-64) #(203 241 197 110 81 220 3 71 166 61 23 198 69 65 140 118)
-  )
+;;v3.2.2
+(defparameter *file-digest* 
+#+(and darwin x86) #(171 193 239 89 169 56 145 175 95 99 27 12 89 59 40 242)
+#+(and darwin x86-64) #(140 186 77 103 113 176 50 204 200 144 153 65 134 41 157
+                        1)
+#+(and unix (not darwin) x86) #(15 193 164 41 170 232 127 104 19 152 201 168
+                                124 152 107 95)
+#+(and unix (not darwin) x86-64) #(206 112 131 14 116 225 243 15 28 194 108 47
+                                   64 65 249 92)
+#+(and windows x86) #(164 168 124 12 19 206 63 89 163 27 225 228 74 252 243 208)
+#+(and windows x86-64) #(39 69 25 63 45 97 159 201 29 253 214 83 182 81 74 46))
+
+
+
 
 ;; returns T if check is ok 
 (defun md5-validiy-check (file digest)
